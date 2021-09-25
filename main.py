@@ -1,17 +1,13 @@
 import pygame
 import os
 from game.game import Game as g
-#from game.settings import path
+from settings import *
 #from .settings import WIDTH
 #from .settings import HEIGHT
 
 
 def main():
-#path
-    current_path = os.path.dirname(__file__) #current path of main.py
-    resource_path = os.path.join(current_path, 'resources') #the resource folder
-    common_path = os.path.join(resource_path, 'common')
-    assets_path = os.path.join(resource_path, 'assets')
+
 
 #intialize pygame
     pygame.init()

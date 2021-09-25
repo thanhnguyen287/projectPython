@@ -1,14 +1,10 @@
 import pygame
 import sys
 from .map import Map
-from .settings import TILE_SIZE
+from settings import *
 import os
 
-#path
-current_path = os.path.dirname(__file__) #current path of main.py
-resource_path = os.path.join(current_path, 'resources') #the resource folder
-common_path = os.path.join(resource_path, 'common')
-assets_path = os.path.join(resource_path, 'assets')
+
 
 class Game:
     def __init__(self, screen, clock):

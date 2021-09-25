@@ -1,12 +1,8 @@
 import pygame
-from .settings import TILE_SIZE
+from settings import *
 import os
 
-#path
-#current_path = os.path.dirname(__file__) #current path of map
-#resource_path = os.path.join(current_path, 'resources') #the resource folder
-#common_path = os.path.join(resource_path, 'common')
-#assets_path = os.path.join(resource_path, 'assets')
+
 
 class Map:
     def __init__(self , grid_length_x, grid_length_y, width, height):
