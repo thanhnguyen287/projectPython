@@ -1,6 +1,5 @@
 import pygame, sys
-
-
+from tkinter import *
 from pygame.locals import *
 from pygame import mixer
 pygame.init()
@@ -8,17 +7,21 @@ pygame.init()
 #create screen
 pygame.display.set_caption('Start Menu')
 screen = pygame.display.set_mode((1200,675))
-
+#COLOR
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GRAY = (30, 30, 30)
 #add icon
 pygame.display.set_caption("AOE 2")
 icon = pygame.image.load('AOE 2.jpg')
 pygame.display.set_icon(icon)
 
-font = pygame.font.SysFont(None, 50)
+font = pygame.font.SysFont('Corbel', 50)
 
 background = pygame.image.load('EV0qwWIXQAA8qpN.jpg')
 
 pygame.display.set_caption('AOE 2: Homemade Edition')
+
 #background music
 mixer.music.load('Age of Empires II- Definitive Edition - Main Menu Soundtrack (audio-extractor.net).wav')
 mixer.music.play(-1)
@@ -33,24 +36,26 @@ def draw_text(text, font, color, surface, x, y):
 click = False
 
 def main_menu():
+    clock =pygame.time.Clock()
     while True:
-
         screen.fill((0,0,0))
         screen.blit(background,(0,0))
-        draw_text('MENU', font, (163, 228, 215), screen, 50 ,150 )
+        draw_text('MENU', font, GRAY, screen, 50 ,150 )
 
         mx, my = pygame.mouse.get_pos()
+        text2 = font.render('Options', True, BLACK)
+        text1 = font.render('Start ', True, BLACK)
+        button_1 = pygame.Rect(50, 250, 100, 50)
+        button_2 = pygame.Rect(50, 400, 160, 50)
 
-        button_1 = pygame.Rect(50, 200, 50, 50)
-        button_2 = pygame.Rect(50, 400, 50, 50)
         if button_1.collidepoint((mx, my)):
             if click:
                 game()
         if button_2.collidepoint((mx, my)):
             if click:
                 options()
-        pygame.draw.rect(screen, (255, 0, 0), button_1)
-        pygame.draw.rect(screen, (255, 0, 0), button_2)
+        pygame.draw.rect(screen, (150, 75, 0), button_1)
+        pygame.draw.rect(screen, (150, 75, 0), button_2)
 
         click = False
         for event in pygame.event.get():
@@ -65,7 +70,11 @@ def main_menu():
                 if event.button == 1:
                     click = True
 
+        screen.blit(text1, (50,250))
+        screen.blit(text2, (50,400))
         pygame.display.update()
+
+        clock.tick(30)
 
 def game():
     running = True
@@ -97,5 +106,4 @@ def options():
                     running = False
 
         pygame.display.update()
-
 main_menu()
