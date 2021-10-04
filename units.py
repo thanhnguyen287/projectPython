@@ -7,21 +7,25 @@ default_unit_model = pygame.image.load ("resources/assets/tree.png")
 # WORK IN PROGRESS
 
 class Unit:
-    def __init__(self, x, y):
+    def __init__(self, x, y,owner_of_unit):
         self.sprite = default_unit_model
         self.x = x
         self.y = y
+        self.owner = owner_of_unit
+
         self.max_health = 10
         self.current_health = self.max_health
-        self.training_time = 0
         self.attack_dmg = 0
         self.attack_speed = 0.0
         self.range = 0
         self.movement_speed = 0
+
         self.is_alive = True
 
-        # GOLD, LUMBER, STONE, FOOD
-        self.training_cost = [0, 0, 0, 0]
+        # TRAINING
+        self.training_cost = [0, 0, 0, 0]         # GOLD, LUMBER, STONE, FOOD
+        self.training_time = 0
+        self.population_produced = 1
 
     def display(self, screen):
         screen.blit(self.sprite, self.get_position())
@@ -44,11 +48,13 @@ class Unit:
     def attack(self, targeted_unit):
 
         targeted_unit.current_health-=self.attack_dmg
-        print ("hp de unit :", targeted_unit.current_health, " / ", targeted_unit.max_health)
+        #pour tester
+        #print("hp de unit :", targeted_unit.current_health, " / ", targeted_unit.max_health)
 
         # if target has less than 0 hp after attack, she dies
         if targeted_unit.current_health < 0:
-            print(" unit DIED")
+            #print pour tester
+            #print(" unit DIED")
             targeted_unit.is_alive = False
             #del units_group[units_group.index(targeted_unit)]
 

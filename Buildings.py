@@ -1,9 +1,19 @@
 import pygame
 
+
 class Building:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+        self.max_health = 100
+        self.current_health = self.max_health
+        self.is_alive = True
+
+        self.construction_time = 1
+        self.construction_cost = [0,0,0,0]
+        self.max_population_bonus = 0
+
         self.sprite = pygame.image.load("resources/assets/town_center.png")
         self.image_select = pygame.image.load("resources/assets/image_select.png")
         self.selected = False
@@ -12,6 +22,12 @@ class Building:
         if self.selected:
             screen.blit(self.image_select, self.get_position_select())
         screen.blit(self.sprite, self.get_position())
+
+
+    def display_life(self, screen):
+        pygame.draw.rect(screen, (255, 0, 0), (self.get_position()[0]-15,self.get_position()[1]-15, self.current_health * 3, 10))
+        pygame.draw.rect(screen, (25, 25, 25), (self.get_position()[0]-15,self.get_position()[1]-15, self.max_health * 3, 10), 4)
+
 
     #we return the "real" x and y position to display the building on the map
     def get_position(self):
