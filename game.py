@@ -5,7 +5,7 @@ from settings import *
 import os
 from player import *
 from villager import *
-from Buildings import *
+from Buildings import buildings
 
 
 class Game:
@@ -54,8 +54,12 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
 
                 if event.button == 1:  #  LEFT CLICK
-                    build1.select()
-                    print(build1.pos_mouse() if 1 <= build1.pos_mouse()[0] <= 10 and 1 <= build1.pos_mouse()[1] <= 10 else "not on map")
+                    #we check the clicks for every building
+                    for b in buildings:
+                        b.select()
+                        #we print the position of the mouse on the map if the mouse is on the map
+                        print(b.pos_mouse() if 1 <= b.pos_mouse()[0] <= 10 and 1 <= b.pos_mouse()[1] <= 10 else "not on map")
+
                 elif event.button == 3:  # RIGHT CLICK
                     if testUnit1.is_alive == True:
                         testUnit2.attack(testUnit1)
@@ -100,7 +104,8 @@ class Game:
                 a_unit.display_life(self.screen)
 
         # buildings display
-        build1.display(self.screen)
+        for b in buildings:
+            b.display(self.screen)
 
         # MOUSE CURSOR - we disable the default one and create a new one at the current position of the mouse
         # MUST BE LAST TO SEE IT AND NOT BE HIDDEN BEHIND OTHER THINGS
