@@ -51,6 +51,15 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
+                # Enable - Disable health bars
+                if event.key == pygame.K_LALT or event.key == pygame.K_RALT:
+                    global ENABLE_HEALTH_BARS
+                    if ENABLE_HEALTH_BARS == False:
+                        ENABLE_HEALTH_BARS = True
+                    else:
+                        ENABLE_HEALTH_BARS = False
+
+
             # USER PRESSED A MOUSEBUTTON
             elif event.type == pygame.MOUSEBUTTONDOWN:
 
@@ -105,13 +114,18 @@ class Game:
                 a_unit.display(self.screen)
 
                 #health bar display
-                a_unit.display_life(self.screen)
+                if ENABLE_HEALTH_BARS:
+                    a_unit.display_life(self.screen)
 
 
 
         # buildings display
         for b in buildings:
-            b.display(self.screen)
+            if b.is_alive:
+                b.display(self.screen)
+
+                if ENABLE_HEALTH_BARS:
+                    b.display_life(self.screen)
 
 
 
