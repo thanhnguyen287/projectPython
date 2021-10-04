@@ -1,10 +1,11 @@
 import pygame
 import sys
-from .map import Map
+from .map import *
 from settings import *
 import os
 from player import *
 from villager import *
+from Buildings import buildings
 
 
 class Game:
@@ -23,7 +24,6 @@ class Game:
         self.display_lumber = myfont.render(str(playerOne.ressources[2]), True, (10, 10, 10))
         self.display_food = myfont.render(str(playerOne.ressources[3]), True, (10, 10, 10))
 
-
     def run(self):
         self.playing = True
         while self.playing:
@@ -31,6 +31,8 @@ class Game:
             self.events()
             self.update()
             self.draw()
+
+
 
     def events(self):
 
@@ -53,10 +55,18 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
 
                 if event.button == 1:  #  LEFT CLICK
-                    ...
+                    # we check the clicks for every building
+                    for b in buildings:
+                        b.select()
+                        # we print the position of the mouse on the map if the mouse is on the map
+                        print(b.pos_mouse() if 1 <= b.pos_mouse()[0] <= 10 and 1 <= b.pos_mouse()[
+                            1] <= 10 else "not on map")
+
                 elif event.button == 3:  # RIGHT CLICK
-                    if testUnit1.is_alive == True:
+                    if testUnit1.is_alive:
                         testUnit2.attack(testUnit1)
+
+
     def update(self):
         # Build later
         pass
@@ -91,14 +101,19 @@ class Game:
 
         # units display
         for a_unit in units_group:
-            if (a_unit.is_alive):
+            if a_unit.is_alive:
                 a_unit.display(self.screen)
 
                 #health bar display
                 a_unit.display_life(self.screen)
 
+
+
         # buildings display
-        ...
+        for b in buildings:
+            b.display(self.screen)
+
+
 
         # MOUSE CURSOR - we disable the default one and create a new one at the current position of the mouse
         # MUST BE LAST TO SEE IT AND NOT BE HIDDEN BEHIND OTHER THINGS
@@ -109,6 +124,4 @@ class Game:
 
         # to refresh the screen and display things properly
         pygame.display.flip()
-
-
 

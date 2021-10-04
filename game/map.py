@@ -60,6 +60,3 @@ class Map:
         rock = pygame.image.load("resources/assets/block.png")
 
         return {"block": block, "tree": tree, "rock": rock}
-
-
-
