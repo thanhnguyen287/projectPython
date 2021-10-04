@@ -22,3 +22,4 @@ class Clubman(Unit):
         #Training : 50 FOOD, 26s
         self.training_cost = [0,0,0,50]
         self.training_time = 26
+        self.population_produced = 1

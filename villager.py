@@ -1,10 +1,11 @@
 from units import *
+from player import *
 
 
 class Villager(Unit):
 
-    def __init__(self,x,y):
-        super().__init__(x, y)
+    def __init__(self,x,y,player_owner_of_unit):
+        super().__init__(x, y, player_owner_of_unit)
 
         #DISPLAY
         self.sprite = pygame.image.load ("resources/assets/Villager.bmp")
@@ -22,6 +23,7 @@ class Villager(Unit):
         #Training : 50 FOOD, 20s
         self.training_cost = [0,0,0,50]
         self.training_time = 20
+        self.population_produced = 1
 
     def build(self, tile,):
         ...
@@ -48,8 +50,8 @@ class Villager(Unit):
             ...
 """
 
-testUnit1 = Villager(800,500)
-testUnit2 = Villager(500, 500)
+testUnit1 = Villager(800,500,playerOne)
+testUnit2 = Villager(500, 500, playerOne)
 
 #units alive are put in this group
 units_group = [testUnit1, testUnit2]

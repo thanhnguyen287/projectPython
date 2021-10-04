@@ -21,3 +21,4 @@ class Bowman(Unit):
         #Training : 20 WOOD, 40 FOOD, 30s
         self.training_cost = [0,20,0,40]
         self.training_time = 30
+        self.population_produced = 1

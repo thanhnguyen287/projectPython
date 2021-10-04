@@ -4,6 +4,8 @@ TILE_SIZE = 64
 WIDTH = 800
 HEIGHT = 600
 
+ENABLE_HEALTH_BARS = False
+
 #path
 current_path = os.path.dirname(__file__) #current path of settings.py
 resource_path = os.path.join(current_path, 'resources') 
