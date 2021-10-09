@@ -1,7 +1,7 @@
 import pygame
 import os
 from game.game import Game as g
-from settings import *
+from projectPython.settings import *
 #from .settings import WIDTH
 #from .settings import HEIGHT
 
@@ -16,13 +16,12 @@ def main():
 
 #create the screen
 #screen = pygame.display.set_mode((1920,1080))
-  #  screen = pygame.display.set_mode((WIDTH,HEIGHT))
-    screen = pygame.display.set_mode((1920,1070))
+    #screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN) #Full screen for many type of screen
+    screen = pygame.display.set_mode((WIDTH,HEIGHT)) #Adjustable in Settings.py
 
 
 
-
-#title and Icon
+#Title and Icon
     pygame.display.set_caption("Age of Empire: Homemade Edition")
     icon = pygame.image.load(os.path.join(common_path,'icon.png'))
     pygame.display.set_icon(icon)

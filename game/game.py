@@ -1,11 +1,12 @@
 import pygame
+import os
 import sys
 from .map import *
 from settings import *
-import os
 from player import *
 from villager import *
 from Buildings import buildings
+from .utils import draw_text
 
 
 class Game:
@@ -13,7 +14,7 @@ class Game:
         self.screen = screen
         self.clock = clock
         self.width, self.height = self.screen.get_size()
-        self.map = Map(10,10, self.width, self.height)
+        self.map = Map(30,30, self.width, self.height)
 
         # Writing style
         myfont = pygame.font.SysFont("monospace", 20)
@@ -27,7 +28,7 @@ class Game:
     def run(self):
         self.playing = True
         while self.playing:
-            self.clock.tick(60)
+            self.clock.tick(120)
             self.events()
             self.update()
             self.draw()
@@ -97,6 +98,14 @@ class Game:
                 render_pos = self.map.map[x][y]["render_pos"]
                 self.screen.blit(self.map.tiles["block"], (render_pos[0] + self.width/2, render_pos[1]+self.height/4 ))
 
+                # Rendering tile, if it is not a tree or rock then render nothing as we already had block with green grass
+                tile = self.map.map[x][y]["tile"]
+                if tile != "":
+                    self.screen.blit(self.map.tiles[tile],
+                                     (render_pos[0] + self.width/2,
+                                      render_pos[1]+self.height/4 - self.map.tiles[tile].get_height() -TILE_SIZE ))
+
+
                 p = self.map.map[x][y]["iso_poly"]
                 p = [(x+self.width/2, y + self.height/4) for x, y in p]
                 #pygame.draw.polygon(self.screen, (255,255,255), p, 1)
@@ -137,5 +146,14 @@ class Game:
         self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
 
         # to refresh the screen and display things properly
+#Draw FPS, must be the last to shown -> put it right on top of the display.flip
+        draw_text(
+            self.screen,
+            'fps={}'.format(round(self.clock.get_fps())),
+            25,
+            (255,0,0),
+            (10,10)
+        )
+
         pygame.display.flip()
 

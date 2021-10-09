@@ -1,5 +1,6 @@
 import pygame
-
+import os
+from projectPython.settings import *
 
 class Building:
     def __init__(self, x, y):
@@ -14,8 +15,8 @@ class Building:
         self.construction_cost = [0,0,0,0]
         self.max_population_bonus = 0
 
-        self.sprite = pygame.image.load("resources/assets/town_center.png")
-        self.image_select = pygame.image.load("resources/assets/image_select.png")
+        self.sprite = pygame.image.load(os.path.join(assets_path,"town_center.png"))
+        self.image_select = pygame.image.load(os.path.join(assets_path,"image_select.png"))
         self.selected = False
 
     def display(self, screen):
