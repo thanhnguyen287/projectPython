@@ -27,7 +27,7 @@ class Townhall(Building):
     def create_villager(self):
         #TODO : change the condition to take in consideration the amount of food and the max pop the player has
         if(1):
-            return Villager(928+(self.x-self.y)*64, 154+(self.y+self.x+4)*32)
+            return Villager(928+(self.x-self.y)*64, 154+(self.y+self.x+4)*32, playerOne)
 
 
 
