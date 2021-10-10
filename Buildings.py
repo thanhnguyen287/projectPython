@@ -1,4 +1,5 @@
 import pygame
+from settings import *
 
 class Building:
     def __init__(self, x, y):
@@ -21,6 +22,8 @@ class Building:
     def display(self, screen):
         if self.selected:
             screen.blit(self.image_select, self.get_position_select())
+            self.display_life(screen)
+
         screen.blit(self.sprite, self.get_position())
 
     def display_life(self, screen):
@@ -45,5 +48,4 @@ class Building:
         mousex = int(((1 / 2) * pygame.mouse.get_pos()[0] + pygame.mouse.get_pos()[1] - 672) // 64)
         mousey = int((pygame.mouse.get_pos()[1] - (1 / 2) * pygame.mouse.get_pos()[0] + 288) // 64)
         return mousex, mousey
-
 
