@@ -1,4 +1,7 @@
 import pygame
+from settings import *
+
+
 
 class Player:
 
@@ -29,5 +32,21 @@ class Player:
         else:
             self.ressources[ressource_type] += amount
 
+    def update_ressources_bar(self, screen):
+        # ressources display
+        screen.blit(top_menu, (180, 95))
+        screen.blit(display_stone, (300, 130))
+        screen.blit(display_gold, (500, 130))
+        screen.blit(display_lumber, (700, 130))
+        screen.blit(display_food, (900, 130))
+
 
 playerOne = Player("Tristan", True, [250, 1000, 500, 100], "GREEK")
+players = [playerOne
+           ]
+#  INIT FOR RESSOURCES DISPLAY
+
+display_stone = myfont.render(str(playerOne.ressources[0]), True, (10, 10, 10))
+display_gold = myfont.render(str(playerOne.ressources[1]), True, (10, 10, 10))
+display_lumber = myfont.render(str(playerOne.ressources[2]), True, (10, 10, 10))
+display_food = myfont.render(str(playerOne.ressources[3]), True, (10, 10, 10))

@@ -3,46 +3,63 @@ from settings import *
 from player import *
 
 
-#créer une classe qui représente les ressources
+# classes for the ressources on the map
 
 
-class Ressource
+class Ressource:
 
-  def  __init__(self):
+    def __init__(self,tile_x,tile_y):
     
-    self.nbRessources = 0
-    self.typeRessource = ""
-    
-  def __init__(self, nbRess, laRess):
-    self.nbRessources = nbRess
-    self.typeRessource = laRess
+      self.quantity = 0
+      self.type = ""
+      self.x = tile_x
+      self.y = tile_y
 
-  def getTypeRessource(self):
-    return self.typeRessource
+      self.max_health = 100
+      self.current_health = self.max_health
+      self.is_standing = True
 
-  def getNbRessources(self):
-    return self.nbRessources
+      self.sprite_standing = pygame.image.load(os.path.join(assets_path,"rock.png"))
+      self.sprite_fallen = pygame.image.load(os.path.join(assets_path,"tree.png"))
 
-  def setTypeRessource(self, typeRess):
-    self.typeRessource = typeRess
-   
-  def setNbRessources(self, nbRess):
-    self.nbRessources = nbRess
-
-# Writing style
-myfont = pygame.font.SysFont("monospace", 20)
-
-  def update_ressources_bar(self,screen):
-    #  INIT FOR RESSOURCES DISPLAY
-    self.display_stone = myfont.render(str(playerOne.ressources[0]), True, (10, 10, 10))
-    self.display_gold = myfont.render(str(playerOne.ressources[1]), True, (10, 10, 10))
-    self.display_lumber = myfont.render(str(playerOne.ressources[2]), True, (10, 10, 10))
-    self.display_food = myfont.render(str(playerOne.ressources[3]), True, (10, 10, 10))
-
-    self.screen.blit(top_menu, (180, 95))
-    self.screen.blit(myfont.render(str(playerOne.ressources[0]), True, (10, 10, 10), (300, 130))
-    self.screen.blit(myfont.render(str(playerOne.ressources[1]), True, (10, 10, 10), (500, 130))
-    self.screen.blit(myfont.render(str(playerOne.ressources[2]), True, (10, 10, 10), (700, 130))
-    self.screen.blit(myfont.render(str(playerOne.ressources[3]), True, (10, 10, 10), (900, 130))
+      self.image_select = pygame.image.load(os.path.join(assets_path,"image_select.png"))
+      self.selected = False
 
 
+    def update_quantity(self, amount):
+      self.quantity += amount
+
+    #we return the "real" x and y position to display the building on the map
+    def get_position(self):
+        return 908+(self.x-self.y)*64, 188+(self.y+self.x)*32
+
+    def get_position_select(self):
+        return 894+(self.x-self.y)*64, 202+(self.y+self.x)*32
+
+    def select(self):
+        if (self.x, self.y) == self.pos_mouse():
+            self.selected = not self.selected
+
+    def pos_mouse(self):
+        mousex = int(((1 / 2) * pygame.mouse.get_pos()[0] + pygame.mouse.get_pos()[1] - 672) // 64)
+        mousey = int((pygame.mouse.get_pos()[1] - (1 / 2) * pygame.mouse.get_pos()[0] + 288) // 64)
+        return mousex, mousey
+
+    def display(self, screen):
+        if self.selected:
+            screen.blit(self.image_select, self.get_position_select())
+            self.display_life(screen)
+
+        #depending on if the tree is standing or fallen we display different models
+        if self.is_standing:
+            screen.blit(self.sprite_standing, self.get_position())
+        else:
+            screen.blit(self.sprite_fallen, self.get_position())
+
+    def display_life(self, screen):
+        pygame.draw.rect(screen, (255, 0, 0), (self.get_position()[0]-15,self.get_position()[1]-15, self.current_health * 3, 10))
+        pygame.draw.rect(screen, (25, 25, 25), (self.get_position()[0]-15,self.get_position()[1]-15, self.max_health * 3, 10), 4)
+
+
+Test_tree = Ressource(1,1)
+ressources = [Test_tree]

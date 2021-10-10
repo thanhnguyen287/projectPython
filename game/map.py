@@ -1,9 +1,9 @@
 import pygame
-from projectPython.settings import *
+import os
+from settings import *
 import os
 import random
 #import noise
-
 
 
 class Map:
@@ -32,7 +32,6 @@ class Map:
                 self.grass_tiles.blit(self.tiles["block"],  (render_pos[0] + self.grass_tiles.get_width()/2, render_pos[1]))
 
         return map
-
 
     def grid_to_map(self, grid_x, grid_y):
         rect = [

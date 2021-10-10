@@ -1,7 +1,7 @@
 import pygame
 import os
 from game.game import Game as g
-from projectPython.settings import *
+from settings import *
 #from .settings import WIDTH
 #from .settings import HEIGHT
 

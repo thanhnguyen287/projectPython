@@ -5,10 +5,14 @@ from .map import *
 from settings import *
 from player import *
 from villager import *
-from Buildings import buildings
 from .utils import draw_text
 from projectPython.game.camera import Camera
 
+from Ressources import ressources
+from TownHall import *
+from House import *
+
+buildings = [town1, house1]
 class Game:
     def __init__(self, screen, clock):
         self.screen = screen
@@ -20,15 +24,6 @@ class Game:
 
         # camera
         self.camera = Camera(self.width,self.height)
-
-        # Writing style
-        myfont = pygame.font.SysFont("monospace", 20)
-
-        #  INIT FOR RESSOURCES DISPLAY
-        self.display_stone = myfont.render(str(playerOne.ressources[0]), True, (10, 10, 10))
-        self.display_gold = myfont.render(str(playerOne.ressources[1]), True, (10, 10, 10))
-        self.display_lumber = myfont.render(str(playerOne.ressources[2]), True, (10, 10, 10))
-        self.display_food = myfont.render(str(playerOne.ressources[3]), True, (10, 10, 10))
 
     def run(self):
         self.playing = True
@@ -116,13 +111,15 @@ class Game:
                 # p = self.map.map[x][y]["iso_poly"]
                 # p = [(x+self.width/2, y + self.height/4) for x, y in p]
                 #pygame.draw.polygon(self.screen, (255,255,255), p, 1)
+                p = self.map.map[x][y]["iso_poly"]
+                p = [(x+self.width/2, y + self.height/4) for x, y in p]
+
+                #to display the tiles
+                pygame.draw.polygon(self.screen, (255,255,255), p, 1)
 
         # ressources display
-        self.screen.blit(top_menu, (180, 95))
-        self.screen.blit(self.display_stone, (300, 130))
-        self.screen.blit(self.display_gold, (500, 130))
-        self.screen.blit(self.display_lumber, (700, 130))
-        self.screen.blit(self.display_food, (900, 130))
+        for a_player in players:
+            playerOne.update_ressources_bar(self.screen)
 
         # units display
         for a_unit in units_group:
@@ -133,11 +130,13 @@ class Game:
                 if ENABLE_HEALTH_BARS:
                     a_unit.display_life(self.screen)
 
-
+        # ressources display
+        for a_ressource in ressources:
+            a_ressource.display(self.screen)
 
         # buildings display
         for b in buildings:
-            if b.is_alive:
+           if b.is_alive:
                 b.display(self.screen)
 
                 if ENABLE_HEALTH_BARS:
@@ -152,7 +151,6 @@ class Game:
         standard_cursor_rect.center = pygame.mouse.get_pos()  # update position
         self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
 
-        # to refresh the screen and display things properly
 #Draw FPS, must be the last to shown -> put it right on top of the display.flip
         draw_text(
             self.screen,
