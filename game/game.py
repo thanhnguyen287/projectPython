@@ -7,14 +7,19 @@ from player import *
 from villager import *
 from Buildings import buildings
 from .utils import draw_text
-
+from projectPython.game.camera import Camera
 
 class Game:
     def __init__(self, screen, clock):
         self.screen = screen
         self.clock = clock
         self.width, self.height = self.screen.get_size()
-        self.map = Map(30,30, self.width, self.height)
+
+        # map
+        self.map = Map(75,75, self.width, self.height)
+
+        # camera
+        self.camera = Camera(self.width,self.height)
 
         # Writing style
         myfont = pygame.font.SysFont("monospace", 20)
@@ -78,36 +83,38 @@ class Game:
 
 
     def update(self):
-        # Build later
-        pass
+        self.camera.update()
 
     # GAME DISPLAY
     def draw(self):
 
         # BLACK BACKGROUND
         self.screen.fill((0,0,0))
+        # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
+        self.screen.blit(self.map.grass_tiles, (self.camera.scroll.x,self.camera.scroll.y))
 
         # FOR THE MAP
         for x in range(self.map.grid_length_x):
             for y in range(self.map.grid_length_y):
-                square = self.map.map[x][y]["drect"]
-                rect = pygame.Rect(square[0][0], square[0][1], TILE_SIZE,TILE_SIZE)
+                # square = self.map.map[x][y]["drect"]
+                # rect = pygame.Rect(square[0][0], square[0][1], TILE_SIZE,TILE_SIZE)
                 #pygame.draw.rect(self.screen, (0,255,255),rect,1)
                 #pygame.draw.rect(surface, color, rect, width...)
 
                 render_pos = self.map.map[x][y]["render_pos"]
-                self.screen.blit(self.map.tiles["block"], (render_pos[0] + self.width/2, render_pos[1]+self.height/4 ))
+                #moving rendering part of "block" to map.py to increase fps
+                #self.screen.blit(self.map.tiles["block"], (render_pos[0] + self.width/2, render_pos[1]+self.height/4 ))
 
                 # Rendering tile, if it is not a tree or rock then render nothing as we already had block with green grass
                 tile = self.map.map[x][y]["tile"]
                 if tile != "":
                     self.screen.blit(self.map.tiles[tile],
-                                     (render_pos[0] + self.width/2,
-                                      render_pos[1]+self.height/4 - self.map.tiles[tile].get_height() -TILE_SIZE ))
+                                     (render_pos[0] + self.map.grass_tiles.get_width()/2 + self.camera.scroll.x,
+                                      render_pos[1] - (self.map.tiles[tile].get_height() -TILE_SIZE) + self.camera.scroll.y))
 
 
-                p = self.map.map[x][y]["iso_poly"]
-                p = [(x+self.width/2, y + self.height/4) for x, y in p]
+                # p = self.map.map[x][y]["iso_poly"]
+                # p = [(x+self.width/2, y + self.height/4) for x, y in p]
                 #pygame.draw.polygon(self.screen, (255,255,255), p, 1)
 
         # ressources display

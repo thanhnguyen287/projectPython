@@ -2,6 +2,7 @@ import pygame
 from projectPython.settings import *
 import os
 import random
+#import noise
 
 
 
@@ -11,8 +12,13 @@ class Map:
         self.grid_length_y = grid_length_y
         self.width = width
         self.height = height
-        self.map = self.create_map()
+
+        self.perlin_scale = grid_length_x/2
+
+        self.grass_tiles = pygame.Surface((grid_length_x * TILE_SIZE * 2 ,grid_length_y * TILE_SIZE + 2 * TILE_SIZE)).convert_alpha()
         self.tiles = self.load_images()
+        self.map = self.create_map() #Set this at the most bottom line of this __init__
+
     def create_map(self):
         map = []
 
@@ -21,6 +27,10 @@ class Map:
             for grid_y in range(self.grid_length_y):
                 map_tile = self.grid_to_map(grid_x,grid_y)
                 map[grid_x].append(map_tile)
+
+                render_pos = map_tile["render_pos"]
+                self.grass_tiles.blit(self.tiles["block"],  (render_pos[0] + self.grass_tiles.get_width()/2, render_pos[1]))
+
         return map
 
 
@@ -40,12 +50,14 @@ class Map:
         miny = min([y for x, y in iso_poly])
 
         r = random.randint(1,100)
-        if r <= 10:
-            tile = "tree"
-        elif r <= 3:
+        if r <= 10 :
             tile = "rock"
+        elif r <= 30:
+            tile = "tree"
         else:
             tile = ""
+
+        #perlin = noise.
 
         out = {
             "grid": [grid_x, grid_y],
