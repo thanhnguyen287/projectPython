@@ -111,11 +111,11 @@ class Game:
                 # p = self.map.map[x][y]["iso_poly"]
                 # p = [(x+self.width/2, y + self.height/4) for x, y in p]
                 #pygame.draw.polygon(self.screen, (255,255,255), p, 1)
-                p = self.map.map[x][y]["iso_poly"]
-                p = [(x+self.width/2, y + self.height/4) for x, y in p]
+                # p = self.map.map[x][y]["iso_poly"]
+                # p = [(x+self.width/2, y + self.height/4) for x, y in p]
 
                 #to display the tiles
-                pygame.draw.polygon(self.screen, (255,255,255), p, 1)
+                # pygame.draw.polygon(self.screen, (255,255,255), p, 1)
 
         # ressources display
         for a_player in players:
