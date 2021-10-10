@@ -1,7 +1,6 @@
 import pygame
-from projectPython.settings import *
+from settings import *
 import os
-import random
 
 
 
@@ -39,20 +38,11 @@ class Map:
         minx = min([x for x, y in iso_poly])
         miny = min([y for x, y in iso_poly])
 
-        r = random.randint(1,100)
-        if r <= 10:
-            tile = "tree"
-        elif r <= 3:
-            tile = "rock"
-        else:
-            tile = ""
-
         out = {
             "grid": [grid_x, grid_y],
             "drect": rect,
             "iso_poly": iso_poly,
-            "render_pos": [minx, miny],
-            "tile": tile
+            "render_pos": [minx, miny]
         }
 
         return out
@@ -65,8 +55,11 @@ class Map:
     def load_images(self):
 
        #block = pygame.image.load(os.path.join(assets_path, "block.png"))
-        block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
-        tree = pygame.image.load(os.path.join(assets_path,"tree.png")).convert_alpha()
-        rock = pygame.image.load(os.path.join(assets_path,"rock.png")).convert_alpha()
+        block = pygame.image.load("resources/assets/block.png")
+        tree = pygame.image.load("resources/assets/block.png")
+        rock = pygame.image.load("resources/assets/block.png")
 
         return {"block": block, "tree": tree, "rock": rock}
+
+
+
