@@ -6,7 +6,7 @@ from settings import *
 from player import *
 from villager import *
 from .utils import draw_text
-from projectPython.game.camera import Camera
+from .camera import Camera
 
 from Ressources import ressources
 from TownHall import *
@@ -20,7 +20,7 @@ class Game:
         self.width, self.height = self.screen.get_size()
 
         # map
-        self.map = Map(75,75, self.width, self.height)
+        self.map = Map(50,50, self.width, self.height)
 
         # camera
         self.camera = Camera(self.width,self.height)
@@ -118,29 +118,29 @@ class Game:
                 # pygame.draw.polygon(self.screen, (255,255,255), p, 1)
 
         # ressources display
-        for a_player in players:
-            playerOne.update_ressources_bar(self.screen)
-
-        # units display
-        for a_unit in units_group:
-            if a_unit.is_alive:
-                a_unit.display(self.screen)
-
-                #health bar display
-                if ENABLE_HEALTH_BARS:
-                    a_unit.display_life(self.screen)
-
-        # ressources display
-        for a_ressource in ressources:
-            a_ressource.display(self.screen)
+        # for a_player in players:
+        #     playerOne.update_ressources_bar(self.screen)
+        #
+        # # units display
+        # # for a_unit in units_group:
+        # #     if a_unit.is_alive:
+        # #         a_unit.display(self.screen)
+        # #
+        # #         #health bar display
+        # #         if ENABLE_HEALTH_BARS:
+        # #             a_unit.display_life(self.screen)
+        #
+        # # ressources display
+        # for a_ressource in ressources:
+        #     a_ressource.display(self.screen)
 
         # buildings display
-        for b in buildings:
-           if b.is_alive:
-                b.display(self.screen)
-
-                if ENABLE_HEALTH_BARS:
-                    b.display_life(self.screen)
+        # for b in buildings:
+        #    if b.is_alive:
+        #         b.display(self.screen)
+        #
+        #         if ENABLE_HEALTH_BARS:
+        #             b.display_life(self.screen)
 
 
 

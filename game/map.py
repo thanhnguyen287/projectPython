@@ -1,9 +1,11 @@
 import pygame
 import os
+import noise
 from settings import *
 import os
 import random
-#import noise
+
+
 
 
 class Map:
@@ -13,7 +15,7 @@ class Map:
         self.width = width
         self.height = height
 
-        self.perlin_scale = grid_length_x/2
+        self.perlin_scale = grid_length_x/2  #anything >1 or <-1, otherwise pnoise will return 0
 
         self.grass_tiles = pygame.Surface((grid_length_x * TILE_SIZE * 2 ,grid_length_y * TILE_SIZE + 2 * TILE_SIZE)).convert_alpha()
         self.tiles = self.load_images()
@@ -49,12 +51,17 @@ class Map:
         miny = min([y for x, y in iso_poly])
 
         r = random.randint(1,100)
-        if r <= 10 :
-            tile = "rock"
-        elif r <= 30:
+        perlin = 100 * noise.pnoise2(grid_x / self.perlin_scale, grid_y / self.perlin_scale)
+
+        if (perlin >=15) or (perlin<=-35):
             tile = "tree"
         else:
-            tile = ""
+            if r <= 1 :
+                tile = "rock"
+            elif r <= 2:
+                tile = "tree"
+            else:
+                tile = ""
 
         #perlin = noise.
 
@@ -75,7 +82,7 @@ class Map:
 
     def load_images(self):
 
-       #block = pygame.image.load(os.path.join(assets_path, "block.png"))
+
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
         tree = pygame.image.load(os.path.join(assets_path,"tree.png")).convert_alpha()
         rock = pygame.image.load(os.path.join(assets_path,"rock.png")).convert_alpha()
