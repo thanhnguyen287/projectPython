@@ -1,5 +1,3 @@
-import settings
-import pygame
 from villager import *
 default_unit_model = pygame.image.load ("resources/assets/tree.png")
 

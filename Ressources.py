@@ -1,10 +1,7 @@
-import pygame
-from settings import *
 from player import *
 
 
 # classes for the ressources on the map
-
 
 class Ressource:
 
@@ -19,10 +16,10 @@ class Ressource:
       self.current_health = self.max_health
       self.is_standing = True
 
-      self.sprite_standing = pygame.image.load(os.path.join(assets_path,"rock.png"))
-      self.sprite_fallen = pygame.image.load(os.path.join(assets_path,"tree.png"))
+      self.sprite_standing = pygame.image.load("resources/assets/tree.png")
+      self.sprite_fallen = pygame.image.load("resources/assets/rock.png")
 
-      self.image_select = pygame.image.load(os.path.join(assets_path,"image_select.png"))
+      self.image_select = pygame.image.load("resources/assets/image_select.png")
       self.selected = False
 
 

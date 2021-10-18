@@ -1,5 +1,3 @@
-import pygame
-import os
 from game.game import Game as g
 from settings import *
 #from .settings import WIDTH

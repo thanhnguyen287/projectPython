@@ -1,13 +1,11 @@
 import pygame
 pygame.init()
 import math
-import os
-from game.game import Game as g
-from settings import *
 
 pygame.init()
-    pygame.mixer.init()
-    clock = pygame.time.Clock()
+pygame.mixer.init()
+clock = pygame.time.Clock()
+
 #à modifier selon la taille de l'écran
 screen = pygame.display.set_mode((1920,1070))
 

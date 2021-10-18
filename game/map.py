@@ -1,11 +1,10 @@
-import pygame
-import os
 import noise
 from settings import *
-import os
 import random
 
+import noise
 
+from settings import *
 
 
 class Map:

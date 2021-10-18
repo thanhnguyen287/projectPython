@@ -1,16 +1,10 @@
-import pygame
-import os
 import sys
-from .map import *
-from settings import *
-from player import *
-from villager import *
-from .utils import draw_text
-from .camera import Camera
 
-from Ressources import ressources
-from TownHall import *
 from House import *
+from TownHall import *
+from .camera import Camera
+from .map import *
+from .utils import draw_text
 
 buildings = [town1, house1]
 class Game:
