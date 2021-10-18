@@ -107,6 +107,10 @@ class Game:
                                      (render_pos[0] + self.map.grass_tiles.get_width()/2 + self.camera.scroll.x,
                                       render_pos[1] - (self.map.tiles[tile].get_height() -TILE_SIZE) + self.camera.scroll.y))
 
+        # RESSOURCES DISPLAY
+        for a_player in players:
+            playerOne.update_ressources_bar(self.screen)
+
 
                 # p = self.map.map[x][y]["iso_poly"]
                 # p = [(x+self.width/2, y + self.height/4) for x, y in p]
@@ -117,10 +121,7 @@ class Game:
                 #to display the tiles
                 # pygame.draw.polygon(self.screen, (255,255,255), p, 1)
 
-        # ressources display
-        # for a_player in players:
-        #     playerOne.update_ressources_bar(self.screen)
-        #
+
         # # units display
         # # for a_unit in units_group:
         # #     if a_unit.is_alive:
@@ -130,9 +131,6 @@ class Game:
         # #         if ENABLE_HEALTH_BARS:
         # #             a_unit.display_life(self.screen)
         #
-         # ressources display
-        for a_ressource in ressources:
-            a_ressource.display(self.screen)
 
         # buildings display
         # for b in buildings:
@@ -152,13 +150,6 @@ class Game:
         self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
 
 #Draw FPS, must be the last to shown -> put it right on top of the display.flip
-        draw_text(
-            self.screen,
-            'fps={}'.format(round(self.clock.get_fps())),
-            25,
-            (255,0,0),
-            (10,10)
-        )
-
+        draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())),25,(255,0,0),(5,80))
         pygame.display.flip()
 

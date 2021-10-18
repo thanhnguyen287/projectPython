@@ -34,11 +34,11 @@ class Player:
 
     def update_ressources_bar(self, screen):
         # ressources display
-        screen.blit(top_menu, (180, 95))
-        screen.blit(display_stone, (300, 130))
-        screen.blit(display_gold, (500, 130))
-        screen.blit(display_lumber, (700, 130))
-        screen.blit(display_food, (900, 130))
+        screen.blit(top_menu, (0, 0))
+        screen.blit(display_stone, (125, 35))
+        screen.blit(display_gold, (320, 35))
+        screen.blit(display_lumber, (535, 35))
+        screen.blit(display_food, (715, 35))
 
 
 playerOne = Player("Tristan", True, [250, 1000, 500, 100], "GREEK")
