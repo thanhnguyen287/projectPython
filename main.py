@@ -16,8 +16,8 @@ def main():
 
 #create the screen
 #screen = pygame.display.set_mode((1920,1080))
-    #screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN) #Full screen for many type of screen
-    screen = pygame.display.set_mode((WIDTH,HEIGHT)) #Adjustable in Settings.py
+    screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN) #Full screen for many type of screen
+    #screen = pygame.display.set_mode((WIDTH,HEIGHT)) #Adjustable in Settings.py
 
 
 

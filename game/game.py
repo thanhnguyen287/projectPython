@@ -130,9 +130,9 @@ class Game:
         # #         if ENABLE_HEALTH_BARS:
         # #             a_unit.display_life(self.screen)
         #
-        # # ressources display
-        # for a_ressource in ressources:
-        #     a_ressource.display(self.screen)
+         # ressources display
+        for a_ressource in ressources:
+            a_ressource.display(self.screen)
 
         # buildings display
         # for b in buildings:
