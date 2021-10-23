@@ -5,26 +5,25 @@ from player import *
 
 class Ressource:
 
-    def __init__(self,tile_x,tile_y):
+    def __init__(self, tile_x, tile_y):
     
-      self.quantity = 0
-      self.type = ""
-      self.x = tile_x
-      self.y = tile_y
+        self.quantity = 0
+        self.type = ""
+        self.x = tile_x
+        self.y = tile_y
 
-      self.max_health = 100
-      self.current_health = self.max_health
-      self.is_standing = True
+        self.max_health = 100
+        self.current_health = self.max_health
+        self.is_standing = True
 
-      self.sprite_standing = pygame.image.load("resources/assets/tree.png")
-      self.sprite_fallen = pygame.image.load("resources/assets/rock.png")
+        self.sprite_standing = pygame.image.load("resources/assets/tree.png")
+        self.sprite_fallen = pygame.image.load("resources/assets/rock.png")
 
-      self.image_select = pygame.image.load("resources/assets/image_select.png")
-      self.selected = False
-
+        self.image_select = pygame.image.load("resources/assets/image_select.png")
+        self.selected = False
 
     def update_quantity(self, amount):
-      self.quantity += amount
+        self.quantity += amount
 
     #we return the "real" x and y position to display the building on the map
     def get_position(self):
@@ -54,9 +53,9 @@ class Ressource:
             screen.blit(self.sprite_fallen, self.get_position())
 
     def display_life(self, screen):
-        pygame.draw.rect(screen, (255, 0, 0), (self.get_position()[0]-15,self.get_position()[1]-15, self.current_health * 3, 10))
-        pygame.draw.rect(screen, (25, 25, 25), (self.get_position()[0]-15,self.get_position()[1]-15, self.max_health * 3, 10), 4)
+        pygame.draw.rect(screen, (255, 0, 0), (self.get_position()[0]-15, self.get_position()[1]-15, self.current_health * 3, 10))
+        pygame.draw.rect(screen, (25, 25, 25), (self.get_position()[0]-15, self.get_position()[1]-15, self.max_health * 3, 10), 4)
 
 
-Test_tree = Ressource(1,1)
+Test_tree = Ressource(1, 1)
 ressources = [Test_tree]

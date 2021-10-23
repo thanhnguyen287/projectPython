@@ -81,9 +81,9 @@ class Map:
 
     def load_images(self):
 
-
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
         tree = pygame.image.load(os.path.join(assets_path,"tree.png")).convert_alpha()
         rock = pygame.image.load(os.path.join(assets_path,"rock.png")).convert_alpha()
+        grass_tile = pygame.image.load(os.path.join(assets_path,"20001_02.png"))
 
-        return {"block": block, "tree": tree, "rock": rock}
+        return {"block": block, "tree": tree, "rock": rock, "grass_tile" : grass_tile}

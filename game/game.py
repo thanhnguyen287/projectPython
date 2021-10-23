@@ -7,6 +7,8 @@ from .map import *
 from .utils import draw_text
 
 buildings = [town1, house1]
+
+
 class Game:
     def __init__(self, screen, clock):
         self.screen = screen
@@ -14,10 +16,10 @@ class Game:
         self.width, self.height = self.screen.get_size()
 
         # map
-        self.map = Map(50,50, self.width, self.height)
+        self.map = Map(50, 50, self.width, self.height)
 
         # camera
-        self.camera = Camera(self.width,self.height)
+        self.camera = Camera(self.width, self.height)
 
     def run(self):
         self.playing = True
@@ -26,8 +28,6 @@ class Game:
             self.events()
             self.update()
             self.draw()
-
-
 
     def events(self):
 
@@ -49,11 +49,10 @@ class Game:
                 # Enable - Disable health bars
                 if event.key == pygame.K_LALT or event.key == pygame.K_RALT:
                     global ENABLE_HEALTH_BARS
-                    if ENABLE_HEALTH_BARS == False:
+                    if not ENABLE_HEALTH_BARS:
                         ENABLE_HEALTH_BARS = True
                     else:
                         ENABLE_HEALTH_BARS = False
-
 
             # USER PRESSED A MOUSEBUTTON
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -70,7 +69,6 @@ class Game:
                     if testUnit1.is_alive:
                         testUnit2.attack(testUnit1)
 
-
     def update(self):
         self.camera.update()
 
@@ -78,9 +76,9 @@ class Game:
     def draw(self):
 
         # BLACK BACKGROUND
-        self.screen.fill((0,0,0))
+        self.screen.fill((0, 0, 0))
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
-        self.screen.blit(self.map.grass_tiles, (self.camera.scroll.x,self.camera.scroll.y))
+        self.screen.blit(self.map.grass_tiles, (self.camera.scroll.x, self.camera.scroll.y))
 
         # FOR THE MAP
         for x in range(self.map.grid_length_x):
@@ -99,7 +97,7 @@ class Game:
                 if tile != "":
                     self.screen.blit(self.map.tiles[tile],
                                      (render_pos[0] + self.map.grass_tiles.get_width()/2 + self.camera.scroll.x,
-                                      render_pos[1] - (self.map.tiles[tile].get_height() -TILE_SIZE) + self.camera.scroll.y))
+                                      render_pos[1] - (self.map.tiles[tile].get_height() - TILE_SIZE) + self.camera.scroll.y))
 
         # RESSOURCES DISPLAY
         for a_player in players:
@@ -144,6 +142,6 @@ class Game:
         self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
 
 #Draw FPS, must be the last to shown -> put it right on top of the display.flip
-        draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())),25,(255,0,0),(5,80))
+        draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())), 25, (255, 0, 0), (5, 40))
         pygame.display.flip()
 
