@@ -1,5 +1,5 @@
 import pygame
-from .utils import draw_text
+#from .utils import draw_text
 
 class Hud:
 
@@ -12,8 +12,8 @@ class Hud:
 
         #resources hud
 
-        self.resources_surface = pygame.Surface((width, height * 0.025), pygame.SRCALPHA)
-        self.resources_surface.fill(self.hud_color)
+        #self.resources_surface = pygame.Surface((width, height * 0.025), pygame.SRCALPHA)
+        #self.resources_surface.fill(self.hud_color)
 
         #building hud
         self.build_surface = pygame.Surface((width * 0.15, height * 0.25), pygame.SRCALPHA)
@@ -82,7 +82,7 @@ class Hud:
             screen.blit(img, pygame.mouse.get_pos())
 
         #display
-        screen.blit(self.resources_surface, (0, 0))
+        #screen.blit(self.resources_surface, (0, 0))
 
         screen.blit(self.build_surface, (0, self.height * 0.75))
 
@@ -92,10 +92,10 @@ class Hud:
             screen.blit(tile["icon"], tile["rect"].topleft)
 
         # resources
-        pos = self.width - 400
-        for resource in ["wood :", "stone :", "gold :"]:
-            draw_text(screen, resource, 30, (255, 255, 255), (pos, 0))
-            pos += 100
+        #pos = self.width - 400
+        #for resource in ["wood :", "stone :", "gold :"]:
+            #draw_text(screen, resource, 30, (255, 255, 255), (pos, 0))
+            #pos += 100
 
     def load_images(self):
         building1 = pygame.image.load("Resources/assets/town_center.png")
