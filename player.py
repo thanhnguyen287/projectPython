@@ -33,6 +33,7 @@ class Player:
     def update_ressources_bar(self, screen):
         # ressources display
         screen.blit(top_menu, (0, 0))
+
         #position of display slightly varies depending on the number of digits of the corresponding resource
 
         # WOOD

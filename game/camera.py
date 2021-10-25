@@ -16,9 +16,9 @@ class Camera:
         mouse_pos = pygame.mouse.get_pos()
 
         #moving in x axis
-        if mouse_pos[0] > self.width * 0.95:
+        if mouse_pos[0] > self.width * 0.97:
             self.dx = -self.speed
-        elif mouse_pos[0] < self.width * 0.05:
+        elif mouse_pos[0] < self.width * 0.03:
             self.dx = self.speed
         else:
             self.dx = 0

@@ -6,6 +6,7 @@ from .camera import Camera
 from .map import *
 from .utils import draw_text
 from .hud import Hud
+from.animation import *
 
 buildings = [town1, house1]
 class Game:
@@ -22,6 +23,8 @@ class Game:
 
         # hud
         self.hud = Hud(self.width, self.height)
+
+
 
     def run(self):
         self.playing = True
@@ -59,6 +62,7 @@ class Game:
                         ENABLE_HEALTH_BARS = False
 
 
+
             # USER PRESSED A MOUSEBUTTON
             elif event.type == pygame.MOUSEBUTTONDOWN:
 
@@ -71,8 +75,12 @@ class Game:
                             1] <= 10 else "not on map")
 
                 elif event.button == 3:  # RIGHT CLICK
-                    if testUnit1.is_alive:
-                        testUnit2.attack(testUnit1)
+                    #if testUnit1.is_alive:
+                     #   testUnit2.attack(testUnit1)
+                    player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
+
+                    player.play()
+
 
 
     def update(self):
@@ -148,6 +156,9 @@ class Game:
         standard_cursor_rect = standard_cursor.get_rect()
         standard_cursor_rect.center = pygame.mouse.get_pos()  # update position
         self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
+
+        moving_sprites.draw(self.screen)
+        moving_sprites.update(0.25)
 
         #Draw FPS, must be the last to shown -> put it right on top of the display.flip
         draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())),25,(255,0,0),(5,80))
