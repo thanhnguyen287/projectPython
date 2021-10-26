@@ -1,5 +1,9 @@
+import os
+from settings import *
 import pygame
-#from .utils import draw_text
+from .utils import draw_text
+from player import players
+
 
 
 class Hud:
@@ -30,6 +34,7 @@ class Hud:
         self.tiles = self.create_build_hud()
 
         self.selected_tile = None
+        self.examined_tile = None
 
     def create_build_hud(self):
 
@@ -73,12 +78,28 @@ class Hud:
                 if mouse_action[0]:
                     self.selected_tile = tile
 
+    # display
     def draw(self, screen):
 
-        # display
-        # screen.blit(self.resources_surface, (0, 0))
+        # resources bar
+        for a_player in players:
+            if a_player.is_human:
+                a_player.update_ressources_bar(screen)
+
+        # build menu
         screen.blit(self.build_surface, (0, self.height * 0.75))
-        screen.blit(self.select_surface, (self.width * 0.35, self.height * 0.8))
+
+        # selection (bottom middle menu)
+        if self.examined_tile is not None:
+            w, h = self.select_rect.width, self.select_rect.height
+            screen.blit(self.select_surface, (self.width * 0.35, self.height * 0.79))
+            # as we are scaling it, we make a copy
+            img = self.images[self.examined_tile["tile"]].copy()
+            img_scaled = self.scale_image(img, h*0.9)
+            # for now, we display the picture of the object and its name
+            screen.blit(img_scaled, (self.width * 0.35 - 10, self.height * 0.79 + 10 ))
+            draw_text(screen, self.examined_tile["tile"], 40, (255, 255, 255), self.select_rect.midtop)
+
 
         #display of the buildings icons inside the build menu
         for tile in self.tiles:
@@ -91,14 +112,18 @@ class Hud:
             #pos += 100
 
     def load_images(self):
-        building1 = pygame.image.load("Resources/assets/town_center.png")
-        building2 = pygame.image.load("Resources/assets/House_sprite.png")
+        tree = pygame.image.load(os.path.join(assets_path, "tree.png")).convert_alpha()
+        rock = pygame.image.load(os.path.join(assets_path, "rock.png")).convert_alpha()
+
+        building1 = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
+        building2 = pygame.image.load("Resources/assets/House_sprite.png").convert_alpha()
 
         images = {
             "building1": building1,
-            "building2": building2
+            "building2": building2,
+            "tree": tree,
+            "rock": rock,
         }
-
         return images
 
     def scale_image(self, image, w=None, h=None):

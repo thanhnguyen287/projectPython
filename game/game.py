@@ -17,14 +17,17 @@ class Game:
         self.clock = clock
         self.width, self.height = self.screen.get_size()
 
-        # camera
-        self.camera = Camera(self.width, self.height)
-
         # hud
         self.hud = Hud(self.width, self.height)
 
         # map
         self.map = Map(self.hud, 50, 50, self.width, self.height)
+
+        # camera
+        self.camera = Camera(self.width, self.height)
+
+
+
 
 
 
@@ -97,10 +100,10 @@ class Game:
 
         # MOUSE CURSOR - we disable the default one and create a new one at the current position of the mouse
         # MUST BE LAST TO SEE IT AND NOT BE HIDDEN BEHIND OTHER THINGS
-        #pygame.mouse.set_visible(False)
-        #standard_cursor_rect = standard_cursor.get_rect()
-        #standard_cursor_rect.center = pygame.mouse.get_pos()  # update position
-        #self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
+        pygame.mouse.set_visible(False)
+        standard_cursor_rect = standard_cursor.get_rect()
+        standard_cursor_rect.center = pygame.mouse.get_pos()  # update position
+        self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
 
         #Boom animation
         moving_sprites.draw(self.screen)

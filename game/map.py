@@ -1,7 +1,6 @@
 import random
 import noise
 import pygame.mouse
-from player import players
 from settings import *
 
 
@@ -24,6 +23,9 @@ class Map:
         #used when selecting a tile to build
         self.temp_tile = None
 
+        # used when examinating elements of the map
+        self.examined_tile = None
+
     def create_map(self):
         map = []
 
@@ -44,6 +46,11 @@ class Map:
         mouse_pos = pygame.mouse.get_pos()
         mouse_action = pygame.mouse.get_pressed()
         self.temp_tile = None
+
+        # we deselect the object examined when right-clicking
+        if mouse_action[2]:
+            self.examined_tile = None
+            self.hud.examined_tile = None
 
         # meaning : the player selected a building in the hud
         if self.hud.selected_tile is not None:
@@ -73,6 +80,18 @@ class Map:
                     self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
                     self.hud.selected_tile = None
 
+        #the player hasn't selected something to build, he will interact with what's on the map
+        else:
+            grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
+
+            # if on the map and left click and the tile isn't empty
+            if self.can_place_tile(grid_pos):
+                collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
+
+                if mouse_action[0] and collision:
+                    self.examined_tile = grid_pos
+                    self.hud.examined_tile = self.map[grid_pos[0]][grid_pos[1]]
+
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
         screen.blit(self.grass_tiles, (camera.scroll.x, camera.scroll.y))
@@ -85,12 +104,19 @@ class Map:
                 # Rendering what's on the map, if it is not a tree or rock then render nothing as we already had block with green grass
                 tile = self.map[x][y]["tile"]
                 if tile != "":
-                    screen.blit(self.tiles[tile],
-                                     (
+                    screen.blit(self.tiles[tile], (
                                          render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                         render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y
-                                     )
-                    )
+                                         render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y)
+                                )
+                    # have we clicked on this tile ?
+                    if self.examined_tile is not None:
+                        if (x == self.examined_tile[0]) and (y == self.examined_tile[1]):
+
+                            # outline in white the object selected
+                            mask = pygame.mask.from_surface(self.tiles[tile]).outline()
+                            mask = [(x + render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y ) for x,y in mask]
+                            pygame.draw.polygon(screen, (255, 255, 255), mask, 3)
+
 
         # display the potential building on the tile
         if self.temp_tile is not None:
@@ -110,22 +136,6 @@ class Map:
                     render_pos[1] - (self.temp_tile["image"].get_height() - TILE_SIZE) + camera.scroll.y
                 )
             )
-
-        # RESOURCES_BAR DISPLAY
-        for a_player in players:
-            if a_player.is_human:
-                a_player.update_ressources_bar(screen)
-
-
-        # # units display
-        # # for a_unit in units_group:
-        # #     if a_unit.is_alive:
-        # #         a_unit.display(self.screen)
-        # #
-        # #         #health bar display
-        # #         if ENABLE_HEALTH_BARS:
-        # #             a_unit.display_life(self.screen)
-        #
 
 
     def load_images(self):
