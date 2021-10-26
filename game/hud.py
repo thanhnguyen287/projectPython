@@ -22,6 +22,7 @@ class Hud:
 
         #building hud - 3rd line is for collision
         self.build_surface = pygame.Surface((width * 0.15, height * 0.25), pygame.SRCALPHA)
+
         self.build_surface.fill(self.hud_color)
         self.build_rect = self.build_surface.get_rect(topleft=(0, self.height * 0.75))
 
@@ -46,8 +47,11 @@ class Hud:
         for image_name, image in self.images.items():
 
             pos = render_pos.copy()
-            image_tmp = image.copy()
-            image_scale = self.scale_image(image_tmp, w=40) #a modifier pour s'adapter a l'ecran
+            if image_name == "Farm":
+                image_scale = farm_icon
+            else:
+                image_tmp = image.copy()
+                image_scale = self.scale_image(image_tmp, w=40) #a modifier pour s'adapter a l'ecran
             rect = image_scale.get_rect(topleft=pos)
 
             tiles.append(
@@ -103,7 +107,8 @@ class Hud:
 
         #display of the buildings icons inside the build menu
         for tile in self.tiles:
-            screen.blit(tile["icon"], tile["rect"].topleft)
+            if tile["name"] != "tree" and tile["name"] != "rock":
+                screen.blit(tile["icon"], tile["rect"].topleft)
 
         # resources
         #pos = self.width - 400
@@ -115,12 +120,14 @@ class Hud:
         tree = pygame.image.load(os.path.join(assets_path, "tree.png")).convert_alpha()
         rock = pygame.image.load(os.path.join(assets_path, "rock.png")).convert_alpha()
 
-        building1 = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
-        building2 = pygame.image.load("Resources/assets/House_sprite.png").convert_alpha()
+        town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/House_sprite.png").convert_alpha()
+        farm = pygame.image.load("Resources/assets/farm.png").convert_alpha()
 
         images = {
-            "building1": building1,
-            "building2": building2,
+            "Town center": town_center,
+            "House": house,
+            "Farm": farm,
             "tree": tree,
             "rock": rock,
         }

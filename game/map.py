@@ -45,13 +45,13 @@ class Map:
     def update(self, camera):
         mouse_pos = pygame.mouse.get_pos()
         mouse_action = pygame.mouse.get_pressed()
-        self.temp_tile = None
 
         # we deselect the object examined when right-clicking
         if mouse_action[2]:
             self.examined_tile = None
             self.hud.examined_tile = None
 
+        self.temp_tile = None
         # meaning : the player selected a building in the hud
         if self.hud.selected_tile is not None:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
@@ -64,7 +64,6 @@ class Map:
 
                 render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
                 iso_poly = self.map[grid_pos[0]][grid_pos[1]]["iso_poly"]
-
                 collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
 
                 self.temp_tile = {
@@ -145,12 +144,15 @@ class Map:
         rock = pygame.image.load(os.path.join(assets_path, "rock.png")).convert_alpha()
         grass_tile = pygame.image.load(os.path.join(assets_path, "20001_02.png")).convert_alpha()
 
-        building1 = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
-        building2 = pygame.image.load("Resources/assets/House_sprite.png").convert_alpha()
+        town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/House_sprite.png").convert_alpha()
+        farm = pygame.image.load("Resources/assets/farm.png").convert_alpha()
+
 
         images = {
-            "building1": building1,
-            "building2": building2,
+            "Town_center": town_center,
+            "House": house,
+            "Farm": farm,
             "tree" : tree,
             "rock" : rock,
             "block" : block,
