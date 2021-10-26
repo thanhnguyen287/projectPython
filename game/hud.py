@@ -1,6 +1,7 @@
 import pygame
 #from .utils import draw_text
 
+
 class Hud:
 
     def __init__(self, width, height):
@@ -15,13 +16,15 @@ class Hud:
         #self.resources_surface = pygame.Surface((width, height * 0.025), pygame.SRCALPHA)
         #self.resources_surface.fill(self.hud_color)
 
-        #building hud
+        #building hud - 3rd line is for collision
         self.build_surface = pygame.Surface((width * 0.15, height * 0.25), pygame.SRCALPHA)
         self.build_surface.fill(self.hud_color)
+        self.build_rect = self.build_surface.get_rect(topleft=(0, self.height * 0.75))
 
-        #select hud
+        #select hud - same for collision
         self.select_surface = pygame.Surface((width * 0.3, height * 0.2), pygame.SRCALPHA)
         self.select_surface.fill(self.hud_color)
+        self.select_rect = self.select_surface.get_rect(topleft =(self.width * 0.35, self.height * 0.8))
 
         self.images = self.load_images()
         self.tiles = self.create_build_hud()
@@ -31,7 +34,6 @@ class Hud:
     def create_build_hud(self):
 
         render_pos = [0 + 10, self.height * 0.75 + 10]
-
         object_width = self.build_surface.get_width()
 
         tiles = []
@@ -58,36 +60,27 @@ class Hud:
 
     def update(self):
 
-        mouse_pos = pygame.mouse.get_pos()
+        mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         mouse_action = pygame.mouse.get_pressed()
 
-        #deselction
+        #deselection by right-clicking
         if mouse_action[2]:
             self.selected_tile = None
 
         #parcours de liste pour voir quelle tile est selectionnée
         for tile in self.tiles:
-
             if tile["rect"].collidepoint(mouse_pos):
                 if mouse_action[0]:
                     self.selected_tile = tile
 
     def draw(self, screen):
 
-        if self.selected_tile is not None:
-            img = self.selected_tile["image"].copy()
-            #transparency
-            img.set_alpha(100)
-
-            screen.blit(img, pygame.mouse.get_pos())
-
-        #display
-        #screen.blit(self.resources_surface, (0, 0))
-
+        # display
+        # screen.blit(self.resources_surface, (0, 0))
         screen.blit(self.build_surface, (0, self.height * 0.75))
-
         screen.blit(self.select_surface, (self.width * 0.35, self.height * 0.8))
 
+        #display of the buildings icons inside the build menu
         for tile in self.tiles:
             screen.blit(tile["icon"], tile["rect"].topleft)
 
@@ -107,10 +100,6 @@ class Hud:
         }
 
         return images
-
-
-
-
 
     def scale_image(self, image, w=None, h=None):
 

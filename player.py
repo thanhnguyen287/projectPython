@@ -10,7 +10,7 @@ class Player:
         self.name = name
 
         # True = Human, False = AI
-        self.controller = controller
+        self.is_human = controller
 
         self.ressources = starting_ressources
 
