@@ -1,14 +1,13 @@
 import sys
 
 from House import *
-from TownHall import *
+from town_center import *
 from .camera import Camera
 from .map import *
 from .utils import draw_text
 from .hud import Hud
 from.animation import *
 
-buildings = [town1, house1]
 
 
 class Game:
@@ -17,15 +16,18 @@ class Game:
         self.clock = clock
         self.width, self.height = self.screen.get_size()
 
+
         # hud
         self.hud = Hud(self.width, self.height)
 
+        # entities list (units, buildings, etc...)
+        self.entities = []
+
         # map
-        self.map = Map(self.hud, 50, 50, self.width, self.height)
+        self.map = Map(self.hud, self.entities, 50, 50, self.width, self.height)
 
         # camera
         self.camera = Camera(self.width, self.height)
-
 
 
 
@@ -39,8 +41,6 @@ class Game:
             self.events()
             self.update()
             self.draw()
-
-
 
     def events(self):
 
@@ -73,9 +73,7 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
 
                 if event.button == 1:  #  LEFT CLICK
-                    # we check the clicks for every building
-                    for b in buildings:
-                        b.select()
+                    pass
 
                 elif event.button == 3:  # RIGHT CLICK
                     #if testUnit1.is_alive:
@@ -87,6 +85,9 @@ class Game:
         self.camera.update()
         self.hud.update()
         self.map.update(self.camera)
+
+        for an_entity in self.entities:
+            an_entity.update()
 
     # GAME DISPLAY
     def draw(self):

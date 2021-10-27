@@ -2,11 +2,14 @@ import random
 import noise
 import pygame.mouse
 from settings import *
+from builds import Farm, Town_center, House
+from player import playerOne
 
 
 class Map:
-    def __init__(self, hud, grid_length_x, grid_length_y, width, height):
+    def __init__(self, hud, entities, grid_length_x, grid_length_y, width, height):
         self.hud = hud
+        self.entities = entities
         self.grid_length_x = grid_length_x
         self.grid_length_y = grid_length_y
         self.width = width
@@ -19,6 +22,9 @@ class Map:
         self.tiles = self.load_images()
         # Set this at the most bottom line of this __init__
         self.map = self.create_map()
+
+        # a list of lists
+        self.buildings = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
 
         #used when selecting a tile to build
         self.temp_tile = None
@@ -73,9 +79,27 @@ class Map:
                     "collision": collision
                 }
 
-                #if we left_click to build : we place the temp tile in the map
+                #if we left_click to build : we will place the building in the map if the targeted tile is empty
                 if mouse_action[0] and not collision:
-                    self.map[grid_pos[0]][grid_pos[1]]["tile"] = self.hud.selected_tile["name"]
+
+                    # we create an instance of the selected building
+                    if self.hud.selected_tile["name"] == "Farm":
+                        new_building = Farm(render_pos, playerOne)
+                        #to add it to the entities list on our map
+                        self.entities.append(new_building)
+                        # grid_pos 0 and grid_pos 1 means : grid_pos_x and grid_pos_y, not the specific tile near the origin
+                        self.buildings[grid_pos[0]][grid_pos[1]] = new_building
+
+                    elif self.hud.selected_tile["name"] == "Town center":
+                        new_building = Town_center(render_pos, playerOne)
+                        self.entities.append(new_building)
+                        self.buildings[grid_pos[0]][grid_pos[1]] = new_building
+
+                    elif self.hud.selected_tile["name"] == "House":
+                        new_building = House(render_pos, playerOne)
+                        self.entities.append(new_building)
+                        self.buildings[grid_pos[0]][grid_pos[1]] = new_building
+
                     self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
                     self.hud.selected_tile = None
 
@@ -85,11 +109,11 @@ class Map:
 
             # if on the map and left click and the tile isn't empty
             if self.can_place_tile(grid_pos):
-                collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
+                building = self.buildings[grid_pos[0]][grid_pos[1]]
 
-                if mouse_action[0] and collision:
+                if mouse_action[0] and (building is not None):
                     self.examined_tile = grid_pos
-                    self.hud.examined_tile = self.map[grid_pos[0]][grid_pos[1]]
+                    self.hud.examined_tile = building
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -99,7 +123,7 @@ class Map:
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
                 render_pos = self.map[x][y]["render_pos"]
-
+                # HERE WE DRAW THE MAP TILES
                 # Rendering what's on the map, if it is not a tree or rock then render nothing as we already had block with green grass
                 tile = self.map[x][y]["tile"]
                 if tile != "":
@@ -107,15 +131,25 @@ class Map:
                                          render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                                          render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y)
                                 )
-                    # have we clicked on this tile ?
+
+                # HERE WE DRAW THE BUILDINGS ON THE MAP
+                # we extract from the buildings list the building we want to display
+                building = self.buildings[x][y]
+                if building is not None:
+                    screen.blit(building.sprite, (
+                        render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                )
+
+                    # have we clicked on this tile ? if yes we will highlight the building
                     if self.examined_tile is not None:
                         if (x == self.examined_tile[0]) and (y == self.examined_tile[1]):
-
                             # outline in white the object selected
-                            mask = pygame.mask.from_surface(self.tiles[tile]).outline()
-                            mask = [(x + render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y ) for x,y in mask]
+                            mask = pygame.mask.from_surface(building.sprite).outline()
+                            mask = [(x + render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                     y + render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                    for x, y in mask]
                             pygame.draw.polygon(screen, (255, 255, 255), mask, 3)
-
 
         # display the potential building on the tile
         if self.temp_tile is not None:
@@ -145,12 +179,12 @@ class Map:
         grass_tile = pygame.image.load(os.path.join(assets_path, "20001_02.png")).convert_alpha()
 
         town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/House_sprite.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/House.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/farm.png").convert_alpha()
 
 
         images = {
-            "Town_center": town_center,
+            "Town center": town_center,
             "House": house,
             "Farm": farm,
             "tree" : tree,

@@ -5,8 +5,6 @@ class House(Building):
         super().__init__(x, y)
 
         #Display
-        self.sprite = pygame.image.load("resources/assets/House_sprite.png")
+        self.sprite = pygame.image.load("resources/assets/House.png")
 
 
-
-house1 = House(2, 7)

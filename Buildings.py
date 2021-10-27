@@ -5,6 +5,7 @@ class Building:
         self.x = x
         self.y = y
 
+        self.name = "none"
         self.max_health = 100
         self.current_health = self.max_health
         self.is_alive = True
@@ -17,6 +18,7 @@ class Building:
 
         self.image_select = pygame.image.load(os.path.join(assets_path,"image_select.png"))
         self.selected = False
+
 
 
     def display(self, screen):

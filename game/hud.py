@@ -2,9 +2,7 @@ import os
 from settings import *
 import pygame
 from .utils import draw_text
-from player import players
-
-
+from player import playerOne
 
 class Hud:
 
@@ -12,13 +10,7 @@ class Hud:
 
         self.width = width
         self.height = height
-
         self.hud_color = (198, 155, 93, 175)
-
-        #resources hud
-
-        #self.resources_surface = pygame.Surface((width, height * 0.025), pygame.SRCALPHA)
-        #self.resources_surface.fill(self.hud_color)
 
         #building hud - 3rd line is for collision
         self.build_surface = pygame.Surface((width * 0.15, height * 0.25), pygame.SRCALPHA)
@@ -59,7 +51,8 @@ class Hud:
                     "name": image_name,
                     "icon": image_scale,
                     "image": self.images[image_name],
-                    "rect": rect
+                    "rect": rect,
+                    "affordable" : True
                 }
             )
 
@@ -76,9 +69,14 @@ class Hud:
         if mouse_action[2]:
             self.selected_tile = None
 
-        #parcours de liste pour voir quelle tile est selectionnée
+        # building selection inside the build menu
         for tile in self.tiles:
-            if tile["rect"].collidepoint(mouse_pos):
+            if playerOne.can_afford(tile["name"]):
+                tile["affordable"] = True
+            else:
+                tile["affordable"] = False
+
+            if tile["rect"].collidepoint(mouse_pos) and tile["affordable"]:
                 if mouse_action[0]:
                     self.selected_tile = tile
 
@@ -86,50 +84,39 @@ class Hud:
     def draw(self, screen):
 
         # resources bar
-        for a_player in players:
-            if a_player.is_human:
-                a_player.update_ressources_bar(screen)
+        playerOne.update_resources_bar(screen)
 
         # build menu
         screen.blit(self.build_surface, (0, self.height * 0.75))
+        # display of the buildings icons inside the build menu
+        for tile in self.tiles:
+            icon = tile["icon"].copy()
+            if not tile["affordable"]:
+                icon.set_alpha(100)
+            screen.blit(icon, tile["rect"].topleft)
 
         # selection (bottom middle menu)
         if self.examined_tile is not None:
             w, h = self.select_rect.width, self.select_rect.height
             screen.blit(self.select_surface, (self.width * 0.35, self.height * 0.79))
             # as we are scaling it, we make a copy
-            img = self.images[self.examined_tile["tile"]].copy()
-            img_scaled = self.scale_image(img, h*0.9)
+            img = self.examined_tile.sprite.copy()
+            img_scaled = self.scale_image(img, h*0.7)
             # for now, we display the picture of the object and its name
             screen.blit(img_scaled, (self.width * 0.35 - 10, self.height * 0.79 + 10 ))
-            draw_text(screen, self.examined_tile["tile"], 40, (255, 255, 255), self.select_rect.midtop)
+            draw_text(screen, self.examined_tile.name, 40, (255, 255, 255), self.select_rect.midtop)
 
 
-        #display of the buildings icons inside the build menu
-        for tile in self.tiles:
-            if tile["name"] != "tree" and tile["name"] != "rock":
-                screen.blit(tile["icon"], tile["rect"].topleft)
-
-        # resources
-        #pos = self.width - 400
-        #for resource in ["wood :", "stone :", "gold :"]:
-            #draw_text(screen, resource, 30, (255, 255, 255), (pos, 0))
-            #pos += 100
 
     def load_images(self):
-        tree = pygame.image.load(os.path.join(assets_path, "tree.png")).convert_alpha()
-        rock = pygame.image.load(os.path.join(assets_path, "rock.png")).convert_alpha()
-
         town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/House_sprite.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/House.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/farm.png").convert_alpha()
 
         images = {
             "Town center": town_center,
             "House": house,
-            "Farm": farm,
-            "tree": tree,
-            "rock": rock,
+            "Farm": farm
         }
         return images
 
@@ -149,6 +136,4 @@ class Hud:
             image = pygame.transform.scale(image, (int(w), int(h)))
 
         return image
-
-
 
