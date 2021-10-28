@@ -80,7 +80,7 @@ class House(Building):
         self.construction_time = 1
 
         self.max_health = 50
-        self.max_population_bonus = 5
+        player_owner_of_unit.max_population += 5
 
         super().__init__(pos, player_owner_of_unit)
 
