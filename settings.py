@@ -2,8 +2,9 @@ import os
 import pygame
 
 TILE_SIZE = 64
-WIDTH = 1920
-HEIGHT = 1080
+#WIDTH = 1920
+#HEIGHT = 1080
+
 
 ENABLE_HEALTH_BARS = False
 

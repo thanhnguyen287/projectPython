@@ -84,7 +84,7 @@ class Game:
     def update(self):
         self.camera.update()
         self.hud.update()
-        self.map.update(self.camera)
+        self.map.update(self.camera, self.screen)
 
         for an_entity in self.entities:
             an_entity.update()

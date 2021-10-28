@@ -48,7 +48,7 @@ class Map:
 
         return map
 
-    def update(self, camera):
+    def update(self, camera, screen):
         mouse_pos = pygame.mouse.get_pos()
         mouse_action = pygame.mouse.get_pressed()
 

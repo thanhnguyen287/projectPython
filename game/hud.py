@@ -3,6 +3,7 @@ from settings import *
 import pygame
 from .utils import draw_text
 from player import playerOne
+from math import ceil
 
 class Hud:
 
@@ -103,10 +104,12 @@ class Hud:
             img = self.examined_tile.sprite.copy()
             img_scaled = self.scale_image(img, h*0.7)
             # for now, we display the picture of the object and its name
-            screen.blit(img_scaled, (self.width * 0.35 - 10, self.height * 0.79 + 10 ))
+            screen.blit(img_scaled, (self.width * 0.35, self.height * 0.79 + 30))
+            #name
             draw_text(screen, self.examined_tile.name, 40, (255, 255, 255), self.select_rect.midtop)
 
-
+            #lifebar and numbers
+            self.display_life(screen, self.examined_tile)
 
     def load_images(self):
         town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
@@ -137,3 +140,15 @@ class Hud:
 
         return image
 
+    def display_life(self, screen, building):
+        #health bar
+        # to get the same health bar size and not have huge ones, we use a ratio
+        health_bar_length = 100
+        hp_displayed = (building.current_health / building.max_health * health_bar_length)
+
+        pygame.draw.rect(screen, (255, 0, 0), (self.width * 0.36, self.height * 0.9 + 30, hp_displayed, 6))
+        pygame.draw.rect(screen, (25, 25, 25), (self.width*0.36, self.height * 0.9 + 30, health_bar_length, 6),2)
+
+        # health text
+        health_text = str(building.current_health) + " / " + str(building.max_health)
+        draw_text(screen, health_text, 20, (255, 255, 255), (self.width*0.38, self.height*0.92 +30))

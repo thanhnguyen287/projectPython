@@ -18,7 +18,6 @@ def main():
     #screen = pygame.display.set_mode((WIDTH,HEIGHT)) #Adjustable in Settings.py
 
 
-
 #Title and Icon
     pygame.display.set_caption("Age of Empire: Homemade Edition")
     icon = pygame.image.load(os.path.join(common_path,'icon.png'))
