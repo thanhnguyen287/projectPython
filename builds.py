@@ -55,10 +55,11 @@ class Town_center(Building):
         self.sprite = pygame.image.load(os.path.join(assets_path, "town_center.png"))
 
         self.construction_cost = [1000, 0, 0, 100]
-        self.construction_time = 1
+        self.construction_time = 150
+
 
         self.max_health = 100
-        self.max_population_bonus = 0
+        player_owner_of_unit.max_population += 5
 
         super().__init__(pos, player_owner_of_unit)
 

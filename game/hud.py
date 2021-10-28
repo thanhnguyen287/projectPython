@@ -32,7 +32,7 @@ class Hud:
 
     def create_build_hud(self):
 
-        render_pos = [0 + 10, self.height * 0.75 + 10]
+        render_pos = [0 + 15, self.height * 0.8 + 10]
         object_width = self.build_surface.get_width()
 
         tiles = []
@@ -41,7 +41,12 @@ class Hud:
 
             pos = render_pos.copy()
             if image_name == "Farm":
-                image_scale = farm_icon
+                image_scale = farm_icon_hd
+            elif image_name == "Town center":
+                image_scale = town_center_icon
+            elif image_name == "House":
+                image_scale = house_icon
+
             else:
                 image_tmp = image.copy()
                 image_scale = self.scale_image(image_tmp, w=40) #a modifier pour s'adapter a l'ecran
@@ -57,7 +62,7 @@ class Hud:
                 }
             )
 
-            render_pos[0] += image_scale.get_width() + 20 #modifier le 20 pour que ça marche pour tout ecran
+            render_pos[0] += image_scale.get_width() + 5 #modifier le 20 pour que ça marche pour tout ecran
 
         return tiles
 
@@ -88,7 +93,11 @@ class Hud:
         playerOne.update_resources_bar_hd(screen)
 
         # build menu
-        screen.blit(self.build_surface, (0, self.height * 0.75))
+
+        # old display
+        #screen.blit(self.build_surface, (0, self.height * 0.75))
+        #new one
+        screen.blit(bot_menu_building_hd, (0, self.height - 182))
         # display of the buildings icons inside the build menu
         for tile in self.tiles:
             icon = tile["icon"].copy()

@@ -19,7 +19,14 @@ assets_path = os.path.join(resource_path, 'assets')
 
 top_menu = pygame.image.load("resources/assets/ressource_bar_ui.png")
 top_menu_hd = pygame.image.load("resources/assets/NewUI_blank_resized.png")
+bot_menu_building_hd = pygame.image.load("resources/assets/buildingmenuDE.png")
+bot_complet_menu_building_hd = pygame.image.load("resources/assets/botuiDE.png")
+
 
 farm_icon = pygame.image.load("resources/assets/icons./farm_icon.png")
+farm_icon_hd = pygame.image.load("resources/assets/icons./FarmDE.png")
+
+town_center_icon = pygame.image.load("resources/assets/icons./town_center_icon_hd.png")
+house_icon = pygame.image.load("resources/assets/icons/houseDE.png")
 
 standard_cursor = pygame.image.load("resources/assets/standard_cursor.png")
