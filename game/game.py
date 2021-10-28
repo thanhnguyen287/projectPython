@@ -1,6 +1,5 @@
 import sys
 
-from House import *
 from town_center import *
 from .camera import Camera
 from .map import *
