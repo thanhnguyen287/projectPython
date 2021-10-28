@@ -1,6 +1,5 @@
 from settings import *
 
-
 class Player:
 
 
@@ -57,31 +56,20 @@ class Player:
             screen.blit(myfont.render(str(playerOne.resources[resource_type]), True, (255, 255, 255)), (resource_text_pos, 2))
             resource_text_pos += 65
 
-"""
-    def is_affordable(self, building):
-        affordable = True
-        for resource, cost in self.building_costs[building].items():
-            if cost > self.resources[resource]:
-                affordable = False
-        return affordable
-"""
-
-"""
-    def can_afford(self, building):
-        affordable = True
+    def update_resources_bar_hd(self, screen):
+        # resources display
+        screen.blit(top_menu_hd, (0, 0))
+        resource_text_pos = 34
         for resource_type in range(4):
-            if building.construction_cost[resource_type] > self.resources[resource_type]:
-                affordable = False
-        return affordable
-"""
+            screen.blit(myfont.render(str(playerOne.resources[resource_type]), True, (255, 255, 255)),
+                        (resource_text_pos, 11))
+            resource_text_pos += 68
+
+        #population
+        population_text = str(playerOne.current_population) + "/" + str(playerOne.max_population)
+        screen.blit(myfont.render(population_text, True, (255, 255, 255)), (resource_text_pos, 11))
+
 
 playerOne = Player("Tristan", True, [500, 750, 250,1000], "GREEK")
 players = [playerOne]
 #  INIT FOR RESSOURCES DISPLAY
-
-"""
-display_wood = myfont.render(str(playerOne.resources[0]), True, (255, 255, 255))
-display_food = myfont.render(str(playerOne.resources[1]), True, (255, 255, 255))
-display_gold = myfont.render(str(playerOne.resources[2]), True, (255, 255, 255))
-display_stone = myfont.render(str(playerOne.resources[3]), True, (255, 255, 255))
-"""

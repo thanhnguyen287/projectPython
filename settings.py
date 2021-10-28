@@ -18,6 +18,8 @@ common_path = os.path.join(resource_path, 'common')
 assets_path = os.path.join(resource_path, 'assets')
 
 top_menu = pygame.image.load("resources/assets/ressource_bar_ui.png")
+top_menu_hd = pygame.image.load("resources/assets/NewUI_blank_resized.png")
+
 farm_icon = pygame.image.load("resources/assets/icons./farm_icon.png")
 
 standard_cursor = pygame.image.load("resources/assets/standard_cursor.png")

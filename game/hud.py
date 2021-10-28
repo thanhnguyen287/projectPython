@@ -85,7 +85,7 @@ class Hud:
     def draw(self, screen):
 
         # resources bar
-        playerOne.update_resources_bar(screen)
+        playerOne.update_resources_bar_hd(screen)
 
         # build menu
         screen.blit(self.build_surface, (0, self.height * 0.75))
