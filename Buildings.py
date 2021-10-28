@@ -1,5 +1,5 @@
 from settings import *
-
+###################OLD CODE, WE ARE NOT WORKING WITH IT ANYMORE. SEE builds to see buildings relevant code
 class Building:
     def __init__(self, x, y):
         self.x = x

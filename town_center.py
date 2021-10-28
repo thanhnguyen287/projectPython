@@ -1,7 +1,7 @@
 from Buildings import *
 from villager import *
 
-
+###################OLD CODE, WE ARE NOT WORKING WITH IT ANYMORE. SEE builds to see buildings relevant code
 class TownCenter (Building):
     def __init__(self, x, y):
         super().__init__(x, y)
