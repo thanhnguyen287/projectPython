@@ -24,6 +24,31 @@ class Building:
         pass
 
 
+class Town_center(Building):
+
+    def __init__(self, pos, player_owner_of_unit):
+
+        self.name = "Town center"
+        self.sprite = pygame.image.load(os.path.join(assets_path, "town_center.png"))
+
+        self.construction_cost = [1000, 0, 0, 100]
+        self.construction_time = 150
+
+        self.max_health = 100
+        player_owner_of_unit.max_population += 5
+
+        self.description = "Used to create villagers."
+
+        super().__init__(pos, player_owner_of_unit)
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        # every 5 secs :
+        if now - self.resource_manager_cooldown > 5000:
+            self.current_health -= 5
+            self.resource_manager_cooldown = now
+
+
 class Farm(Building):
     def __init__(self, pos, player_owner_of_unit):
 
@@ -36,6 +61,8 @@ class Farm(Building):
         self.max_health = 10
         self.max_population_bonus = 0
 
+        self.description = "Provides 50 food every 5 seconds."
+
         super().__init__(pos, player_owner_of_unit)
 
     def update(self):
@@ -44,30 +71,6 @@ class Farm(Building):
         if now - self.resource_manager_cooldown > 5000:
             self.owner.resources[0] += 50
             self.current_health-=1
-            self.resource_manager_cooldown = now
-
-
-class Town_center(Building):
-
-    def __init__(self, pos, player_owner_of_unit):
-
-        self.name = "Town center"
-        self.sprite = pygame.image.load(os.path.join(assets_path, "town_center.png"))
-
-        self.construction_cost = [1000, 0, 0, 100]
-        self.construction_time = 150
-
-
-        self.max_health = 100
-        player_owner_of_unit.max_population += 5
-
-        super().__init__(pos, player_owner_of_unit)
-
-    def update(self):
-        now = pygame.time.get_ticks()
-        # every 5 secs :
-        if now - self.resource_manager_cooldown > 5000:
-            self.current_health-=5
             self.resource_manager_cooldown = now
 
 
@@ -82,6 +85,8 @@ class House(Building):
 
         self.max_health = 50
         player_owner_of_unit.max_population += 5
+
+        self.description = "Each House increases the maximum population by 5."
 
         super().__init__(pos, player_owner_of_unit)
 

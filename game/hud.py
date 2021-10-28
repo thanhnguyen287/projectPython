@@ -117,6 +117,8 @@ class Hud:
             #name
             draw_text(screen, self.examined_tile.name, 40, (255, 255, 255), self.select_rect.midtop)
 
+            #description
+            self.display_description(screen, self.examined_tile)
             #lifebar and numbers
             self.display_life(screen, self.examined_tile)
 
@@ -161,3 +163,7 @@ class Hud:
         # health text
         health_text = str(building.current_health) + " / " + str(building.max_health)
         draw_text(screen, health_text, 20, (255, 255, 255), (self.width*0.38, self.height*0.92 +30))
+
+    def display_description(self, screen, building):
+        # warning - for now, you cannot render multiples lines
+        draw_text(screen, building.description, 20, (255, 255, 255), (self.width * 0.38 + 85, self.height * 0.92 - 70))
