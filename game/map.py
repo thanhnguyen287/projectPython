@@ -5,7 +5,6 @@ from settings import *
 from builds import Farm, Town_center, House
 from player import playerOne
 
-
 class Map:
     def __init__(self, hud, entities, grid_length_x, grid_length_y, width, height):
         self.hud = hud
@@ -20,10 +19,10 @@ class Map:
 
         self.grass_tiles = pygame.Surface((grid_length_x * TILE_SIZE * 2, grid_length_y * TILE_SIZE + 2 * TILE_SIZE)).convert_alpha()
         self.tiles = self.load_images()
-        # Set this at the most bottom line of this __init__
+
         self.map = self.create_map()
 
-        # a list of lists
+        # lists of lists
         self.buildings = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
 
         #used when selecting a tile to build
@@ -279,3 +278,19 @@ class Map:
             return True
         else:
             return False
+
+    # matrix of 1 and 0, will be used for pathfinding
+    # 1 : possible tile
+    # 0 : there's already something : collision
+    # because of the implementation of the pathfinding package, this matrix can't mirror the map grid and needs to be inverted
+    def create_collision_matrix(self):
+        #at first, we initialise our matrix with 1 : this means you can go everywhere
+        collision_matrix = [[1 for x in range (self.grid_length_x)] for y in range(self.grid_length_y)]
+
+        for x in range(self.grid_length_x):
+            for y in range(self.grid_length_y):
+                # we iterate through our tiles, if there's something, we put a 0 in our collision matrix
+                if self.map[x][y]["collision"]:
+                    collision_matrix[y][x] = 0
+
+            return collision_matrix
