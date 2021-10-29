@@ -5,6 +5,7 @@ from settings import *
 from builds import Farm, Town_center, House
 from player import playerOne
 
+
 class Map:
     def __init__(self, hud, entities, grid_length_x, grid_length_y, width, height):
         self.hud = hud
@@ -75,12 +76,13 @@ class Map:
                     "image": image,
                     "render_pos": render_pos,
                     "iso_poly": iso_poly,
-                    "collision": collision
+                    "collision": collision,
+                    "2x2_collision": False
+
                 }
 
                 #if we left_click to build : we will place the building in the map if the targeted tile is empty
                 if mouse_action[0] and not collision:
-
                     # we create an instance of the selected building
                     if self.hud.selected_tile["name"] == "Farm":
                         new_building = Farm(render_pos, playerOne)
@@ -93,6 +95,12 @@ class Map:
                         new_building = Town_center(render_pos, playerOne)
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
+                        # additional collision bc town center is 2x2 tile, not 1x1
+                        self.map[grid_pos[0] + 1][grid_pos[1]]["collision"] = True
+                        self.map[grid_pos[0]][grid_pos[1] - 1]["collision"] = True
+                        self.map[grid_pos[0] + 1][grid_pos[1] - 1]["collision"] = True
+                        self.map[grid_pos[0]][grid_pos[1]]["2x2_collision"] = True
+
 
                     elif self.hud.selected_tile["name"] == "House":
                         new_building = House(render_pos, playerOne)
@@ -149,6 +157,12 @@ class Map:
                                      y + render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
                                     for x, y in mask]
                             pygame.draw.polygon(screen, (255, 255, 255), mask, 3)
+
+                            # display examined tile in white
+                            #temp_coor = self.grid_to_map(self.examined_tile[0], self.examined_tile[1])
+                            #iso_poly = temp_coor["iso_poly"]
+                            #iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y) for x, y in iso_poly]
+                            #pygame.draw.polygon(screen, (255, 255, 255), iso_poly, 3)
 
         # display the potential building on the tile
         if self.temp_tile is not None:
@@ -231,7 +245,8 @@ class Map:
             "iso_poly": iso_poly,
             "render_pos": [minx, miny],
             "tile": tile,
-            "collision" : False if tile == "" else True
+            "collision": False if tile == "" else True,
+            "2x2_collision": False
         }
 
         return out
