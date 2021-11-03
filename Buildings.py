@@ -22,6 +22,7 @@ class Building:
 
 
     def display(self, screen):
+
         if self.selected:
             screen.blit(self.image_select, self.get_position_select())
             self.display_life(screen)
