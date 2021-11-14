@@ -1,7 +1,9 @@
 import pygame, sys
-from tkinter import *
 from pygame.locals import *
 from pygame import mixer
+from settings import assets_path
+import os
+
 pygame.init()
 
 #create screen
@@ -13,18 +15,19 @@ BLACK = (0, 0, 0)
 GRAY = (30, 30, 30)
 #add icon
 pygame.display.set_caption("AOE 2")
-icon = pygame.image.load('AOE 2.jpg')
+icon = pygame.image.load(os.path.join(assets_path,'AOE 2.jpg'))
 pygame.display.set_icon(icon)
 
 font = pygame.font.SysFont('Corbel', 50)
 
-background = pygame.image.load('EV0qwWIXQAA8qpN.jpg')
+background = pygame.image.load(os.path.join(assets_path,'EV0qwWIXQAA8qpN.jpg'))
 
 pygame.display.set_caption('AOE 2: Homemade Edition')
 
 #background music
-mixer.music.load('Age of Empires II- Definitive Edition - Main Menu Soundtrack (audio-extractor.net).wav')
-mixer.music.play(-1)
+#mixer.music.load((os.path.join(assets_path,'Age of Empires II- Definitive Edition - Main Menu Soundtrack (audio-extractor.net).wav'))
+
+#mixer.music.play(-1)
 pygame.display.update()
 
 def draw_text(text, font, color, surface, x, y):
