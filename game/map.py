@@ -4,7 +4,7 @@ import pygame.mouse
 from settings import *
 from builds import Farm, Town_center, House
 from player import playerOne
-
+from Ressources import Ressource
 
 class Map:
     def __init__(self, hud, entities, grid_length_x, grid_length_y, width, height):
@@ -108,6 +108,7 @@ class Map:
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
                     self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
+
                     self.hud.selected_tile = None
 
         #the player hasn't selected something to build, he will interact with what's on the map
@@ -118,9 +119,10 @@ class Map:
             if self.can_place_tile(grid_pos):
                 building = self.buildings[grid_pos[0]][grid_pos[1]]
 
-                if mouse_action[0] and (building is not None):
+                if mouse_action[0]:
                     self.examined_tile = grid_pos
-                    self.hud.examined_tile = building
+                    if building is not None:
+                        self.hud.examined_tile = building
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -129,15 +131,32 @@ class Map:
         # FOR THE MAP
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
+
                 render_pos = self.map[x][y]["render_pos"]
+
                 # HERE WE DRAW THE MAP TILES
                 # Rendering what's on the map, if it is not a tree or rock then render nothing as we already had block with green grass
+
                 tile = self.map[x][y]["tile"]
+
+
+
+                #if the tile isnt empty and inst destroyed, we display it
                 if tile != "":
                     screen.blit(self.tiles[tile], (
                                          render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                                          render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y)
                                 )
+
+                #here we delete the ressource we left click on
+                if (self.examined_tile is not None) and (tile == "tree" or tile == "rock"):
+                    if(x == self.examined_tile[0] and y == self.examined_tile[1]):
+                        self.map[x][y]["tile"] = "" #the tile becomes empty since we destroy  the tree/rock
+                        if tile == "tree":
+                            playerOne.update_resource(0, 10) #the player gains +10 wood if the tile was a tree
+                        elif tile == "rock":
+                            playerOne.update_resource(3, 10) #the player gains +10 stone if the tile was a rock
+
 
                 # HERE WE DRAW THE BUILDINGS ON THE MAP
                 # we extract from the buildings list the building we want to display
@@ -187,12 +206,12 @@ class Map:
     def load_images(self):
 
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
-        tree = pygame.image.load(os.path.join(assets_path, "tree.png")).convert_alpha()
+        tree = pygame.image.load(os.path.join(assets_path, "tree_2_resized_2.png")).convert_alpha()
         rock = pygame.image.load(os.path.join(assets_path, "rock.png")).convert_alpha()
         grass_tile = pygame.image.load(os.path.join(assets_path, "20001_02.png")).convert_alpha()
 
         town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/House.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/House_2.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/farm.png").convert_alpha()
 
 
@@ -200,10 +219,10 @@ class Map:
             "Town center": town_center,
             "House": house,
             "Farm": farm,
-            "tree" : tree,
-            "rock" : rock,
-            "block" : block,
-            "grass_tile" : grass_tile
+            "tree": tree,
+            "rock": rock,
+            "block": block,
+            "grass_tile": grass_tile
         }
 
         return images
@@ -229,8 +248,9 @@ class Map:
 
         if (perlin >=15) or (perlin<=-35):
             tile = "tree"
+
         else:
-            if r <= 1 :
+            if r <= 1:
                 tile = "rock"
             elif r <= 2:
                 tile = "tree"
@@ -238,6 +258,7 @@ class Map:
                 tile = ""
 
         #perlin = noise.
+
 
         out = {
             "grid": [grid_x, grid_y],
