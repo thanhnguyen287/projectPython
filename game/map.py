@@ -152,6 +152,7 @@ class Map:
                 if (self.examined_tile is not None) and (tile == "tree" or tile == "rock"):
                     if(x == self.examined_tile[0] and y == self.examined_tile[1]):
                         self.map[x][y]["tile"] = "" #the tile becomes empty since we destroy  the tree/rock
+                        self.map[x][y]["collision"] = False #we "free" the tile
                         if tile == "tree":
                             playerOne.update_resource(0, 10) #the player gains +10 wood if the tile was a tree
                         elif tile == "rock":
