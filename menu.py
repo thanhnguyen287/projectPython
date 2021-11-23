@@ -25,9 +25,9 @@ background = pygame.image.load(os.path.join(assets_path,'EV0qwWIXQAA8qpN.jpg'))
 pygame.display.set_caption('AOE 2: Homemade Edition')
 
 #background music
-#mixer.music.load((os.path.join(assets_path,'Age of Empires II- Definitive Edition - Main Menu Soundtrack (audio-extractor.net).wav'))
+mixer.music.load((os.path.join(assets_path,'Age of Empires II- Definitive Edition - Main Menu Soundtrack (audio-extractor.net).wav')))
 
-#mixer.music.play(-1)
+mixer.music.play(-1)
 pygame.display.update()
 
 def draw_text(text, font, color, surface, x, y):
