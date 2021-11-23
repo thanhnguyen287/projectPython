@@ -1,5 +1,3 @@
-import pygame
-import Buildings
 from settings import *
 
 
@@ -58,7 +56,7 @@ class Farm(Building):
         self.construction_cost = [100, 0, 0, 0]
         self.construction_time = 1
 
-        self.max_health = 10
+        self.max_health = 1
         self.max_population_bonus = 0
 
         self.description = "Provides 50 food every 5 seconds."
