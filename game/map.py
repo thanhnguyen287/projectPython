@@ -110,6 +110,8 @@ class Map:
                         self.map[grid_pos[0]][grid_pos[1]]["2x2_collision"] = True
 
 
+
+
                     elif self.hud.selected_tile["name"] == "House":
                         new_building = House(render_pos, playerOne)
                         self.entities.append(new_building)
@@ -214,16 +216,16 @@ class Map:
 
                         # HERE WE DRAW THE UNITS ON THE MAP
                         # we extract from the buildings list the building we want to display
-                        building = self.buildings[x][y]
-                        if building is not None and building.current_health <= 0:
-                            self.buildings[x][y] = None
+                        unit = self.units[x][y]
+                        if unit is not None and unit.current_health <= 0:
+                            self.unit[x][y] = None
                             self.map[x][y]["collision"] = False
                             self.examined_tile = None
                             self.hud.examined_tile = None
-                        if building is not None:
-                            screen.blit(building.sprite, (
+                        if unit is not None:
+                            screen.blit(unit.sprite, (
                                 render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
                                         )
 
         # display the potential building on the tile

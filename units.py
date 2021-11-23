@@ -55,7 +55,7 @@ class Villager(Unit):
 
         super().__init__(starting_tile, map)
 
-    def build(self, tile,):
+    def build(self, tile, map):
         ...
 
     def repair(self, building):

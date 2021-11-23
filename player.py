@@ -69,6 +69,6 @@ class Player:
         screen.blit(myfont.render(population_text, True, (255, 255, 255)), (resource_text_pos, 11))
 
 
-playerOne = Player("Tristan", True, [500, 750, 250,1000], "GREEK")
+playerOne = Player("Tristan", True, [5000, 750, 250, 1000], "GREEK")
 players = [playerOne]
 #  INIT FOR RESSOURCES DISPLAY

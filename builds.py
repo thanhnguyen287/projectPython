@@ -1,4 +1,5 @@
 from settings import *
+from units import Villager
 
 
 class Building:
@@ -33,6 +34,7 @@ class Town_center(Building):
         self.construction_time = 150
 
         self.max_health = 100
+        self.working = True
         player_owner_of_unit.max_population += 5
 
         self.description = "Used to create villagers."
@@ -45,6 +47,16 @@ class Town_center(Building):
         if now - self.resource_manager_cooldown > 5000:
             self.current_health -= 5
             self.resource_manager_cooldown = now
+
+    def create_villager(self, map):
+        now = pygame.time.get_ticks()
+        # every 3 secs :
+        if now - self.resource_manager_cooldown > 3000 and self.working:
+            new_villager = Villager(self.pos, map)
+            print("villager created")
+            self.working = False
+            self.resource_manager_cooldown = now
+
 
 
 class Farm(Building):
