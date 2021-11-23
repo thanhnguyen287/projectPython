@@ -71,18 +71,22 @@ class Map:
                 # setting transparency to make sure player understands it's not built
                 image.set_alpha(100)
 
-                render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
-                iso_poly = self.map[grid_pos[0]][grid_pos[1]]["iso_poly"]
-                collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
-
-                self.temp_tile = {
+                if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
+                    render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
+                    iso_poly = self.map[grid_pos[0]][grid_pos[1]]["iso_poly"]
+                    collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
+                                  
+                    self.temp_tile = {
                     "image": image,
                     "render_pos": render_pos,
                     "iso_poly": iso_poly,
                     "collision": collision,
                     "2x2_collision": False
 
-                }
+                    }
+                    
+                else:
+                    pass
 
                 # if we left_click to build : we will place the building in the map if the targeted tile is empty
                 if mouse_action[0] and not collision:
@@ -120,12 +124,15 @@ class Map:
 
             # if on the map and left click and the tile isn't empty
             if self.can_place_tile(grid_pos):
-                building = self.buildings[grid_pos[0]][grid_pos[1]]
+                if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
+                    building = self.buildings[grid_pos[0]][grid_pos[1]]
 
-                if mouse_action[0]:
-                    self.examined_tile = grid_pos
-                    if building is not None:
-                        self.hud.examined_tile = building
+                    if mouse_action[0]:
+                        self.examined_tile = grid_pos
+                        if building is not None:
+                            self.hud.examined_tile = building
+                else:
+                    pass
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
