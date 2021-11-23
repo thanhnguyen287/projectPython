@@ -3,6 +3,11 @@ from pygame.locals import *
 from pygame import mixer
 from settings import assets_path
 import os
+import tkinter as tk
+from main import *
+
+from game import *
+
 
 pygame.init()
 
@@ -25,9 +30,9 @@ background = pygame.image.load(os.path.join(assets_path,'EV0qwWIXQAA8qpN.jpg'))
 pygame.display.set_caption('AOE 2: Homemade Edition')
 
 #background music
-mixer.music.load((os.path.join(assets_path,'Age of Empires II- Definitive Edition - Main Menu Soundtrack (audio-extractor.net).wav')))
+#mixer.music.load((os.path.join(assets_path,'Age of Empires II- Definitive Edition - Main Menu Soundtrack (audio-extractor.net).wav'))
 
-mixer.music.play(-1)
+#mixer.music.play(-1)
 pygame.display.update()
 
 def draw_text(text, font, color, surface, x, y):
@@ -46,19 +51,39 @@ def main_menu():
         draw_text('MENU', font, GRAY, screen, 50 ,150 )
 
         mx, my = pygame.mouse.get_pos()
+        text4 = font.render('New Game',True, BLACK)
+        text3 = font.render('Exit', True, BLACK)
         text2 = font.render('Options', True, BLACK)
-        text1 = font.render('Start ', True, BLACK)
-        button_1 = pygame.Rect(50, 250, 100, 50)
-        button_2 = pygame.Rect(50, 400, 160, 50)
+        text1 = font.render('Load Game ', True, BLACK)
+        #root = tk.Tk()
+        #LoadGame_Button = tk.Button()
+       # im = tk.PhotoImage(file="resources/assets/Playbutton.gif")
+       # LoadGame_Button.config(image=im)
+   # tk.Button(root, text="Play", command=root.quit, anchor='w',
+            #      width=500, activebackground="#33B5E5")
+        LoadGame_Button = pygame.Rect(50, 300, 250, 50)
+        Option_Button = pygame.Rect(50, 350, 250, 50)
+        Exit_Button = pygame.Rect(50, 400, 250, 50)
+        NewGame_Button = pygame.Rect(50, 250, 250, 50)
 
-        if button_1.collidepoint((mx, my)):
+
+        if LoadGame_Button.collidepoint((mx, my)):
             if click:
-                game()
-        if button_2.collidepoint((mx, my)):
+                main()
+                spawns[0]
+        if Option_Button.collidepoint((mx, my)):
             if click:
                 options()
-        pygame.draw.rect(screen, (150, 75, 0), button_1)
-        pygame.draw.rect(screen, (150, 75, 0), button_2)
+        if Exit_Button.collidepoint((mx, my)):
+            if click:
+                sys.exit()
+        if NewGame_Button.collidepoint((mx,my)):
+             if click:
+                   main()
+        pygame.draw.rect(screen, (150, 75, 0), LoadGame_Button)
+        pygame.draw.rect(screen, (150, 75, 0), Option_Button)
+        pygame.draw.rect(screen, (150, 75, 0), Exit_Button)
+        pygame.draw.rect(screen, (150, 75, 0), NewGame_Button)
 
         click = False
         for event in pygame.event.get():
@@ -73,8 +98,10 @@ def main_menu():
                 if event.button == 1:
                     click = True
 
-        screen.blit(text1, (50,250))
-        screen.blit(text2, (50,400))
+        screen.blit(text1, (50, 300))
+        screen.blit(text2, (50, 350))
+        screen.blit(text3, (50, 400))
+        screen.blit(text4, (50, 250))
         pygame.display.update()
 
         clock.tick(30)
