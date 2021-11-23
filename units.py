@@ -4,8 +4,11 @@ import pygame
 
 
 class Unit:
-    def __init__(self, starting_tile):
-        self.tile = starting_tile
+    def __init__(self, pos, map):
+        self.tile = pos
+        self.map = map
+        self.map.entities.append(self)
+
         self.current_health = self.max_health
         self.is_alive = True
 
@@ -25,15 +28,16 @@ class Unit:
             targeted_unit.is_alive = False
             #del units_group[units_group.index(targeted_unit)]
 
-
+    def update(self):
+        pass
 class Villager(Unit):
 
-    def __init__(self, starting_tile):
+    def __init__(self, starting_tile, map):
 
         self.name = "Villager"
 
         # DISPLAY
-        self.sprite = pygame.image.load("resources/assets/Villager.bmp")
+        self.sprite = pygame.image.load("resources/assets/Villager.bmp").convert_alpha()
 
         # DATA
         self.max_health = 25
@@ -49,7 +53,7 @@ class Villager(Unit):
         self.training_time = 20
         self.population_produced = 1
 
-        super().__init__(starting_tile)
+        super().__init__(starting_tile, map)
 
     def build(self, tile,):
         ...
@@ -79,8 +83,8 @@ class Villager(Unit):
 
 class Bowman(Unit):
 
-    def __init__(self, starting_tile):
-        super().__init__(starting_tile)
+    def __init__(self, starting_tile, map):
+        super().__init__(starting_tile, map)
 
         #DISPLAY
         self.sprite = None
@@ -102,8 +106,8 @@ class Bowman(Unit):
 
 class Clubman(Unit):
 
-    def __init__(self, starting_tile):
-        super().__init__(starting_tile)
+    def __init__(self, starting_tile, map):
+        super().__init__(starting_tile, map)
 
         #DISPLAY
         self.sprite = None

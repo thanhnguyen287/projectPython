@@ -27,6 +27,7 @@ class Map:
 
         # lists of lists
         self.buildings = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
+        self.units = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
 
         # used when selecting a tile to build
         self.temp_tile = None
@@ -46,7 +47,7 @@ class Map:
                 render_pos = map_tile["render_pos"]
 
                 # self.grass_tiles.getwidth()/2 : offset
-                self.grass_tiles.blit(self.tiles["block"],
+                self.grass_tiles.blit(self.tiles["grass"],
                                       (render_pos[0] + self.grass_tiles.get_width() / 2, render_pos[1]))
 
         return map
@@ -211,6 +212,19 @@ class Map:
                             # iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y) for x, y in iso_poly]
                             # pygame.draw.polygon(screen, (255, 255, 255), iso_poly, 3)
 
+                        # HERE WE DRAW THE UNITS ON THE MAP
+                        # we extract from the buildings list the building we want to display
+                        building = self.buildings[x][y]
+                        if building is not None and building.current_health <= 0:
+                            self.buildings[x][y] = None
+                            self.map[x][y]["collision"] = False
+                            self.examined_tile = None
+                            self.hud.examined_tile = None
+                        if building is not None:
+                            screen.blit(building.sprite, (
+                                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                        )
 
         # display the potential building on the tile
         if self.temp_tile is not None:
@@ -237,7 +251,9 @@ class Map:
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
         tree = pygame.image.load(os.path.join(assets_path, "tree_2_resized_2.png")).convert_alpha()
         rock = pygame.image.load(os.path.join(assets_path, "rock.png")).convert_alpha()
-        grass_tile = pygame.image.load(os.path.join(assets_path, "20001_02.png")).convert_alpha()
+        grass_tile = pygame.image.load(os.path.join(assets_path, "grass.png")).convert_alpha()
+        gold = pygame.image.load(os.path.join(assets_path, "gold.png")).convert_alpha()
+
 
         town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
         house = pygame.image.load("Resources/assets/House_2.png").convert_alpha()
@@ -250,7 +266,8 @@ class Map:
             "tree": tree,
             "rock": rock,
             "block": block,
-            "grass_tile": grass_tile
+            "grass": grass_tile,
+            "gold" : gold
         }
 
         return images

@@ -9,6 +9,7 @@ class Animation(pygame.sprite.Sprite):
 
 	def __init__(self, pos_x, pos_y):
 		super().__init__()
+
 		self.attack_animation = False
 		self.sprites = []
 		self.sprites.append(pygame.image.load("resources/assets/Boom/496_0.png"))
@@ -48,6 +49,7 @@ class Animation(pygame.sprite.Sprite):
 				self.attack_animation = False
 
 		self.image = self.sprites[int(self.current_sprite)]
+
 
 # Creating the sprites and groups
 

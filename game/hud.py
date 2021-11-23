@@ -3,7 +3,6 @@ from settings import *
 import pygame
 from .utils import draw_text
 from player import playerOne
-from math import ceil
 
 class Hud:
 

@@ -31,9 +31,6 @@ class Game:
 
 
 
-
-
-
     def run(self):
         self.playing = True
         while self.playing:
