@@ -28,5 +28,6 @@ farm_icon_hd = pygame.image.load("resources/assets/icons./FarmDE.png")
 
 town_center_icon = pygame.image.load("resources/assets/icons./town_center_icon_hd.png")
 house_icon = pygame.image.load("resources/assets/icons/houseDE.png")
+villager_icon = pygame.image.load("resources/assets/icons/villagerde.bmp")
 
 standard_cursor = pygame.image.load("resources/assets/standard_cursor.png")

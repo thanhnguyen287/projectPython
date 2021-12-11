@@ -4,13 +4,21 @@ import pygame
 
 
 class Unit:
-    def __init__(self, pos, map):
-        self.tile = pos
-        self.map = map
-        self.map.entities.append(self)
+    def __init__(self, pos, player_owner_of_unit):
+        self.owner = player_owner_of_unit
+
+        self.pos = pos
+        #self.map = map
+        #self.map.entities.append(self)
 
         self.current_health = self.max_health
         self.is_alive = True
+
+        self.owner.pay_entity_cost(self)
+
+        # means current population +1
+        self.owner.update_resource(4, 1)
+
 
     def move_to(self, location):
         ...
@@ -32,7 +40,7 @@ class Unit:
         pass
 class Villager(Unit):
 
-    def __init__(self, starting_tile, map):
+    def __init__(self, pos, player_owner_of_unit):
 
         self.name = "Villager"
 
@@ -49,13 +57,16 @@ class Villager(Unit):
         self.range = 0
 
         #Training : 50 FOOD, 20s
-        self.training_cost = [0, 50, 0, 0]
+        self.construction_cost = [0, 10, 25, 0]
         self.training_time = 20
         self.population_produced = 1
 
-        super().__init__(starting_tile, map)
+        self.description = "Your best friend. Can work, fight, get resources."
 
-    def build(self, tile, map):
+
+        super().__init__(pos, player_owner_of_unit)
+
+    def build(self, tile):
         ...
 
     def repair(self, building):
@@ -83,8 +94,8 @@ class Villager(Unit):
 
 class Bowman(Unit):
 
-    def __init__(self, starting_tile, map):
-        super().__init__(starting_tile, map)
+    def __init__(self, pos, player_owner_of_unit):
+        super().__init__(pos, player_owner_of_unit)
 
         #DISPLAY
         self.sprite = None
@@ -103,11 +114,14 @@ class Bowman(Unit):
         self.training_time = 30
         self.population_produced = 1
 
+        self.description = "Basic ranged unit."
+
+
 
 class Clubman(Unit):
 
-    def __init__(self, starting_tile, map):
-        super().__init__(starting_tile, map)
+    def __init__(self, pos, player_owner_of_unit):
+        super().__init__(pos, player_owner_of_unit)
 
         #DISPLAY
         self.sprite = None
@@ -126,3 +140,6 @@ class Clubman(Unit):
         self.training_cost = [0, 50, 0, 0]
         self.training_time = 26
         self.population_produced = 1
+
+        self.description = "Basic melee unit."
+

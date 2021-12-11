@@ -10,3 +10,17 @@ def draw_text(screen, text, size, color, pos):
     text_rect = text_surface.get_rect(topleft=pos)
 
     screen.blit(text_surface, text_rect)
+
+
+# 2D -> 2.5D
+def decarte_to_iso(x, y):
+    iso_x = x - y
+    iso_y = (x + y) / 2
+    return iso_x, iso_y
+
+
+def iso_to_decarte(iso_x, iso_y):
+    y = (2 * iso_y - iso_x) / 2
+    x = (2 * iso_y + iso_x) / 2
+    return x, y
+

@@ -17,7 +17,7 @@ class Building:
         self.selected = False
 
         self.resource_manager_cooldown = pygame.time.get_ticks()
-        self.owner.pay_construction_cost(self)
+        self.owner.pay_entity_cost(self)
 
     def update(self):
         pass

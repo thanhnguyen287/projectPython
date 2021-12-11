@@ -25,7 +25,8 @@ class Game:
 
         # map
         self.map = Map(self.hud, self.entities, 50, 50, self.width, self.height)
-
+        #start_unit = Villager(self.map.map[5][5], playerOne)
+        #self.map.units[5][5] = start_unit
         # camera
         self.camera = Camera(self.width, self.height)
 

@@ -16,10 +16,21 @@ class Player:
 
         self.civilization = civilization
 
-        self.building_costs = {
+        self.entity_costs = {
             "Farm": {"wood": 100, "stone": 0, "food": 0, "gold": 0},
             "House": {"wood": 600, "stone": 0, "food": 0, "gold": 0},
-            "Town center": {"wood": 1000, "stone": 0, "food": 0, "gold": 0}
+            "Town center": {"wood": 1000, "stone": 0, "food": 0, "gold": 0},
+
+            "Villager": {"wood": 0, "stone": 0, "food": 10, "gold": 25}
+
+        }
+
+        self.entity_population_cost = {
+            "Farm": 0,
+            "House": 0,
+            "Town center": 0,
+
+            "Villager": 1
 
         }
 
@@ -34,18 +45,23 @@ class Player:
         else:
             self.resources[resource_type] += amount
 
-    def can_afford(self, building):
+    def can_afford(self, entity):
         affordable = True
         i = 0
-        for ressource_type, cost in self.building_costs[building].items():
+        for ressource_type, cost in self.entity_costs[entity].items():
             if cost > self.resources[i]:
                 affordable = False
             i += 1
+
+        if self.current_population + self.entity_population_cost[entity] > self.max_population:
+            affordable = False
         return affordable
 
-    def pay_construction_cost(self, building):
+    def pay_entity_cost(self, entity):
         for resource_type in range(4):
-            self.resources[resource_type] -= building.construction_cost[resource_type]
+            self.resources[resource_type] -= entity.construction_cost[resource_type]
+
+
 
     def update_resources_bar(self, screen):
         # resources display
@@ -66,6 +82,7 @@ class Player:
 
         #population
         population_text = str(playerOne.current_population) + "/" + str(playerOne.max_population)
+
         screen.blit(myfont.render(population_text, True, (255, 255, 255)), (resource_text_pos, 11))
 
 

@@ -45,6 +45,8 @@ class Hud:
                 image_scale = town_center_icon
             elif image_name == "House":
                 image_scale = house_icon
+            elif image_name == "Villager":
+                image_scale = villager_icon
 
             else:
                 image_tmp = image.copy()
@@ -126,10 +128,13 @@ class Hud:
         house = pygame.image.load("Resources/assets/House.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/farm.png").convert_alpha()
 
+        villager = pygame.image.load("resources/assets/Villager.bmp").convert_alpha()
+
         images = {
             "Town center": town_center,
             "House": house,
-            "Farm": farm
+            "Farm": farm,
+            "Villager" : villager
         }
         return images
 
@@ -150,19 +155,19 @@ class Hud:
 
         return image
 
-    def display_life(self, screen, building):
+    def display_life(self, screen, entity):
         #health bar
         # to get the same health bar size and not have huge ones, we use a ratio
         health_bar_length = 100
-        hp_displayed = (building.current_health / building.max_health * health_bar_length)
+        hp_displayed = (entity.current_health / entity.max_health * health_bar_length)
 
         pygame.draw.rect(screen, (255, 0, 0), (self.width * 0.36, self.height * 0.9 + 30, hp_displayed, 6))
         pygame.draw.rect(screen, (25, 25, 25), (self.width*0.36, self.height * 0.9 + 30, health_bar_length, 6),2)
 
         # health text
-        health_text = str(building.current_health) + " / " + str(building.max_health)
+        health_text = str(entity.current_health) + " / " + str(entity.max_health)
         draw_text(screen, health_text, 20, (255, 255, 255), (self.width*0.38, self.height*0.92 +30))
 
-    def display_description(self, screen, building):
+    def display_description(self, screen, entity):
         # warning - for now, you cannot render multiples lines
-        draw_text(screen, building.description, 20, (255, 255, 255), (self.width * 0.38 + 85, self.height * 0.92 - 70))
+        draw_text(screen, entity.description, 20, (255, 255, 255), (self.width * 0.38 + 85, self.height * 0.92 - 70))
