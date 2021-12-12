@@ -62,6 +62,7 @@ class Villager(Unit):
         self.population_produced = 1
 
         self.description = "Your best friend. Can work, fight, get resources."
+        self.construction_tooltip = " Train a Villager"
 
 
         super().__init__(pos, player_owner_of_unit)
@@ -115,6 +116,8 @@ class Bowman(Unit):
         self.population_produced = 1
 
         self.description = "Basic ranged unit."
+        self.construction_tooltip = " Train a Bowman"
+
 
 
 
@@ -142,4 +145,6 @@ class Clubman(Unit):
         self.population_produced = 1
 
         self.description = "Basic melee unit."
+        self.construction_tooltip = " Train a Clubman"
+
 

@@ -30,4 +30,10 @@ town_center_icon = pygame.image.load("resources/assets/icons./town_center_icon_h
 house_icon = pygame.image.load("resources/assets/icons/houseDE.png")
 villager_icon = pygame.image.load("resources/assets/icons/villagerde.bmp")
 
+wood_cost = pygame.image.load("resources/assets/icons/wood_cost.png")
+food_cost = pygame.image.load("resources/assets/icons/food_cost.png")
+gold_cost = pygame.image.load("resources/assets/icons/gold_cost.png")
+stone_cost = pygame.image.load("resources/assets/icons/stone_cost.png")
+population_cost = pygame.image.load("resources/assets/icons/population_cost.png")
+
 standard_cursor = pygame.image.load("resources/assets/standard_cursor.png")

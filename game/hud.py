@@ -23,6 +23,13 @@ class Hud:
         self.select_surface.fill(self.hud_color)
         self.select_rect = self.select_surface.get_rect(topleft =(self.width * 0.35, self.height * 0.8))
 
+        #tooltip hud
+        self.tooltip_surface = pygame.Surface((width * 0.2, height * 0.15), pygame.SRCALPHA)
+        #grey
+        self.tooltip_color = (60, 60, 60, 145)
+        self.tooltip_surface.fill(self.tooltip_color)
+        self.tooltip_rect = self.tooltip_surface.get_rect(topleft=(0, self.height * 0.65))
+
         self.images = self.load_images()
         self.tiles = self.create_build_hud()
 
@@ -67,7 +74,7 @@ class Hud:
 
         return tiles
 
-    def update(self):
+    def update(self,screen):
 
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         mouse_action = pygame.mouse.get_pressed()
@@ -86,6 +93,7 @@ class Hud:
             if tile["rect"].collidepoint(mouse_pos) and tile["affordable"]:
                 if mouse_action[0]:
                     self.selected_tile = tile
+                    #self.display_construction_tooltip(screen, self.selected_tile["name"])
 
     # display
     def draw(self, screen):
@@ -116,12 +124,15 @@ class Hud:
             # for now, we display the picture of the object and its name
             screen.blit(img_scaled, (self.width * 0.35, self.height * 0.79 + 30))
             #name
-            draw_text(screen, self.examined_tile.name, 40, (255, 255, 255), self.select_rect.midtop)
-
+            draw_text(screen, self.examined_tile.name, 30, (255, 255, 255), self.select_rect.midtop)
             #description
             self.display_description(screen, self.examined_tile)
             #lifebar and numbers
             self.display_life(screen, self.examined_tile)
+
+            # build/train tooltip display
+            if self.selected_tile is not None or self.examined_tile is not None:
+                self.display_construction_tooltip(screen, self.examined_tile)
 
     def load_images(self):
         town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
@@ -168,6 +179,44 @@ class Hud:
         health_text = str(entity.current_health) + " / " + str(entity.max_health)
         draw_text(screen, health_text, 20, (255, 255, 255), (self.width*0.38, self.height*0.92 +30))
 
+    #used for bottom mid menu
     def display_description(self, screen, entity):
         # warning - for now, you cannot render multiples lines
-        draw_text(screen, entity.description, 20, (255, 255, 255), (self.width * 0.38 + 85, self.height * 0.92 - 70))
+        draw_text(screen, entity.description, 15, (255, 255, 255), (self.width * 0.38 + 85, self.height * 0.92 - 70))
+
+    # display what entity, its costs, and a brief description
+    def display_construction_tooltip(self, screen, entity):
+
+        w, h = self.tooltip_rect.width, self.tooltip_rect.height
+        screen.blit(self.tooltip_surface, (0, self.height * 0.64))
+        pygame.draw.rect(self.tooltip_surface, (255, 201, 14),
+                         pygame.Rect(0, 0, self.tooltip_rect.width, self.tooltip_rect.height), 2)
+        # tooltip
+        draw_text(screen, entity.construction_tooltip, 14, (220, 220, 220),
+                  (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
+
+        # construction/training resources costs
+        screen.blit(wood_cost, (5, self.height * 0.64 + 25))
+        screen.blit(food_cost, (0 + 55, self.height * 0.64 + 25))
+        screen.blit(gold_cost, (0 + 110, self.height * 0.64 + 25))
+        screen.blit(stone_cost, (0 + 165, self.height * 0.64 + 25))
+        screen.blit(population_cost, (0 + 220, self.height * 0.64 + 25))
+
+        temp_pos = (27, self.height * 0.64 + 30)
+        draw_text(screen, str(entity.construction_cost[0]), 12, (255, 201, 14), temp_pos)
+
+        temp_pos = (27 + 55, self.height * 0.64 + 30)
+        draw_text(screen, str(entity.construction_cost[1]), 12, (255, 201, 14), temp_pos)
+
+        temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
+        draw_text(screen, str(entity.construction_cost[2]), 12, (255, 201, 14), temp_pos)
+
+        temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
+        draw_text(screen, str(entity.construction_cost[3]), 12, (255, 201, 14), temp_pos)
+
+        temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
+        draw_text(screen, str(entity.population_produced), 12, (255, 201, 14), temp_pos)
+
+        # grey line
+        temp_pos = (5, self.height * 0.64 + 55)
+        pygame.draw.line(screen, (192, 192, 192), temp_pos, (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))

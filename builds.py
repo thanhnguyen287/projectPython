@@ -13,6 +13,8 @@ class Building:
         self.current_health = self.max_health
         self.is_alive = True
 
+        self.population_produced = 0
+
         self.image_select = pygame.image.load(os.path.join(assets_path,"image_select.png"))
         self.selected = False
 
@@ -38,6 +40,8 @@ class Town_center(Building):
         player_owner_of_unit.max_population += 5
 
         self.description = "Used to create villagers."
+        self.construction_tooltip = " Build a Town Center"
+
 
         super().__init__(pos, player_owner_of_unit)
 
@@ -72,6 +76,8 @@ class Farm(Building):
         self.max_population_bonus = 0
 
         self.description = "Provides 50 food every 5 seconds."
+        self.construction_tooltip = " Build a Farm"
+
 
         super().__init__(pos, player_owner_of_unit)
 
@@ -97,6 +103,8 @@ class House(Building):
         player_owner_of_unit.max_population += 5
 
         self.description = "Each House increases the maximum population by 5."
+        self.construction_tooltip = " Build a House"
+
 
         super().__init__(pos, player_owner_of_unit)
 

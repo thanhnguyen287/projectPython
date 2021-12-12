@@ -81,7 +81,7 @@ class Game:
 
     def update(self):
         self.camera.update()
-        self.hud.update()
+        self.hud.update(self.screen)
         self.map.update(self.camera, self.screen)
 
         for an_entity in self.entities:
@@ -109,6 +109,6 @@ class Game:
         moving_sprites.update(0.25)
 
         #Draw FPS, must be the last to shown -> put it right on top of the display.flip
-        draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())),25,(255,0,0),(5,80))
+        draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())),20,(255,0,0),(5,40))
         pygame.display.flip()
 
