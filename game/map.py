@@ -167,12 +167,12 @@ class Map:
 
         #trying to move units, they only tp for now
         if mouse_action[2]:
-
-            if self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
-                grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
-                villager_pos = self.hud.examined_tile.pos
-                if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
-                    self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(self.map[grid_pos[0]][grid_pos[1]])
+            ...
+            #if self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
+              #  grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
+              #  villager_pos = self.hud.examined_tile.pos
+              #  if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
+                #    self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].change_tile(self.map[grid_pos[0]][grid_pos[1]])
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -372,7 +372,6 @@ class Map:
 
         return out
 
-
     # From the mouse coordinates, we find the corresponding tile of our map (=grid position).
     # Almost does the "opposite" work of grid_to_map
     # x and y : position of mouse
@@ -389,7 +388,7 @@ class Map:
         grid_x = int(cart_x // TILE_SIZE)
         grid_y = int(cart_y // TILE_SIZE)
 
-        return grid_x, grid_y
+        return grid_x + 1, grid_y
 
     def renderpos_to_grid(self, x, y):
         # 2 : we remove the isometric transformation to find cartesian coordinates
@@ -408,15 +407,12 @@ class Map:
             (grid_x * TILE_SIZE + TILE_SIZE, grid_y * TILE_SIZE + TILE_SIZE),
             (grid_x * TILE_SIZE, grid_y * TILE_SIZE + TILE_SIZE)
         ]
-        print("rect : " + str(rect))
         # polygon
         iso_poly = [decarte_to_iso(x, y) for x, y in rect]
-        print("**********\n\n" + str(iso_poly))
         minx = min([x for x, y in iso_poly])
         miny = min([y for x, y in iso_poly])
 
         render_pos = [minx, miny]
-        print("\n\n\n render pos : " + str(render_pos))
         return render_pos
 
     # takes tile "matrice" coordinates, returns center of tile

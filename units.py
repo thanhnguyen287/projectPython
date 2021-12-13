@@ -24,29 +24,15 @@ class Unit:
         #pathfinding
         self.move_timer = pygame.time.get_ticks()
 
-        #self.create_path()
+        self.create_path()
 
-    def update(self):
-        ...
-
-    def move_to(self, dest_tile):
-        print("TEST POS : " + str(self.pos["grid"]))
+    def change_tile(self, new_tile):
         # remove the unit from its current position on the map
         self.map.units[self.pos["grid"][0]][self.pos["grid"][1]] = None
 
         # update the map
-        self.map.units[dest_tile["grid"][0]][dest_tile["grid"][1]] = self
-        self.pos = self.map.map[dest_tile["grid"][0]][dest_tile["grid"][1]]
-
-
-"""
-    def change_tile(self, new_tile):
-        #remove the unit from its current position on the map
-        self.map.units[self.tile["grid"][0]][self.tile["grid"][1]] = None
-        #update the map
         self.map.units[new_tile[0]][new_tile[1]] = self
-        self.tile = self.map.map[new_tile[0]][new_tile[1]]
-
+        self.pos = self.map.map[new_tile[0]][new_tile[1]]
 
     def create_path(self):
         searching_for_path = True
@@ -56,14 +42,13 @@ class Unit:
             dest_tile = self.map.map[x][y]
             if not dest_tile["collision"]:
                 self.grid = Grid(matrix=self.map.collision_matrix)
-                self.start = self.grid.node(self.tile["grid"][0], self.tile["grid"][1])
+                self.start = self.grid.node(self.pos["grid"][0], self.pos["grid"][1])
                 self.end = self.grid.node(x, y)
                 finder = AStarFinder()
                 # how far along the path are we
                 self.path_index = 0
                 self.path, runs = finder.find_path(self.start, self.end, self.grid)
                 searching_for_path = False
-
 
     def attack(self, targeted_unit):
 
@@ -87,9 +72,18 @@ class Unit:
             self.path_index += 1
             self.move_timer = now
             if self.path_index == len(self.path) - 1:
-                ...
+                self.create_path()
+
 
 """
+    def tp_to(self, dest_tile):
+        # remove the unit from its current position on the map
+        self.map.units[self.pos["grid"][0]][self.pos["grid"][1]] = None
+
+        # update the map
+        self.map.units[dest_tile["grid"][0]][dest_tile["grid"][1]] = self
+        self.pos = self.map.map[dest_tile["grid"][0]][dest_tile["grid"][1]]
+        """
 
 
 class Villager(Unit):
