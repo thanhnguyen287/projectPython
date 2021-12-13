@@ -389,7 +389,7 @@ class Map:
         grid_x = int(cart_x // TILE_SIZE)
         grid_y = int(cart_y // TILE_SIZE)
 
-        return grid_x, grid_y
+        return grid_x +1, grid_y
 
     def renderpos_to_grid(self, x, y):
         # 2 : we remove the isometric transformation to find cartesian coordinates

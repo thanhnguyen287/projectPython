@@ -30,7 +30,6 @@ class Unit:
         ...
 
     def move_to(self, dest_tile):
-        print("TEST POS : " + str(self.pos["grid"]))
         # remove the unit from its current position on the map
         self.map.units[self.pos["grid"][0]][self.pos["grid"][1]] = None
 
