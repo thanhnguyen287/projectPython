@@ -1,15 +1,18 @@
 import pygame
-
-# WORK IN PROGRESS
+from pathfinding.core.diagonal_movement import DiagonalMovement
+from pathfinding.core.grid import Grid
+from pathfinding.finder.a_star import AStarFinder
+import random
 
 
 class Unit:
-    def __init__(self, pos, player_owner_of_unit):
+    def __init__(self, pos, player_owner_of_unit, map):
         self.owner = player_owner_of_unit
+        self.map = map
+        #self.map.entities.append(self)
 
         self.pos = pos
-        #self.map = map
-        #self.map.entities.append(self)
+        print(str(self.map.renderpos_to_grid(pos[0], pos[1])))
 
         self.current_health = self.max_health
         self.is_alive = True
@@ -19,9 +22,49 @@ class Unit:
         # means current population +1
         self.owner.update_resource(4, 1)
 
+        #pathfinding
+        self.move_timer = pygame.time.get_ticks()
 
-    def move_to(self, location):
+        #self.create_path()
+
+    def update(self):
         ...
+
+    def move_to(self, dest_tile):
+        # remove the unit from its current position on the map
+        #self.map.units[self.tile["grid"][0]][self.tile["grid"][1]] = None
+        print(self.map.units[self.pos[0]][self.pos[1]])
+
+        # update the map
+        self.map.units[dest_tile[0]][dest_tile[1]] = self
+        self.tile = self.map.map[dest_tile[0]][dest_tile[1]]
+
+
+"""
+    def change_tile(self, new_tile):
+        #remove the unit from its current position on the map
+        self.map.units[self.tile["grid"][0]][self.tile["grid"][1]] = None
+        #update the map
+        self.map.units[new_tile[0]][new_tile[1]] = self
+        self.tile = self.map.map[new_tile[0]][new_tile[1]]
+
+
+    def create_path(self):
+        searching_for_path = True
+        while searching_for_path:
+            x = random.randint(0, self.map.grid_length_x -1)
+            y = random.randint(0, self.map.grid_length_y -1)
+            dest_tile = self.map.map[x][y]
+            if not dest_tile["collision"]:
+                self.grid = Grid(matrix=self.map.collision_matrix)
+                self.start = self.grid.node(self.tile["grid"][0], self.tile["grid"][1])
+                self.end = self.grid.node(x, y)
+                finder = AStarFinder()
+                # how far along the path are we
+                self.path_index = 0
+                self.path, runs = finder.find_path(self.start, self.end, self.grid)
+                searching_for_path = False
+
 
     def attack(self, targeted_unit):
 
@@ -37,10 +80,22 @@ class Unit:
             #del units_group[units_group.index(targeted_unit)]
 
     def update(self):
-        pass
+        now = pygame.time.get_ticks()
+        if now - self.move_timer > 1000:
+            new_pos = self.path[self.path_index]
+            #update positoin in the world
+            self.change_tile(new_pos)
+            self.path_index += 1
+            self.move_timer = now
+            if self.path_index == len(self.path) - 1:
+                ...
+
+"""
+
+
 class Villager(Unit):
 
-    def __init__(self, pos, player_owner_of_unit):
+    def __init__(self, pos, player_owner_of_unit, map):
 
         self.name = "Villager"
 
@@ -65,7 +120,7 @@ class Villager(Unit):
         self.construction_tooltip = " Train a Villager"
 
 
-        super().__init__(pos, player_owner_of_unit)
+        super().__init__(pos, player_owner_of_unit, map)
 
     def build(self, tile):
         ...
@@ -95,8 +150,8 @@ class Villager(Unit):
 
 class Bowman(Unit):
 
-    def __init__(self, pos, player_owner_of_unit):
-        super().__init__(pos, player_owner_of_unit)
+    def __init__(self, pos, player_owner_of_unit, map):
+        super().__init__(pos, player_owner_of_unit, map)
 
         #DISPLAY
         self.sprite = None
@@ -123,8 +178,8 @@ class Bowman(Unit):
 
 class Clubman(Unit):
 
-    def __init__(self, pos, player_owner_of_unit):
-        super().__init__(pos, player_owner_of_unit)
+    def __init__(self, pos, player_owner_of_unit, map):
+        super().__init__(pos, player_owner_of_unit, map)
 
         #DISPLAY
         self.sprite = None

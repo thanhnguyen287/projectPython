@@ -25,7 +25,7 @@ class Game:
 
         # map
         self.map = Map(self.hud, self.entities, 50, 50, self.width, self.height)
-        #start_unit = Villager(self.map.map[5][5], playerOne)
+        #start_unit = Villager(self.map.map[5][5], playerOne, self.map)
         #self.map.units[5][5] = start_unit
         # camera
         self.camera = Camera(self.width, self.height)
@@ -74,10 +74,11 @@ class Game:
                     pass
 
                 elif event.button == 3:  # RIGHT CLICK
+                    ...
                     #if testUnit1.is_alive:
                         #testUnit2.attack(testUnit1)
-                    player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
-                    player.play()
+                    #player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
+                    #player.play()
 
     def update(self):
         self.camera.update()

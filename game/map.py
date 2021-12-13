@@ -30,8 +30,10 @@ class Map:
         self.units = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
 
         self.map = self.create_map()
+        self.collision_matrix = self.create_collision_matrix()
 
-
+        #new_villager = Villager((0, 0), playerOne, self.map)
+        #self.units[0][0] = new_villager
 
         # used when selecting a tile to build
         self.temp_tile = None
@@ -56,11 +58,7 @@ class Map:
                 scroll = pygame.Vector2(0, 0)
                 scroll.x = 0
                 scroll.y = 0
-                #new_villager = Villager(self.get_tile_center(0,0, scroll), playerOne)
-                #self.units[0][0] = new_villager
-                #print(str(self.units[0][0]))
 
-                #print("villager created at position : " + str(self.get_tile_center(0,0,scroll)))
 
         return map
 
@@ -121,22 +119,21 @@ class Map:
                         self.map[grid_pos[0] + 1][grid_pos[1] - 1]["collision"] = True
                         self.map[grid_pos[0]][grid_pos[1]]["2x2_collision"] = True
 
-
                     elif self.hud.selected_tile["name"] == "House":
                         new_building = House(render_pos, playerOne)
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
                     elif self.hud.selected_tile["name"] == "Villager":
-                        new_unit = Villager(render_pos, playerOne)
+                        new_unit = Villager(render_pos, playerOne, self)
                         self.entities.append(new_unit)
                         self.units[grid_pos[0]][grid_pos[1]] = new_unit
-
+                        print(self.units[grid_pos[0]][grid_pos[1]])
+                        print(grid_pos)
 
                     self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
+                    self.collision_matrix[grid_pos[1]][grid_pos[0]] = 0
                     self.hud.selected_tile = None
-
-
 
         # the player hasn't selected something to build, he will interact with what's on the map
         else:
@@ -155,6 +152,19 @@ class Map:
                             self.hud.examined_tile = unit
                 else:
                     pass
+
+        #trying to move units
+        #if mouse_action[2]:
+        #    ...
+           # if self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
+               # grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
+                #render_pos = self.map[grid_pos[0]][grid_pos[1]]
+                #print("des : " + str(grid_pos))
+                #print("grid pos of villager : " + str(self.renderpos_to_grid(self.hud.examined_tile.pos[0], self.hud.examined_tile.pos[1])))
+                #villager_pos = self.renderpos_to_grid(self.hud.examined_tile.pos[0], self.hud.examined_tile.pos[1])
+                #if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
+                #    self.units[villager_pos[0]][villager_pos[1]].move_to(self.map[grid_pos[0]][grid_pos[1]])
+                 #   print("success")
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -372,6 +382,17 @@ class Map:
         grid_y = int(cart_y // TILE_SIZE)
 
         return grid_x, grid_y
+
+    def renderpos_to_grid(self, x, y):
+        # 2 : we remove the isometric transformation to find cartesian coordinates
+        cart_x, cart_y = iso_to_decarte(x, y)
+
+        # 3 : find the grid coordinates (we must get integers to make sense)
+        grid_x = int(cart_x // TILE_SIZE)
+        grid_y = int(cart_y // TILE_SIZE)
+
+        return grid_x, grid_y
+
 
     # takes tile "matrice" coordinates, returns center of tile
     def get_tile_center(self, tile_x, tile_y, scroll):
