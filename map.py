@@ -1,10 +1,12 @@
 import random
 import noise
 import pygame.mouse
+from .utils import decarte_to_iso, iso_to_decarte
 from settings import *
 from builds import Farm, Town_center, House
 from player import playerOne
 from New_ressources import *
+from units import Villager
 
 
 class Map:
@@ -16,7 +18,6 @@ class Map:
         self.width = width
         self.height = height
 
-        self.town_hall_placed = False
 
         # anything >1 or <-1, otherwise pnoise will return 0
         self.perlin_scale = grid_length_x / 2
@@ -27,8 +28,15 @@ class Map:
 
         # lists of lists
         self.buildings = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
+        self.units = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
 
         self.map = self.create_map()
+        # used in the fonction that places the townhall randomly on the map
+        self.townhall_placed = False
+        self.place_x = 0
+        self.place_y = 0
+        # here we place the townhall randomly on the map
+        self.place_townhall()
 
         # used when selecting a tile to build
         self.temp_tile = None
@@ -45,21 +53,20 @@ class Map:
                 map_tile = self.grid_to_map(grid_x, grid_y)
                 map[grid_x].append(map_tile)
 
-                #here we define the collisions for the townhall that we placed randomly on the map
-                #and we delete things on the tiles of the building
-                if map[grid_x - 1][grid_y]["tile"] == "building":
-                    map[grid_x][grid_y]["collision"] = True
-                    map[grid_x][grid_y]["tile"] = ""
-                    map[grid_x - 1][grid_y - 1]["collision"] = True
-                    map[grid_x - 1][grid_y - 1]["tile"] = ""
-                    map[grid_x][grid_y - 1]["collision"] = True
-                    map[grid_x][grid_y - 1]["tile"] = ""
-
                 render_pos = map_tile["render_pos"]
 
                 # self.grass_tiles.getwidth()/2 : offset
-                self.grass_tiles.blit(self.tiles["block"],
+                self.grass_tiles.blit(self.tiles["grass"],
                                       (render_pos[0] + self.grass_tiles.get_width() / 2, render_pos[1]))
+                scroll = pygame.Vector2(0, 0)
+                scroll.x = 0
+                scroll.y = 0
+                #new_villager = Villager(self.get_tile_center(0,0, scroll), playerOne)
+                #self.units[0][0] = new_villager
+                #print(str(self.units[0][0]))
+
+                #print("villager created at position : " + str(self.get_tile_center(0,0,scroll)))
+
 
         return map
 
@@ -67,8 +74,8 @@ class Map:
         mouse_pos = pygame.mouse.get_pos()
         mouse_action = pygame.mouse.get_pressed()
 
-        # we deselect the object examined when right-clicking
-        if mouse_action[2]:
+        # we deselect the object examined when left-clicking
+        if mouse_action[0]:
             self.examined_tile = None
             self.hud.examined_tile = None
 
@@ -87,7 +94,7 @@ class Map:
                     render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
                     iso_poly = self.map[grid_pos[0]][grid_pos[1]]["iso_poly"]
                     collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
-                                  
+
                     self.temp_tile = {
                     "image": image,
                     "render_pos": render_pos,
@@ -96,7 +103,7 @@ class Map:
                     "2x2_collision": False
 
                     }
-                    
+
                 else:
                     pass
 
@@ -126,9 +133,16 @@ class Map:
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
-                    self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
+                    elif self.hud.selected_tile["name"] == "Villager":
+                        new_unit = Villager(render_pos, playerOne)
+                        self.entities.append(new_unit)
+                        self.units[grid_pos[0]][grid_pos[1]] = new_unit
 
+
+                    self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
                     self.hud.selected_tile = None
+
+
 
         # the player hasn't selected something to build, he will interact with what's on the map
         else:
@@ -138,11 +152,13 @@ class Map:
             if self.can_place_tile(grid_pos):
                 if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
                     building = self.buildings[grid_pos[0]][grid_pos[1]]
-
+                    unit = self.units[grid_pos[0]][grid_pos[1]]
                     if mouse_action[0]:
                         self.examined_tile = grid_pos
                         if building is not None:
                             self.hud.examined_tile = building
+                        else:
+                            self.hud.examined_tile = unit
                 else:
                     pass
 
@@ -224,6 +240,31 @@ class Map:
                             # pygame.draw.polygon(screen, (255, 255, 255), iso_poly, 3)
 
 
+                # HERE WE DRAW THE UNITS ON THE MAP
+                # we extract from the units list the building we want to display
+                unit = self.units[x][y]
+                if unit is not None and unit.current_health <= 0:
+                    self.units[x][y] = None
+                    self.map[x][y]["collision"] = False
+                    self.examined_tile = None
+                    self.hud.examined_tile = None
+                if unit is not None:
+                    screen.blit(unit.sprite, (
+                        render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                        render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                )
+
+                    # have we clicked on this tile ? if yes we will highlight the tile
+                    if self.examined_tile is not None:
+                        if (x == self.examined_tile[0]) and (y == self.examined_tile[1]):
+                            # outline in white the object selected
+                            temp_coor = self.grid_to_map(self.examined_tile[0], self.examined_tile[1])
+                            iso_poly = temp_coor["iso_poly"]
+                            iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y) for x, y in iso_poly]
+                            pygame.draw.polygon(screen, (255, 255, 255), iso_poly, 3)
+
+
+
         # display the potential building on the tile
         if self.temp_tile is not None:
             iso_poly = self.temp_tile["iso_poly"]
@@ -248,12 +289,16 @@ class Map:
 
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
         tree = pygame.image.load(os.path.join(assets_path, "tree_2_resized_2.png")).convert_alpha()
-        rock = pygame.image.load(os.path.join(assets_path, "rock.png")).convert_alpha()
-        grass_tile = pygame.image.load(os.path.join(assets_path, "20001_02.png")).convert_alpha()
+        rock = pygame.image.load(os.path.join(assets_path, "stone1.png")).convert_alpha()
+        grass_tile = pygame.image.load(os.path.join(assets_path, "grass.png")).convert_alpha()
+        grass_hd = pygame.image.load(os.path.join(assets_path, "12.png")).convert_alpha()
+        gold = pygame.image.load(os.path.join(assets_path, "gold.png")).convert_alpha()
 
         town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
         house = pygame.image.load("Resources/assets/House_2.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/farm.png").convert_alpha()
+
+        villager = pygame.image.load("resources/assets/Villager.bmp").convert_alpha()
 
         images = {
             "Town center": town_center,
@@ -262,7 +307,10 @@ class Map:
             "tree": tree,
             "rock": rock,
             "block": block,
-            "grass_tile": grass_tile
+            "grass": grass_tile,
+            "grass_hd" : grass_hd,
+            "gold" : gold,
+            "Villager" : villager
         }
 
         return images
@@ -277,15 +325,13 @@ class Map:
         ]
 
         # polygon
-        iso_poly = [self.decarte_to_iso(x, y) for x, y in rect]
+        iso_poly = [decarte_to_iso(x, y) for x, y in rect]
 
         minx = min([x for x, y in iso_poly])
         miny = min([y for x, y in iso_poly])
 
         r = random.randint(1, 100)
         perlin = 100 * noise.pnoise2(grid_x / self.perlin_scale, grid_y / self.perlin_scale)
-
-        place_town_hall = random.random()
 
         if (perlin >= 15) or (perlin <= -35):
             tile = "tree"
@@ -295,16 +341,6 @@ class Map:
                 tile = "rock"
             elif r <= 2:
                 tile = "tree"
-
-            #here we place randomly the townhall on the map
-            elif place_town_hall <= 0.003 and not self.town_hall_placed:
-                new_building = Town_center((minx, miny), playerOne)
-                self.entities.append(new_building)
-                self.buildings[grid_x][grid_y] = new_building
-
-                self.town_hall_placed = True
-
-                tile = "building"
             else:
                 tile = ""
 
@@ -324,10 +360,6 @@ class Map:
 
         return out
 
-    def decarte_to_iso(self, x, y):
-        iso_x = x - y
-        iso_y = (x + y) / 2
-        return iso_x, iso_y
 
     # From the mouse coordinates, we find the corresponding tile of our map (=grid position).
     # Almost does the "opposite" work of grid_to_map
@@ -335,19 +367,35 @@ class Map:
     def mouse_to_grid(self, mouse_x, mouse_y, scroll):
 
         # 1 : we remove the camera scroll and the offset (for x) to get the corresponding map position
-        map_x = mouse_x - scroll.x - self.grass_tiles.get_width() / 2
-        map_y = mouse_y - scroll.y
+        iso_x = mouse_x - scroll.x - self.grass_tiles.get_width() / 2
+        iso_y = mouse_y - scroll.y
 
         # 2 : we remove the isometric transformation to find cartesian coordinates
-        # opposite of decarte_to_iso function
-        cart_y = (2 * map_y - map_x) / 2
-        cart_x = cart_y + map_x
+        cart_x, cart_y = iso_to_decarte(iso_x, iso_y)
 
         # 3 : find the grid coordinates (we must get integers to make sense)
         grid_x = int(cart_x // TILE_SIZE)
         grid_y = int(cart_y // TILE_SIZE)
 
         return grid_x, grid_y
+
+    # takes tile "matrice" coordinates, returns center of tile
+    def get_tile_center(self, tile_x, tile_y, scroll):
+        top_left_corner = (tile_x * TILE_SIZE, tile_y * TILE_SIZE)
+        bottom_left_corner = (tile_x * TILE_SIZE + TILE_SIZE, tile_y * TILE_SIZE)
+        top_right_corner = (tile_x * TILE_SIZE, tile_y * TILE_SIZE + TILE_SIZE)
+        bottom_right_corner = (tile_x * TILE_SIZE + TILE_SIZE, tile_y * TILE_SIZE + TILE_SIZE)
+
+        tile_center_x = tile_x + (TILE_SIZE / 2)
+        tile_center_y = tile_y + (TILE_SIZE / 2)
+
+        tile_center_x, tile_center_y = decarte_to_iso(tile_center_x, tile_center_y)
+
+        tile_center_x = tile_center_x + scroll.x + (self.grass_tiles.get_width() * 2)
+        #tile_center_x = tile_center_x + scroll.x
+        tile_center_y = tile_center_y + scroll.y
+
+        return tile_center_x, tile_center_y
 
     # to check if we are able to place an object (collision)
     def can_place_tile(self, grid_pos):
@@ -382,3 +430,31 @@ class Map:
                     collision_matrix[y][x] = 0
 
             return collision_matrix
+
+    # here is the fonction that places the townhall randomly on the map
+    def place_townhall(self):
+        while not self.townhall_placed:
+            place_x = random.randint(0, self.grid_length_x-2)
+            place_y = random.randint(1, self.grid_length_y-1)
+
+            self.place_x = place_x
+            self.place_y = place_y
+
+            new_building = Town_center((place_x, place_y), playerOne)
+            self.entities.append(new_building)
+            self.buildings[place_x][place_y] = new_building
+
+            self.townhall_placed = True
+
+            self.map[place_x][place_y]["tile"] = "building"
+            self.map[place_x][place_y]["collision"] = True
+            self.map[place_x+1][place_y]["tile"] = "building"
+            self.map[place_x+1][place_y]["collision"] = True
+            self.map[place_x][place_y-1]["tile"] = "building"
+            self.map[place_x][place_y-1]["collision"] = True
+            self.map[place_x+1][place_y-1]["tile"] = "building"
+            self.map[place_x+1][place_y-1]["collision"] = True
+
+
+
+
