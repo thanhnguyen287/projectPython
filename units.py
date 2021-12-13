@@ -9,10 +9,9 @@ class Unit:
     def __init__(self, pos, player_owner_of_unit, map):
         self.owner = player_owner_of_unit
         self.map = map
-        #self.map.entities.append(self)
+        self.map.entities.append(self)
 
         self.pos = pos
-        print(str(self.map.renderpos_to_grid(pos[0], pos[1])))
 
         self.current_health = self.max_health
         self.is_alive = True
@@ -31,13 +30,13 @@ class Unit:
         ...
 
     def move_to(self, dest_tile):
+        print("TEST POS : " + str(self.pos["grid"]))
         # remove the unit from its current position on the map
-        #self.map.units[self.tile["grid"][0]][self.tile["grid"][1]] = None
-        print(self.map.units[self.pos[0]][self.pos[1]])
+        self.map.units[self.pos["grid"][0]][self.pos["grid"][1]] = None
 
         # update the map
-        self.map.units[dest_tile[0]][dest_tile[1]] = self
-        self.tile = self.map.map[dest_tile[0]][dest_tile[1]]
+        self.map.units[dest_tile["grid"][0]][dest_tile["grid"][1]] = self
+        self.pos = self.map.map[dest_tile["grid"][0]][dest_tile["grid"][1]]
 
 
 """

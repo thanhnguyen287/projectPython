@@ -125,11 +125,23 @@ class Map:
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
                     elif self.hud.selected_tile["name"] == "Villager":
-                        new_unit = Villager(render_pos, playerOne, self)
+
+                        render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
+                        grid = self.renderpos_to_grid(render_pos[0], render_pos[1])
+                        iso_poly = self.map[grid_pos[0]][grid_pos[1]]["iso_poly"]
+                        collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
+
+                        self.temp_ = {
+                            "grid" : grid,
+                            "render_pos": render_pos,
+                            "iso_poly": iso_poly,
+                            "collision": collision,
+
+                        }
+
+                        new_unit = Villager(self.temp_, playerOne, self)
                         self.entities.append(new_unit)
                         self.units[grid_pos[0]][grid_pos[1]] = new_unit
-                        print(self.units[grid_pos[0]][grid_pos[1]])
-                        print(grid_pos)
 
                     self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
                     self.collision_matrix[grid_pos[1]][grid_pos[0]] = 0
@@ -153,18 +165,14 @@ class Map:
                 else:
                     pass
 
-        #trying to move units
-        #if mouse_action[2]:
-        #    ...
-           # if self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
-               # grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
-                #render_pos = self.map[grid_pos[0]][grid_pos[1]]
-                #print("des : " + str(grid_pos))
-                #print("grid pos of villager : " + str(self.renderpos_to_grid(self.hud.examined_tile.pos[0], self.hud.examined_tile.pos[1])))
-                #villager_pos = self.renderpos_to_grid(self.hud.examined_tile.pos[0], self.hud.examined_tile.pos[1])
-                #if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
-                #    self.units[villager_pos[0]][villager_pos[1]].move_to(self.map[grid_pos[0]][grid_pos[1]])
-                 #   print("success")
+        #trying to move units, they only tp for now
+        if mouse_action[2]:
+
+            if self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
+                grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
+                villager_pos = self.hud.examined_tile.pos
+                if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
+                    self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(self.map[grid_pos[0]][grid_pos[1]])
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -391,8 +399,25 @@ class Map:
         grid_x = int(cart_x // TILE_SIZE)
         grid_y = int(cart_y // TILE_SIZE)
 
-        return grid_x, grid_y
+        return grid_x +1, grid_y
 
+    def grid_to_renderpos(self, grid_x, grid_y):
+        rect = [
+            (grid_x * TILE_SIZE, grid_y * TILE_SIZE),
+            (grid_x * TILE_SIZE + TILE_SIZE, grid_y * TILE_SIZE),
+            (grid_x * TILE_SIZE + TILE_SIZE, grid_y * TILE_SIZE + TILE_SIZE),
+            (grid_x * TILE_SIZE, grid_y * TILE_SIZE + TILE_SIZE)
+        ]
+        print("rect : " + str(rect))
+        # polygon
+        iso_poly = [decarte_to_iso(x, y) for x, y in rect]
+        print("**********\n\n" + str(iso_poly))
+        minx = min([x for x, y in iso_poly])
+        miny = min([y for x, y in iso_poly])
+
+        render_pos = [minx, miny]
+        print("\n\n\n render pos : " + str(render_pos))
+        return render_pos
 
     # takes tile "matrice" coordinates, returns center of tile
     def get_tile_center(self, tile_x, tile_y, scroll):
