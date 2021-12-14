@@ -3,6 +3,7 @@ from settings import *
 import pygame
 from .utils import draw_text
 from player import playerOne
+from units import Villager
 
 class Hud:
 
@@ -32,9 +33,42 @@ class Hud:
 
         self.images = self.load_images()
         self.tiles = self.create_build_hud()
+        self.town_hall_menu = self.create_train_menu_Town_hall()
 
         self.selected_tile = None
         self.examined_tile = None
+
+    def create_train_menu_Town_hall(self):
+        render_pos = [0 + 15, self.height * 0.8 + 10]
+        object_width = self.build_surface.get_width()
+
+        tiles = []
+
+        for image_name, image in self.images.items():
+
+            pos = render_pos.copy()
+            if image_name == "Villager":
+                image_scale = villager_icon
+
+            else:
+                image_tmp = image.copy()
+                image_scale = self.scale_image(image_tmp, w=40)  # a modifier pour s'adapter a l'ecran
+            rect = image_scale.get_rect(topleft=pos)
+
+            tiles.append(
+                {
+                    "name": image_name,
+                    "icon": image_scale,
+                    "image": self.images[image_name],
+                    "rect": rect,
+                    "tooltip": Villager.construction_tooltip,
+                    "affordable": True
+                }
+            )
+
+            #render_pos[0] += image_scale.get_width() + 5  # modifier le 20 pour que ça marche pour tout ecran
+
+        return tiles
 
     def create_build_hud(self):
 
@@ -74,7 +108,7 @@ class Hud:
 
         return tiles
 
-    def update(self,screen):
+    def update(self, screen):
 
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         mouse_action = pygame.mouse.get_pressed()
@@ -107,12 +141,20 @@ class Hud:
         #screen.blit(self.build_surface, (0, self.height * 0.75))
         #new one
         screen.blit(bot_menu_building_hd, (0, self.height - 182))
-        # display of the buildings icons inside the build menu
-        for tile in self.tiles:
-            icon = tile["icon"].copy()
-            if not tile["affordable"]:
-                icon.set_alpha(100)
-            screen.blit(icon, tile["rect"].topleft)
+        # display of the buildings icons inside the build menu if you selected a villager
+        if self.examined_tile is not None and self.examined_tile.name == "Villager":
+            for tile in self.tiles:
+                icon = tile["icon"].copy()
+                if not tile["affordable"]:
+                    icon.set_alpha(100)
+                screen.blit(icon, tile["rect"].topleft)
+        #display of town hall menu (bottom left)
+        elif self.examined_tile is not None and self.examined_tile.name == "Town center":
+            for tile in self.town_hall_menu:
+                icon = tile["icon"].copy()
+                if not tile["affordable"]:
+                    icon.set_alpha(100)
+                screen.blit(icon, tile["rect"].topleft)
 
         # selection (bottom middle menu)
         if self.examined_tile is not None:

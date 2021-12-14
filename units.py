@@ -6,6 +6,7 @@ from settings import destination_flag, TILE_SIZE
 
 
 class Unit:
+
     def __init__(self, pos, player_owner_of_unit, map):
         self.owner = player_owner_of_unit
         self.map = map
@@ -82,7 +83,12 @@ class Unit:
 
 
 class Villager(Unit):
-
+    # Training : 50 FOOD, 20s
+    description = "Your best friend. Can work, fight, get resources."
+    construction_tooltip = " Train a Villager"
+    construction_cost = [0, 10, 25, 0]
+    training_time = 20
+    population_produced = 1
     def __init__(self, pos, player_owner_of_unit, map):
 
         self.name = "Villager"
@@ -143,6 +149,7 @@ class Bowman(Unit):
 
         #DISPLAY
         self.sprite = None
+        self.name = "Bowman"
 
         # DATA
         self.max_health = 35
@@ -171,6 +178,8 @@ class Clubman(Unit):
 
         #DISPLAY
         self.sprite = None
+        self.name = "Clubman"
+
 
         # DATA
         self.max_health = 40

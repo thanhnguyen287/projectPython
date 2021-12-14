@@ -170,7 +170,7 @@ class Map:
                 else:
                     pass
 
-        #trying to move units, they only tp for now
+        #units movement
         if mouse_action[2] and self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
             dest_grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             villager_pos = self.hud.examined_tile.pos
