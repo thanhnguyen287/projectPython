@@ -12,7 +12,7 @@ class Player:
         self.resources = starting_resources
 
         self.current_population = 0
-        self.max_population = 0
+        self.max_population = 5
 
         self.civilization = civilization
 

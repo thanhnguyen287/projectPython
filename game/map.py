@@ -66,10 +66,7 @@ class Map:
         mouse_pos = pygame.mouse.get_pos()
         mouse_action = pygame.mouse.get_pressed()
 
-        # we deselect the object examined when left-clicking
-        if mouse_action[0]:
-            self.examined_tile = None
-            self.hud.examined_tile = None
+
 
         self.temp_tile = None
         # meaning : the player selected a building in the hud
@@ -150,6 +147,13 @@ class Map:
         # the player hasn't selected something to build, he will interact with what's on the map
         else:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
+            if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
+                collision2 = self.map[grid_pos[0]][grid_pos[1]]["collision"]
+
+                # we deselect the object examined when left-clicking
+                if mouse_action[0] and not collision2:
+                    self.examined_tile = None
+                    self.hud.examined_tile = None
 
             # if on the map and left click and the tile isn't empty
             if self.can_place_tile(grid_pos):
@@ -160,19 +164,18 @@ class Map:
                         self.examined_tile = grid_pos
                         if building is not None:
                             self.hud.examined_tile = building
+
                         else:
                             self.hud.examined_tile = unit
                 else:
                     pass
 
         #trying to move units, they only tp for now
-        if mouse_action[2]:
-            ...
-            #if self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
-              #  grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
-              #  villager_pos = self.hud.examined_tile.pos
-              #  if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
-                #    self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].change_tile(self.map[grid_pos[0]][grid_pos[1]])
+        if mouse_action[2] and self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
+            dest_grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
+            villager_pos = self.hud.examined_tile.pos
+            if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
+                self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(self.map[grid_pos[0]][grid_pos[1]])
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -245,13 +248,6 @@ class Map:
                                     for x, y in mask]
                             pygame.draw.polygon(screen, (255, 255, 255), mask, 3)
 
-                            # display examined tile in white
-                            # temp_coor = self.grid_to_map(self.examined_tile[0], self.examined_tile[1])
-                            # iso_poly = temp_coor["iso_poly"]
-                            # iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y) for x, y in iso_poly]
-                            # pygame.draw.polygon(screen, (255, 255, 255), iso_poly, 3)
-
-
                 # HERE WE DRAW THE UNITS ON THE MAP
                 # we extract from the units list the building we want to display
                 unit = self.units[x][y]
@@ -273,11 +269,9 @@ class Map:
                             temp_coor = self.grid_to_map(self.examined_tile[0], self.examined_tile[1])
                             iso_poly = temp_coor["iso_poly"]
                             iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y) for x, y in iso_poly]
-                            pygame.draw.polygon(screen, (255, 255, 255), iso_poly, 3)
+                            self.highlight_tile(iso_poly, screen, "WHITE")
 
 
-
-        # display the potential building on the tile
         if self.temp_tile is not None:
             iso_poly = self.temp_tile["iso_poly"]
             iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y) for x, y in
@@ -285,10 +279,11 @@ class Map:
 
             # if we cannot place our building on the tile because there's already smth, we display the tile in red, else, in green
             if self.temp_tile["collision"]:
-                pygame.draw.polygon(screen, (255, 0, 0), iso_poly, 3)
+                self.highlight_tile(iso_poly, screen, "RED")
             else:
-                pygame.draw.polygon(screen, (0, 255, 0), iso_poly, 3)
+                self.highlight_tile(iso_poly, screen, "GREEN")
 
+            # display the potential building on the tile
             render_pos = self.temp_tile["render_pos"]
             screen.blit(self.temp_tile["image"],
                         (  # we obviously have to reapply the offset + camera scroll
@@ -388,7 +383,7 @@ class Map:
         grid_x = int(cart_x // TILE_SIZE)
         grid_y = int(cart_y // TILE_SIZE)
 
-        return grid_x + 1, grid_y
+        return grid_x, grid_y
 
     def renderpos_to_grid(self, x, y):
         # 2 : we remove the isometric transformation to find cartesian coordinates
@@ -398,7 +393,7 @@ class Map:
         grid_x = int(cart_x // TILE_SIZE)
         grid_y = int(cart_y // TILE_SIZE)
 
-        return grid_x +1, grid_y
+        return grid_x+1, grid_y
 
     def grid_to_renderpos(self, grid_x, grid_y):
         rect = [
@@ -458,11 +453,31 @@ class Map:
     def create_collision_matrix(self):
         # at first, we initialise our matrix with 1 : this means you can go everywhere
         collision_matrix = [[1 for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
-
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
                 # we iterate through our tiles, if there's something, we put a 0 in our collision matrix
                 if self.map[x][y]["collision"]:
                     collision_matrix[y][x] = 0
 
-            return collision_matrix
+        return collision_matrix
+
+    def highlight_tile(self, iso_poly, screen, color):
+
+        if color == "WHITE":
+            pygame.draw.polygon(screen, (255, 255, 255), iso_poly, 3)
+
+        elif color == "BLACK":
+            pygame.draw.polygon(screen, (0, 0, 0), iso_poly, 3)
+
+        elif color == "BLUE":
+            pygame.draw.polygon(screen, (0, 0, 255), iso_poly, 3)
+
+        elif color == "GREEN":
+            pygame.draw.polygon(screen, (0, 255, 0), iso_poly, 3)
+
+        elif color == "RED":
+            pygame.draw.polygon(screen, (255, 0, 0), iso_poly, 3)
+
+
+
+

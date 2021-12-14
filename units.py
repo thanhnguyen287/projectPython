@@ -23,67 +23,58 @@ class Unit:
 
         #pathfinding
         self.move_timer = pygame.time.get_ticks()
+        self.searching_for_path = False
+        #self.create_path()
 
-        self.create_path()
+    def move_to(self, new_tile):
+        if not new_tile["collision"]:
+            self.searching_for_path = True
+            self.grid = Grid(matrix=self.map.collision_matrix)
+            self.start = self.grid.node(self.pos["grid"][0], self.pos["grid"][1])
+            self.end = self.grid.node(new_tile["grid"][0], new_tile["grid"][1])
+            finder = AStarFinder()
+            # how far along the path are we
+            self.path_index = 0
+            self.path, runs = finder.find_path(self.start, self.end, self.grid)
 
     def change_tile(self, new_tile):
         # remove the unit from its current position on the map
         self.map.units[self.pos["grid"][0]][self.pos["grid"][1]] = None
+        #remove collision from old position
+        self.map.collision_matrix[self.pos["grid"][1]][self.pos["grid"][0]] = 1
+        self.map.map[self.pos["grid"][0]][self.pos["grid"][1]]["collision"] = False
 
         # update the map
         self.map.units[new_tile[0]][new_tile[1]] = self
         self.pos = self.map.map[new_tile[0]][new_tile[1]]
-
-    def create_path(self):
-        searching_for_path = True
-        while searching_for_path:
-            x = random.randint(0, self.map.grid_length_x -1)
-            y = random.randint(0, self.map.grid_length_y -1)
-            dest_tile = self.map.map[x][y]
-            if not dest_tile["collision"]:
-                self.grid = Grid(matrix=self.map.collision_matrix)
-                self.start = self.grid.node(self.pos["grid"][0], self.pos["grid"][1])
-                self.end = self.grid.node(x, y)
-                finder = AStarFinder()
-                # how far along the path are we
-                self.path_index = 0
-                self.path, runs = finder.find_path(self.start, self.end, self.grid)
-                searching_for_path = False
-
-    def attack(self, targeted_unit):
-
-        targeted_unit.current_health -= self.attack_dmg
-        #pour tester
-        #print("hp de unit :", targeted_unit.current_health, " / ", targeted_unit.max_health)
-
-        # if target has less than 0 hp after attack, she dies
-        if targeted_unit.current_health < 0:
-            #print pour tester
-            #print(" unit DIED")
-            targeted_unit.is_alive = False
-            #del units_group[units_group.index(targeted_unit)]
+        #update collision for new tile
+        self.map.collision_matrix[self.pos["grid"][1]][self.pos["grid"][0]] = 0
+        self.map.map[self.pos["grid"][0]][self.pos["grid"][1]]["collision"] = True
 
     def update(self):
+
         now = pygame.time.get_ticks()
-        if now - self.move_timer > 1000:
+        if now - self.move_timer > 1000 and self.searching_for_path:
             new_pos = self.path[self.path_index]
             #update positoin in the world
             self.change_tile(new_pos)
             self.path_index += 1
             self.move_timer = now
-            if self.path_index == len(self.path) - 1:
-                self.create_path()
+            if self.path_index == len(self.path):
+                self.searching_for_path = False
 
+    def attack(self, targeted_unit):
 
-"""
-    def tp_to(self, dest_tile):
-        # remove the unit from its current position on the map
-        self.map.units[self.pos["grid"][0]][self.pos["grid"][1]] = None
+        targeted_unit.current_health -= self.attack_dmg
+        # pour tester
+        # print("hp de unit :", targeted_unit.current_health, " / ", targeted_unit.max_health)
 
-        # update the map
-        self.map.units[dest_tile["grid"][0]][dest_tile["grid"][1]] = self
-        self.pos = self.map.map[dest_tile["grid"][0]][dest_tile["grid"][1]]
-        """
+        # if target has less than 0 hp after attack, she dies
+        if targeted_unit.current_health < 0:
+            # print pour tester
+            # print(" unit DIED")
+            targeted_unit.is_alive = False
+            # del units_group[units_group.index(targeted_unit)]
 
 
 class Villager(Unit):
