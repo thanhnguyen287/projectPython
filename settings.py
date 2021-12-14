@@ -37,3 +37,5 @@ stone_cost = pygame.image.load("resources/assets/icons/stone_cost.png")
 population_cost = pygame.image.load("resources/assets/icons/population_cost.png")
 
 standard_cursor = pygame.image.load("resources/assets/standard_cursor.png")
+
+destination_flag = pygame.image.load("resources/assets/dflag.png")

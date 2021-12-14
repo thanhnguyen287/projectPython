@@ -2,7 +2,7 @@ import pygame
 from pathfinding.core.diagonal_movement import DiagonalMovement
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
-import random
+from settings import destination_flag, TILE_SIZE
 
 
 class Unit:
@@ -24,11 +24,12 @@ class Unit:
         #pathfinding
         self.move_timer = pygame.time.get_ticks()
         self.searching_for_path = False
-        #self.create_path()
+        self.dest = None
 
-    def move_to(self, new_tile):
+    def move_to(self, new_tile, screen, camera):
         if not new_tile["collision"]:
             self.searching_for_path = True
+            self.dest = new_tile
             self.grid = Grid(matrix=self.map.collision_matrix)
             self.start = self.grid.node(self.pos["grid"][0], self.pos["grid"][1])
             self.end = self.grid.node(new_tile["grid"][0], new_tile["grid"][1])
@@ -36,6 +37,9 @@ class Unit:
             # how far along the path are we
             self.path_index = 0
             self.path, runs = finder.find_path(self.start, self.end, self.grid)
+
+
+
 
     def change_tile(self, new_tile):
         # remove the unit from its current position on the map

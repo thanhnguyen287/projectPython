@@ -175,7 +175,7 @@ class Map:
             dest_grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             villager_pos = self.hud.examined_tile.pos
             if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
-                self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(self.map[grid_pos[0]][grid_pos[1]])
+                self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(self.map[grid_pos[0]][grid_pos[1]], screen, camera)
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -261,6 +261,12 @@ class Map:
                         render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                         render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
                                 )
+                    if unit.searching_for_path:
+                        # creates a flag to display where the unit is going
+                        screen.blit(destination_flag, (
+                            unit.dest["render_pos"][0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                            unit.dest["render_pos"][1] - (destination_flag.get_height() - TILE_SIZE) + camera.scroll.y)
+                                    )
 
                     # have we clicked on this tile ? if yes we will highlight the tile
                     if self.examined_tile is not None:
