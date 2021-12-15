@@ -1,4 +1,6 @@
 import sys
+
+from town_center import *
 from .camera import Camera
 from .map import *
 from .utils import draw_text
@@ -23,13 +25,8 @@ class Game:
 
         # map
         self.map = Map(self.hud, self.entities, 50, 50, self.width, self.height)
-
-        #first villagers
-        start_unit = Villager(self.map.map[5][5], playerOne, self.map)
-        self.map.units[5][5] = start_unit
-        self.map.collision_matrix[start_unit.pos["grid"][1]][start_unit.pos["grid"][0]] = 0
-        self.map.map[start_unit.pos["grid"][0]][start_unit.pos["grid"][1]]["collision"] = True
-
+        #start_unit = Villager(self.map.map[5][5], playerOne)
+        #self.map.units[5][5] = start_unit
         # camera
         self.camera = Camera(self.width, self.height)
 
@@ -111,10 +108,10 @@ class Game:
 
         # MOUSE CURSOR - we disable the default one and create a new one at the current position of the mouse
         # MUST BE LAST TO SEE IT AND NOT BE HIDDEN BEHIND OTHER THINGS
-        #pygame.mouse.set_visible(False)
-        #standard_cursor_rect = standard_cursor.get_rect()
-        #standard_cursor_rect.center = pygame.mouse.get_pos()  # update position
-        #self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
+        pygame.mouse.set_visible(False)
+        standard_cursor_rect = standard_cursor.get_rect()
+        standard_cursor_rect.center = pygame.mouse.get_pos()  # update position
+        self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
 
         #Boom animation
         moving_sprites.draw(self.screen)
