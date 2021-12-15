@@ -2,17 +2,17 @@ import pygame
 from pathfinding.core.diagonal_movement import DiagonalMovement
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
-from settings import destination_flag, TILE_SIZE
+import random
 
 
 class Unit:
-
     def __init__(self, pos, player_owner_of_unit, map):
         self.owner = player_owner_of_unit
         self.map = map
-        self.map.entities.append(self)
+        #self.map.entities.append(self)
 
         self.pos = pos
+        print(str(self.map.renderpos_to_grid(pos[0], pos[1])))
 
         self.current_health = self.max_health
         self.is_alive = True
@@ -24,71 +24,69 @@ class Unit:
 
         #pathfinding
         self.move_timer = pygame.time.get_ticks()
-        self.searching_for_path = False
-        self.dest = None
 
-    def move_to(self, new_tile, screen, camera):
-        if not new_tile["collision"]:
-            self.searching_for_path = True
-            self.dest = new_tile
-            self.grid = Grid(matrix=self.map.collision_matrix)
-            self.start = self.grid.node(self.pos["grid"][0], self.pos["grid"][1])
-            self.end = self.grid.node(new_tile["grid"][0], new_tile["grid"][1])
-            finder = AStarFinder()
-            # how far along the path are we
-            self.path_index = 0
-            self.path, runs = finder.find_path(self.start, self.end, self.grid)
-
-
-
-
-    def change_tile(self, new_tile):
-        # remove the unit from its current position on the map
-        self.map.units[self.pos["grid"][0]][self.pos["grid"][1]] = None
-        #remove collision from old position
-        self.map.collision_matrix[self.pos["grid"][1]][self.pos["grid"][0]] = 1
-        self.map.map[self.pos["grid"][0]][self.pos["grid"][1]]["collision"] = False
-
-        # update the map
-        self.map.units[new_tile[0]][new_tile[1]] = self
-        self.pos = self.map.map[new_tile[0]][new_tile[1]]
-        #update collision for new tile
-        self.map.collision_matrix[self.pos["grid"][1]][self.pos["grid"][0]] = 0
-        self.map.map[self.pos["grid"][0]][self.pos["grid"][1]]["collision"] = True
+        #self.create_path()
 
     def update(self):
+        ...
 
+    def move_to(self, dest_tile):
+        # remove the unit from its current position on the map
+        #self.map.units[self.tile["grid"][0]][self.tile["grid"][1]] = None
+        print(self.map.units[self.pos[0]][self.pos[1]])
+
+        # update the map
+        self.map.units[dest_tile[0]][dest_tile[1]] = self
+        self.tile = self.map.map[dest_tile[0]][dest_tile[1]]
+
+
+"""
+    def change_tile(self, new_tile):
+        #remove the unit from its current position on the map
+        self.map.units[self.tile["grid"][0]][self.tile["grid"][1]] = None
+        #update the map
+        self.map.units[new_tile[0]][new_tile[1]] = self
+        self.tile = self.map.map[new_tile[0]][new_tile[1]]
+    def create_path(self):
+        searching_for_path = True
+        while searching_for_path:
+            x = random.randint(0, self.map.grid_length_x -1)
+            y = random.randint(0, self.map.grid_length_y -1)
+            dest_tile = self.map.map[x][y]
+            if not dest_tile["collision"]:
+                self.grid = Grid(matrix=self.map.collision_matrix)
+                self.start = self.grid.node(self.tile["grid"][0], self.tile["grid"][1])
+                self.end = self.grid.node(x, y)
+                finder = AStarFinder()
+                # how far along the path are we
+                self.path_index = 0
+                self.path, runs = finder.find_path(self.start, self.end, self.grid)
+                searching_for_path = False
+    def attack(self, targeted_unit):
+        targeted_unit.current_health -= self.attack_dmg
+        #pour tester
+        #print("hp de unit :", targeted_unit.current_health, " / ", targeted_unit.max_health)
+        # if target has less than 0 hp after attack, she dies
+        if targeted_unit.current_health < 0:
+            #print pour tester
+            #print(" unit DIED")
+            targeted_unit.is_alive = False
+            #del units_group[units_group.index(targeted_unit)]
+    def update(self):
         now = pygame.time.get_ticks()
-        if now - self.move_timer > 1000 and self.searching_for_path:
+        if now - self.move_timer > 1000:
             new_pos = self.path[self.path_index]
             #update positoin in the world
             self.change_tile(new_pos)
             self.path_index += 1
             self.move_timer = now
-            if self.path_index == len(self.path):
-                self.searching_for_path = False
-
-    def attack(self, targeted_unit):
-
-        targeted_unit.current_health -= self.attack_dmg
-        # pour tester
-        # print("hp de unit :", targeted_unit.current_health, " / ", targeted_unit.max_health)
-
-        # if target has less than 0 hp after attack, she dies
-        if targeted_unit.current_health < 0:
-            # print pour tester
-            # print(" unit DIED")
-            targeted_unit.is_alive = False
-            # del units_group[units_group.index(targeted_unit)]
+            if self.path_index == len(self.path) - 1:
+                ...
+"""
 
 
 class Villager(Unit):
-    # Training : 50 FOOD, 20s
-    description = "Your best friend. Can work, fight, get resources."
-    construction_tooltip = " Train a Villager"
-    construction_cost = [0, 10, 25, 0]
-    training_time = 20
-    population_produced = 1
+
     def __init__(self, pos, player_owner_of_unit, map):
 
         self.name = "Villager"
@@ -149,7 +147,6 @@ class Bowman(Unit):
 
         #DISPLAY
         self.sprite = None
-        self.name = "Bowman"
 
         # DATA
         self.max_health = 35
@@ -178,8 +175,6 @@ class Clubman(Unit):
 
         #DISPLAY
         self.sprite = None
-        self.name = "Clubman"
-
 
         # DATA
         self.max_health = 40
@@ -198,5 +193,3 @@ class Clubman(Unit):
 
         self.description = "Basic melee unit."
         self.construction_tooltip = " Train a Clubman"
-
-
