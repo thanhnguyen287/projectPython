@@ -115,16 +115,20 @@ class Villager(Unit):
         if (tar["tile"] == "tree" or tar["tile"] == "rock") and tar["health"] > 0:
             self.target["health"] -= 2
         else:
-            tar["tile"] = ""
-            tar["collision"] = False
-            self.target = None
-            self.gathering = False
-            #we need to update the collision matrix to
-
+            #we update the ressource of the player
             if tar["tile"] == "tree":
                 playerOne.update_resource(0, 10)
             elif tar["tile"] == "rock":
                 playerOne.update_resource(1, 10)
+
+            #we delete the tile
+            tar["tile"] = ""
+            tar["collision"] = False
+            self.target = None
+            self.gathering = False
+
+            #we need to update the collision matrix to
+
 
     def update(self):
         now = pygame.time.get_ticks()
