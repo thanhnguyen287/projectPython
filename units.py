@@ -4,6 +4,8 @@ from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from settings import destination_flag, TILE_SIZE
 
+from player import *
+
 
 class Unit:
 
@@ -15,12 +17,16 @@ class Unit:
         self.current_health = self.max_health
         self.is_alive = True
         self.owner.pay_entity_cost(self)
+
         # means current population +1
         self.owner.update_resource(4, 1)
+
         #pathfinding
         self.move_timer = pygame.time.get_ticks()
         self.searching_for_path = False
         self.dest = None
+
+
     def move_to(self, new_tile, screen, camera):
         if not new_tile["collision"]:
             self.searching_for_path = True
@@ -32,6 +38,8 @@ class Unit:
             # how far along the path are we
             self.path_index = 0
             self.path, runs = finder.find_path(self.start, self.end, self.grid)
+
+
     def change_tile(self, new_tile):
         # remove the unit from its current position on the map
         self.map.units[self.pos["grid"][0]][self.pos["grid"][1]] = None
@@ -44,6 +52,8 @@ class Unit:
         #update collision for new tile
         self.map.collision_matrix[self.pos["grid"][1]][self.pos["grid"][0]] = 0
         self.map.map[self.pos["grid"][0]][self.pos["grid"][1]]["collision"] = True
+
+
     def update(self):
         now = pygame.time.get_ticks()
         if now - self.move_timer > 1000 and self.searching_for_path:
@@ -54,6 +64,8 @@ class Unit:
             self.move_timer = now
             if self.path_index == len(self.path):
                 self.searching_for_path = False
+
+
     def attack(self, targeted_unit):
         targeted_unit.current_health -= self.attack_dmg
         # pour tester
@@ -74,18 +86,28 @@ class Villager(Unit):
     construction_cost = [0, 10, 25, 0]
     training_time = 20
     population_produced = 1
+
+
     def __init__(self, pos, player_owner_of_unit, map):
 
         self.name = "Villager"
         # DISPLAY
         self.sprite = pygame.image.load("resources/assets/Villager.bmp").convert_alpha()
+
         # DATA
         self.max_health = 25
         self.attack_dmg = 3
         self.attack_speed = 1.5
         self.movement_speed = 1.1
+
+        # used to gather ressources
+        self.target = None
+        self.gathering = False
+        self.fighting = False
+
         # unit type : melee
         self.range = 0
+
         #Training : 50 FOOD, 20s
         self.construction_cost = [0, 10, 25, 0]
         self.training_time = 20
@@ -93,28 +115,52 @@ class Villager(Unit):
         self.description = "Your best friend. Can work, fight, get resources."
         self.construction_tooltip = " Train a Villager"
         super().__init__(pos, player_owner_of_unit, map)
+
+
     def build(self, tile):
         ...
+
+
     def repair(self, building):
         if building.current_health != building.max_health:
             ...
         else:
             ...
-    """
-    def gatherRessources(self, ressource):
-        if (ressource.type = BERRY_BUSH):
-            ...
-        elif (ressource.type = TREE):
-            ...
-        elif (ressource.type = GOLD_MINE):
-            ...
-        elif (ressource.type = STONE_MINE):
-            ...
-        elif (ressource.type = SHORE_FISH):
-            ...
-        elif (ressource.type = ANIMALS):
-            ...
-    """
+
+    def gatherRessources(self, tar):
+        if (tar["tile"] == "tree" or tar["tile"] == "rock") and tar["health"] > 0:
+            self.target["health"] -= 2
+
+        else:
+            tar["tile"] = ""
+            tar["collision"] = False
+            self.target = None
+            self.gathering = False
+            #we need to update the collision matrix to
+
+            if tar["tile"] == "tree":
+                playerOne.update_resource(0, 10)
+            elif tar["tile"] == "rock":
+                playerOne.update_resource(1, 10)
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.move_timer > 500:
+            if self.searching_for_path:
+                new_pos = self.path[self.path_index]
+                #update position in the world
+                self.change_tile(new_pos)
+                self.path_index += 1
+                if self.path_index == len(self.path):
+                    self.searching_for_path = False
+
+            if (self.gathering or self.target is not None) and not self.searching_for_path:
+                self.gatherRessources(self.target)
+
+            #always at the end to reset the timer
+            self.move_timer = now
+
+
 class Bowman(Unit):
     def __init__(self, pos, player_owner_of_unit, map):
         super().__init__(pos, player_owner_of_unit, map)
@@ -137,6 +183,8 @@ class Bowman(Unit):
         self.population_produced = 1
         self.description = "Basic ranged unit."
         self.construction_tooltip = " Train a Bowman"
+
+
 class Clubman(Unit):
     def __init__(self, pos, player_owner_of_unit, map):
         super().__init__(pos, player_owner_of_unit, map)

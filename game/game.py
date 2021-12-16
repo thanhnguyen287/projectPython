@@ -10,10 +10,16 @@ class Game:
         self.screen = screen
         self.clock = clock
         self.width, self.height = self.screen.get_size()
+
+
         # hud
         self.hud = Hud(self.width, self.height)
+
+
         # entities list (units, buildings, etc...)
         self.entities = []
+
+
         # map
         self.map = Map(self.hud, self.entities, 50, 50, self.width, self.height)
 
@@ -35,6 +41,8 @@ class Game:
         cam_x = (iso_to_decarte(th_x*64, th_y*32)[0]) - 4050
         cam_y = (iso_to_decarte(th_x*64, th_y*32)[1]) - 1200
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
+
+
     def run(self):
         self.playing = True
         while self.playing:
@@ -76,6 +84,8 @@ class Game:
         self.map.update(self.camera, self.screen)
         for an_entity in self.entities:
             an_entity.update()
+
+
     # GAME DISPLAY
     def draw(self):
         # BLACK BACKGROUND
