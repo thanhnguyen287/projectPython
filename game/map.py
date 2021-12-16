@@ -65,6 +65,7 @@ class Map:
                 elif self.hud.examined_tile.name == "Town Center":
                     self.hud.bottom_left_menu = self.hud.town_hall_menu
 
+                print(str(self.hud.bottom_left_menu))
                 image = self.hud.selected_tile["image"].copy()
                 # setting transparency to make sure player understands it's not built
                 image.set_alpha(100)
@@ -146,14 +147,23 @@ class Map:
                         self.examined_tile = grid_pos
                         if building is not None:
                             self.hud.examined_tile = building
-                            self.hud.bottom_left_menu = self.hud.town_hall_menu
+                            if building.name == "Town center":
+                                self.hud.bottom_left_menu = self.hud.town_hall_menu
+                            else:
+                                self.hud.bottom_left_menu = None
 
                         else:
-                            self.hud.examined_tile = unit
-                            self.hud.bottom_left_menu = self.hud.villager_menu
+                            if unit is not None:
+                                self.hud.examined_tile = unit
+                                if unit.name == "Villager":
+                                    self.hud.bottom_left_menu = self.hud.villager_menu
+                                else:
+                                    self.hud.bottom_left_menu = None
+
                 else:
                     pass
-        #trying to move units, they only tp for now
+
+        #units movement
         if mouse_action[2] and self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
             dest_grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             villager_pos = self.hud.examined_tile.pos
@@ -167,15 +177,18 @@ class Map:
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
                 render_pos = self.map[x][y]["render_pos"]
+
                 # HERE WE DRAW THE MAP TILES
                 # Rendering what's on the map, if it is not a tree or rock then render nothing as we already had block with green grass
                 tile = self.map[x][y]["tile"]
+
                 # if the tile isnt empty and inst destroyed, we display it
                 if tile != "":
                     screen.blit(self.tiles[tile], (
                         render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                         render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y)
                                 )
+
                     # here we display the health bar of the ressources
                     if (self.examined_tile is not None and x == self.examined_tile[0] and y == self.examined_tile[1]) \
                             or self.map[x][y]["health"] != self.map[x][y]["max_health"]:
@@ -187,6 +200,7 @@ class Map:
                                        render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10,
                                        render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y,
                                        self.map[x][y]["health"], self.map[x][y]["max_health"])
+
                 # here we delete the ressource we left click on
                 if (self.examined_tile is not None) and (tile == "tree" or tile == "rock"):
                     if x == self.examined_tile[0] and y == self.examined_tile[1]:
@@ -199,6 +213,7 @@ class Map:
                             elif tile == "rock":
                                 playerOne.update_resource(3, 10)  # the player gains +10 stone if the tile was a rock
                         self.examined_tile = None
+
                 # HERE WE DRAW THE BUILDINGS ON THE MAP
                 # we extract from the buildings list the building we want to display
                 building = self.buildings[x][y]
@@ -266,6 +281,7 @@ class Map:
                             render_pos[1] - (self.temp_tile["image"].get_height() - TILE_SIZE) + camera.scroll.y
                         )
                         )
+
     def load_images(self):
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
         tree = pygame.image.load(os.path.join(assets_path, "tree_2_resized_2.png")).convert_alpha()

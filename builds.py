@@ -3,6 +3,8 @@ from units import Villager
 
 
 class Building:
+    population_produced = 0
+
     def __init__(self, pos, player_owner_of_unit):
         self.owner = player_owner_of_unit
         self.rect = self.sprite.get_rect(topleft=pos)
@@ -13,7 +15,6 @@ class Building:
         self.current_health = self.max_health
         self.is_alive = True
 
-        self.population_produced = 0
 
         self.image_select = pygame.image.load(os.path.join(assets_path,"image_select.png"))
         self.selected = False
@@ -26,6 +27,10 @@ class Building:
 
 
 class Town_center(Building):
+    description = "Used to create villagers."
+    construction_tooltip = " Build a Town Center"
+    construction_cost = [1000, 0, 0, 100]
+    construction_time = 150
 
     def __init__(self, pos, player_owner_of_unit):
 
@@ -62,8 +67,12 @@ class Town_center(Building):
             self.resource_manager_cooldown = now
 
 
-
 class Farm(Building):
+    description = "Provides 50 food every 5 seconds."
+    construction_tooltip = " Build a Farm"
+    construction_cost = [100, 0, 0, 0]
+    construction_time = 1
+
     def __init__(self, pos, player_owner_of_unit):
 
         self.name = "Farm"
@@ -78,7 +87,6 @@ class Farm(Building):
         self.description = "Provides 50 food every 5 seconds."
         self.construction_tooltip = " Build a Farm"
 
-
         super().__init__(pos, player_owner_of_unit)
 
     def update(self):
@@ -91,6 +99,10 @@ class Farm(Building):
 
 
 class House(Building):
+    description = "Each House increases the maximum population by 5."
+    construction_tooltip = " Build a House"
+    construction_cost = [600, 0, 0, 0]
+    construction_time = 1
 
     def __init__(self, pos, player_owner_of_unit):
         self.name = "House"
@@ -104,7 +116,6 @@ class House(Building):
 
         self.description = "Each House increases the maximum population by 5."
         self.construction_tooltip = " Build a House"
-
 
         super().__init__(pos, player_owner_of_unit)
 

@@ -4,6 +4,7 @@ import pygame
 from .utils import draw_text
 from player import playerOne
 from units import Villager
+from builds import Town_center, House, Farm
 
 
 class Hud:
@@ -52,10 +53,10 @@ class Hud:
         rect = None
 
         for image_name, image in self.images.items():
+            pos = render_pos.copy()
+
             if image_name == "Villager":
                 image_scale = villager_icon
-                pos = render_pos.copy()
-
                 rect = image_scale.get_rect(topleft=pos)
 
         tiles.append(
@@ -64,13 +65,50 @@ class Hud:
                 "icon": image_scale,
                 "image": self.images[image_name],
                 "rect": rect,
-                "tooltip": Villager.construction_tooltip,
                 "affordable": True
             }
         )
+        return tiles
 
-            #render_pos[0] += image_scale.get_width() + 5  # modifier le 20 pour que ça marche pour tout ecran
-        print(str(tiles))
+    def create_build_interact_menu_villager(self):
+
+        render_pos = [0 + 15, self.height * 0.8 + 10]
+
+        tiles = []
+        image_scale = None
+        rect = None
+
+        for image_name, image in self.images.items():
+            pos = render_pos.copy()
+            if image_name == "Villager":
+                image_scale = villager_icon
+                rect = image_scale.get_rect(topleft=pos)
+
+            elif image_name == "Farm":
+                image_scale = farm_icon_hd
+                rect = image_scale.get_rect(topleft=pos)
+
+            elif image_name == "Town center":
+                image_scale = town_center_icon
+                rect = image_scale.get_rect(topleft=pos)
+
+            elif image_name == "House":
+                image_scale = house_icon
+                rect = image_scale.get_rect(topleft=pos)
+
+            tiles.append(
+                {
+                    "name": image_name,
+                    "icon": image_scale,
+                    "image": self.images[image_name],
+                    "rect": rect,
+                    "affordable": True
+                }
+
+            )
+            render_pos[0] += image_scale.get_width() + 5 #modifier le 20 pour que ça marche pour tout ecran
+
+
         return tiles
 
     def create_build_hud(self):
@@ -79,16 +117,18 @@ class Hud:
         object_width = self.build_surface.get_width()
 
         tiles = []
-
         for image_name, image in self.images.items():
 
             pos = render_pos.copy()
             if image_name == "Farm":
                 image_scale = farm_icon_hd
+
             elif image_name == "Town center":
                 image_scale = town_center_icon
+
             elif image_name == "House":
                 image_scale = house_icon
+
             elif image_name == "Villager":
                 image_scale = villager_icon
 
@@ -103,7 +143,7 @@ class Hud:
                     "icon": image_scale,
                     "image": self.images[image_name],
                     "rect": rect,
-                    "affordable" : True
+                    "affordable": True
                 }
             )
 
@@ -122,44 +162,41 @@ class Hud:
 
         # building selection inside the build menu
         if self.bottom_left_menu is not None:
-            for tile in self.bottom_left_menu:
-                if playerOne.can_afford(tile["name"]):
-                    tile["affordable"] = True
+            for button in self.bottom_left_menu:
+                if playerOne.can_afford(button["name"]):
+                    button["affordable"] = True
                 else:
-                    tile["affordable"] = False
+                    button["affordable"] = False
 
-                if tile["rect"].collidepoint(mouse_pos) and tile["affordable"]:
+                if button["rect"].collidepoint(mouse_pos) and button["affordable"]:
                     if mouse_action[0]:
-                        self.selected_tile = tile
-
-                        #self.display_construction_tooltip(screen, self.selected_tile["name"])
+                        self.selected_tile = button
 
     # display
     def draw(self, screen):
 
         # resources bar
         playerOne.update_resources_bar_hd(screen)
-
+        mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         # build menu
 
         # old display
         #screen.blit(self.build_surface, (0, self.height * 0.75))
         #new one
         screen.blit(bot_menu_building_hd, (0, self.height - 182))
-        # display of the buildings icons inside the build menu if you selected a villager
-        if self.examined_tile is not None and self.examined_tile.name == "Villager":
-            for tile in self.tiles:
+
+        #building selection inside the build menu
+        if self.bottom_left_menu is not None:
+            for tile in self.bottom_left_menu:
                 icon = tile["icon"].copy()
-                if not tile["affordable"]:
+                if playerOne.can_afford(tile["name"]):
+                    tile["affordable"] = True
+                else:
+                    tile["affordable"] = False
                     icon.set_alpha(100)
                 screen.blit(icon, tile["rect"].topleft)
-        #display of town hall menu (bottom left)
-        elif self.examined_tile is not None and self.examined_tile.name == "Town center":
-            for tile in self.town_hall_menu:
-                icon = tile["icon"].copy()
-                if not tile["affordable"]:
-                    icon.set_alpha(100)
-                screen.blit(icon, tile["rect"].topleft)
+                if tile["rect"].collidepoint(mouse_pos) and tile["affordable"]:
+                    self.display_construction_tooltip(screen, tile["name"])
 
         # selection (bottom middle menu)
         if self.examined_tile is not None:
@@ -176,10 +213,6 @@ class Hud:
             self.display_description(screen, self.examined_tile)
             #lifebar and numbers
             self.display_life(screen, self.examined_tile)
-
-            # build/train tooltip display
-            if self.selected_tile is not None or self.examined_tile is not None:
-                self.display_construction_tooltip(screen, self.examined_tile)
 
     def load_images(self):
         town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
@@ -234,13 +267,85 @@ class Hud:
     # display what entity, its costs, and a brief description
     def display_construction_tooltip(self, screen, entity):
 
+
         w, h = self.tooltip_rect.width, self.tooltip_rect.height
         screen.blit(self.tooltip_surface, (0, self.height * 0.64))
         pygame.draw.rect(self.tooltip_surface, (255, 201, 14),
                          pygame.Rect(0, 0, self.tooltip_rect.width, self.tooltip_rect.height), 2)
         # tooltip
-        draw_text(screen, entity.construction_tooltip, 14, (220, 220, 220),
+        if entity == "Villager":
+            print(str(Villager.construction_tooltip))
+            draw_text(screen, Villager.construction_tooltip, 14, (220, 220, 220),
                   (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
+            temp_pos = (27, self.height * 0.64 + 30)
+
+            draw_text(screen, str(Villager.construction_cost[0]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55, self.height * 0.64 + 30)
+            draw_text(screen, str(Villager.construction_cost[1]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
+            draw_text(screen, str(Villager.construction_cost[2]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
+            draw_text(screen, str(Villager.construction_cost[3]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
+            draw_text(screen, str(Villager.population_produced), 12, (255, 201, 14), temp_pos)
+
+        elif entity == "Town center":
+            draw_text(screen, Town_center.construction_tooltip, 14, (220, 220, 220),
+                  (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
+            temp_pos = (27, self.height * 0.64 + 30)
+            draw_text(screen, str(Town_center.construction_cost[0]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55, self.height * 0.64 + 30)
+            draw_text(screen, str(Town_center.construction_cost[1]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
+            draw_text(screen, str(Town_center.construction_cost[2]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
+            draw_text(screen, str(Town_center.construction_cost[3]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
+            draw_text(screen, str(Town_center.population_produced), 12, (255, 201, 14), temp_pos)
+
+        elif entity == "House":
+            draw_text(screen, House.construction_tooltip, 14, (220, 220, 220),
+                  (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
+            temp_pos = (27, self.height * 0.64 + 30)
+            draw_text(screen, str(House.construction_cost[0]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55, self.height * 0.64 + 30)
+            draw_text(screen, str(House.construction_cost[1]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
+            draw_text(screen, str(House.construction_cost[2]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
+            draw_text(screen, str(House.construction_cost[3]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
+            draw_text(screen, str(House.population_produced), 12, (255, 201, 14), temp_pos)
+
+        elif entity == "Farm":
+            draw_text(screen, Farm.construction_tooltip, 14, (220, 220, 220),
+                  (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
+            temp_pos = (27, self.height * 0.64 + 30)
+            draw_text(screen, str(Farm.construction_cost[0]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55, self.height * 0.64 + 30)
+            draw_text(screen, str(Farm.construction_cost[1]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
+            draw_text(screen, str(Farm.construction_cost[2]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
+            draw_text(screen, str(Farm.construction_cost[3]), 12, (255, 201, 14), temp_pos)
+
+            temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
+            draw_text(screen, str(Farm.population_produced), 12, (255, 201, 14), temp_pos)
 
         # construction/training resources costs
         screen.blit(wood_cost, (5, self.height * 0.64 + 25))
@@ -249,20 +354,20 @@ class Hud:
         screen.blit(stone_cost, (0 + 165, self.height * 0.64 + 25))
         screen.blit(population_cost, (0 + 220, self.height * 0.64 + 25))
 
-        temp_pos = (27, self.height * 0.64 + 30)
-        draw_text(screen, str(entity.construction_cost[0]), 12, (255, 201, 14), temp_pos)
+        #temp_pos = (27, self.height * 0.64 + 30)
+        #draw_text(screen, str(entity.construction_cost[0]), 12, (255, 201, 14), temp_pos)
 
-        temp_pos = (27 + 55, self.height * 0.64 + 30)
-        draw_text(screen, str(entity.construction_cost[1]), 12, (255, 201, 14), temp_pos)
+        #temp_pos = (27 + 55, self.height * 0.64 + 30)
+        #draw_text(screen, str(entity.construction_cost[1]), 12, (255, 201, 14), temp_pos)
 
-        temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
-        draw_text(screen, str(entity.construction_cost[2]), 12, (255, 201, 14), temp_pos)
+        #temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
+        #draw_text(screen, str(entity.construction_cost[2]), 12, (255, 201, 14), temp_pos)
 
-        temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
-        draw_text(screen, str(entity.construction_cost[3]), 12, (255, 201, 14), temp_pos)
+        #temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
+        #draw_text(screen, str(entity.construction_cost[3]), 12, (255, 201, 14), temp_pos)
 
-        temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
-        draw_text(screen, str(entity.population_produced), 12, (255, 201, 14), temp_pos)
+        #temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
+        #draw_text(screen, str(entity.population_produced), 12, (255, 201, 14), temp_pos)
 
         # grey line
         temp_pos = (5, self.height * 0.64 + 55)
