@@ -7,6 +7,8 @@ from builds import Farm, Town_center, House
 from player import playerOne
 from New_ressources import *
 from units import Villager
+
+
 class Map:
     def __init__(self, hud, entities, grid_length_x, grid_length_y, width, height):
         self.hud = hud
@@ -31,6 +33,7 @@ class Map:
         self.temp_tile = None
         # used when examinating elements of the map
         self.examined_tile = None
+
     def create_map(self):
         map = []
         for grid_x in range(self.grid_length_x):
@@ -46,15 +49,22 @@ class Map:
                 scroll.x = 0
                 scroll.y = 0
         return map
+
     def update(self, camera, screen):
         mouse_pos = pygame.mouse.get_pos()
         mouse_action = pygame.mouse.get_pressed()
         self.temp_tile = None
-        # meaning : the player selected a building in the hud
-        if self.hud.selected_tile is not None:
+
+        #the player selects a building in the hud
+        if self.hud.selected_tile is not None and self.hud.examined_tile is not None:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             # if we can't place the building on the tile, there's no need to do the following
             if self.can_place_tile(grid_pos):
+                if self.hud.examined_tile.name == "Villager":
+                    self.hud.bottom_left_menu = self.hud.villager_menu
+                elif self.hud.examined_tile.name == "Town Center":
+                    self.hud.bottom_left_menu = self.hud.town_hall_menu
+
                 image = self.hud.selected_tile["image"].copy()
                 # setting transparency to make sure player understands it's not built
                 image.set_alpha(100)
@@ -76,12 +86,14 @@ class Map:
                 # if we left_click to build : we will place the building in the map if the targeted tile is empty
                 if mouse_action[0] and not collision:
                     # we create an instance of the selected building
+
                     if self.hud.selected_tile["name"] == "Farm":
                         new_building = Farm(render_pos, playerOne)
                         # to add it to the entities list on our map
                         self.entities.append(new_building)
                         # grid_pos 0 and grid_pos 1 means : grid_pos_x and grid_pos_y, not the specific tile near the origin
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
+
                     elif self.hud.selected_tile["name"] == "Town center":
                         new_building = Town_center(render_pos, playerOne)
                         self.entities.append(new_building)
@@ -91,10 +103,12 @@ class Map:
                         self.map[grid_pos[0]][grid_pos[1] - 1]["collision"] = True
                         self.map[grid_pos[0] + 1][grid_pos[1] - 1]["collision"] = True
                         self.map[grid_pos[0]][grid_pos[1]]["2x2_collision"] = True
+
                     elif self.hud.selected_tile["name"] == "House":
                         new_building = House(render_pos, playerOne)
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
+
                     elif self.hud.selected_tile["name"] == "Villager":
                         render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
                         grid = self.renderpos_to_grid(render_pos[0], render_pos[1])
@@ -112,6 +126,7 @@ class Map:
                     self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
                     self.collision_matrix[grid_pos[1]][grid_pos[0]] = 0
                     self.hud.selected_tile = None
+
         # the player hasn't selected something to build, he will interact with what's on the map
         else:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
@@ -121,6 +136,7 @@ class Map:
                 if mouse_action[0] and not collision2:
                     self.examined_tile = None
                     self.hud.examined_tile = None
+                    self.hud.bottom_left_menu = None
             # if on the map and left click and the tile isn't empty
             if self.can_place_tile(grid_pos):
                 if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
@@ -130,8 +146,11 @@ class Map:
                         self.examined_tile = grid_pos
                         if building is not None:
                             self.hud.examined_tile = building
+                            self.hud.bottom_left_menu = self.hud.town_hall_menu
+
                         else:
                             self.hud.examined_tile = unit
+                            self.hud.bottom_left_menu = self.hud.villager_menu
                 else:
                     pass
         #trying to move units, they only tp for now
@@ -139,7 +158,6 @@ class Map:
             dest_grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             villager_pos = self.hud.examined_tile.pos
             if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
-                self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(self.map[grid_pos[0]][grid_pos[1]])
                 self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(self.map[grid_pos[0]][grid_pos[1]], screen, camera)
 
     def draw(self, screen, camera):

@@ -5,6 +5,7 @@ from .utils import draw_text
 from player import playerOne
 from units import Villager
 
+
 class Hud:
 
     def __init__(self, width, height):
@@ -33,41 +34,43 @@ class Hud:
 
         self.images = self.load_images()
         self.tiles = self.create_build_hud()
-        self.town_hall_menu = self.create_train_menu_Town_hall()
+        self.town_hall_menu = self.create_train_menu_town_hall()
+        self.villager_menu = self.create_build_hud()
 
         self.selected_tile = None
         self.examined_tile = None
 
-    def create_train_menu_Town_hall(self):
+        self.bottom_left_menu = None
+
+    def create_train_menu_town_hall(self):
         render_pos = [0 + 15, self.height * 0.8 + 10]
-        object_width = self.build_surface.get_width()
+        object_width = 50
 
         tiles = []
+        image_scale = None
+        image_name = None
+        rect = None
 
         for image_name, image in self.images.items():
-
-            pos = render_pos.copy()
             if image_name == "Villager":
                 image_scale = villager_icon
+                pos = render_pos.copy()
 
-            else:
-                image_tmp = image.copy()
-                image_scale = self.scale_image(image_tmp, w=40)  # a modifier pour s'adapter a l'ecran
-            rect = image_scale.get_rect(topleft=pos)
+                rect = image_scale.get_rect(topleft=pos)
 
-            tiles.append(
-                {
-                    "name": image_name,
-                    "icon": image_scale,
-                    "image": self.images[image_name],
-                    "rect": rect,
-                    "tooltip": Villager.construction_tooltip,
-                    "affordable": True
-                }
-            )
+        tiles.append(
+            {
+                "name": image_name,
+                "icon": image_scale,
+                "image": self.images[image_name],
+                "rect": rect,
+                "tooltip": Villager.construction_tooltip,
+                "affordable": True
+            }
+        )
 
             #render_pos[0] += image_scale.get_width() + 5  # modifier le 20 pour que ça marche pour tout ecran
-
+        print(str(tiles))
         return tiles
 
     def create_build_hud(self):
@@ -118,16 +121,18 @@ class Hud:
             self.selected_tile = None
 
         # building selection inside the build menu
-        for tile in self.tiles:
-            if playerOne.can_afford(tile["name"]):
-                tile["affordable"] = True
-            else:
-                tile["affordable"] = False
+        if self.bottom_left_menu is not None:
+            for tile in self.bottom_left_menu:
+                if playerOne.can_afford(tile["name"]):
+                    tile["affordable"] = True
+                else:
+                    tile["affordable"] = False
 
-            if tile["rect"].collidepoint(mouse_pos) and tile["affordable"]:
-                if mouse_action[0]:
-                    self.selected_tile = tile
-                    #self.display_construction_tooltip(screen, self.selected_tile["name"])
+                if tile["rect"].collidepoint(mouse_pos) and tile["affordable"]:
+                    if mouse_action[0]:
+                        self.selected_tile = tile
+
+                        #self.display_construction_tooltip(screen, self.selected_tile["name"])
 
     # display
     def draw(self, screen):
@@ -187,7 +192,7 @@ class Hud:
             "Town center": town_center,
             "House": house,
             "Farm": farm,
-            "Villager" : villager
+            "Villager": villager
         }
         return images
 
