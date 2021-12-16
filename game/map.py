@@ -139,7 +139,6 @@ class Map:
             dest_grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             villager_pos = self.hud.examined_tile.pos
             if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
-                self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(self.map[grid_pos[0]][grid_pos[1]])
                 self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(self.map[grid_pos[0]][grid_pos[1]], screen, camera)
 
     def draw(self, screen, camera):
