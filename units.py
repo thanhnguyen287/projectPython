@@ -1,6 +1,7 @@
 import pygame
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
+from pathfinding.finder.a_star import DiagonalMovement
 
 
 class Unit:
@@ -27,7 +28,7 @@ class Unit:
             self.grid = Grid(matrix=self.map.collision_matrix)
             self.start = self.grid.node(self.pos["grid"][0], self.pos["grid"][1])
             self.end = self.grid.node(new_tile["grid"][0], new_tile["grid"][1])
-            finder = AStarFinder()
+            finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
             # how far along the path are we
             self.path_index = 0
             self.path, runs = finder.find_path(self.start, self.end, self.grid)
