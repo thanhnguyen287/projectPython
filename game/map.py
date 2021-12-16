@@ -163,12 +163,57 @@ class Map:
                 else:
                     pass
 
-        #units movement
-        if mouse_action[2] and self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
-            dest_grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
-            villager_pos = self.hud.examined_tile.pos
-            if self.map[grid_pos[0]][grid_pos[1]]["collision"] is not True:
-                self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(self.map[grid_pos[0]][grid_pos[1]], screen, camera)
+        # right click, gathering and moving units (fighting in future)
+        if mouse_action[2]:
+            if self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
+                villager_pos = self.hud.examined_tile.pos
+
+                # if the villager isnt gathering/planning to gather, and there is not collision on the tile we right click on, then he moves
+                if not self.map[grid_pos[0]][grid_pos[1]]["collision"] and not \
+                        self.units[villager_pos["grid"][0]][
+                            villager_pos["grid"][1]].gathering and self.units[villager_pos["grid"][0]][
+                    villager_pos["grid"][1]].target is None:
+                    self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
+                        self.map[grid_pos[0]][grid_pos[1]], screen, camera)
+
+                # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving
+                pos_mouse = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
+                pos_x = pos_mouse[0]
+                pos_y = pos_mouse[1]
+                # if the tile next to him is a ressource and we right click on it and he is not moving, he will gather it
+                if not self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].searching_for_path \
+                        and (self.map[pos_x][pos_y]["tile"] == "tree" or self.map[pos_x][pos_y][
+                    "tile"] == "rock"):
+
+                    if (abs(pos_x - villager_pos["grid"][0]) <= 1 and abs(
+                            pos_y - villager_pos["grid"][1]) == 0) \
+                            or (abs(pos_x - villager_pos["grid"][0]) == 0 and abs(
+                        pos_y - villager_pos["grid"][1]) <= 1):
+
+                        self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                        self.map[pos_x][pos_y]
+                        self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].gathering = True
+
+                    # if the tile we right click on is a ressource, he will travel to it and then gather it
+                    else:
+
+                        if self.map[pos_x - 1][pos_y]["tile"] == "":
+                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
+                                self.map[pos_x - 1][pos_y], screen, camera)
+                        elif self.map[pos_x + 1][pos_y]["tile"] == "":
+                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
+                                self.map[pos_x + 1][pos_y], screen, camera)
+                        elif self.map[pos_x][pos_y - 1]["tile"] == "":
+                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
+                                self.map[pos_x][pos_y - 1], screen, camera)
+                        elif self.map[pos_x][pos_y + 1]["tile"] == "":
+                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
+                                self.map[pos_x][pos_y + 1], screen, camera)
+                        else:
+                            pass
+
+                        self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                        self.map[pos_x][pos_y]
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
