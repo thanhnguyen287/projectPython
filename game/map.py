@@ -201,18 +201,6 @@ class Map:
                                        render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y,
                                        self.map[x][y]["health"], self.map[x][y]["max_health"])
 
-                # here we delete the ressource we left click on
-                if (self.examined_tile is not None) and (tile == "tree" or tile == "rock"):
-                    if x == self.examined_tile[0] and y == self.examined_tile[1]:
-                        self.map[x][y]["health"] -= 0.2
-                        if self.map[x][y]["health"] <= 0:
-                            self.map[x][y]["tile"] = ""  # the tile becomes empty since we destroy  the tree/rock
-                            self.map[x][y]["collision"] = False
-                            if tile == "tree":
-                                playerOne.update_resource(0, 10)  # the player gains +10 wood if the tile was a tree
-                            elif tile == "rock":
-                                playerOne.update_resource(3, 10)  # the player gains +10 stone if the tile was a rock
-                        self.examined_tile = None
 
                 # HERE WE DRAW THE BUILDINGS ON THE MAP
                 # we extract from the buildings list the building we want to display
