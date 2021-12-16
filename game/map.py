@@ -200,20 +200,26 @@ class Map:
                         if self.map[pos_x - 1][pos_y]["tile"] == "":
                             self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
                                 self.map[pos_x - 1][pos_y], screen, camera)
+                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                                self.map[pos_x][pos_y]
                         elif self.map[pos_x + 1][pos_y]["tile"] == "":
                             self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
                                 self.map[pos_x + 1][pos_y], screen, camera)
+                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                                self.map[pos_x][pos_y]
                         elif self.map[pos_x][pos_y - 1]["tile"] == "":
                             self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
                                 self.map[pos_x][pos_y - 1], screen, camera)
+                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                                self.map[pos_x][pos_y]
                         elif self.map[pos_x][pos_y + 1]["tile"] == "":
                             self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
                                 self.map[pos_x][pos_y + 1], screen, camera)
+                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                                self.map[pos_x][pos_y]
                         else:
-                            pass
+                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = None
 
-                        self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
-                        self.map[pos_x][pos_y]
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
