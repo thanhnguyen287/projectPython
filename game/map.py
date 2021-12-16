@@ -26,6 +26,12 @@ class Map:
         self.buildings = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
         self.units = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
         self.map = self.create_map()
+        # used in the fonction that places the townhall randomly on the map
+        self.townhall_placed = False
+        self.place_x = 0
+        self.place_y = 0
+        # here we place the townhall randomly on the map
+        self.place_townhall()
         self.collision_matrix = self.create_collision_matrix()
         #new_villager = Villager((0, 0), playerOne, self.map)
         #self.units[0][0] = new_villager
@@ -234,7 +240,7 @@ class Map:
                 tile = self.map[x][y]["tile"]
 
                 # if the tile isnt empty and inst destroyed, we display it
-                if tile != "":
+                if tile != "" and tile != "building":
                     screen.blit(self.tiles[tile], (
                         render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                         render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y)
@@ -465,3 +471,27 @@ class Map:
             pygame.draw.polygon(screen, (0, 255, 0), iso_poly, 3)
         elif color == "RED":
             pygame.draw.polygon(screen, (255, 0, 0), iso_poly, 3)
+
+    # here is the fonction that places the townhall randomly on the map
+    def place_townhall(self):
+        while not self.townhall_placed:
+            place_x = random.randint(0, self.grid_length_x - 2)
+            place_y = random.randint(1, self.grid_length_y - 1)
+
+            self.place_x = place_x
+            self.place_y = place_y
+
+            new_building = Town_center((place_x, place_y), playerOne)
+            self.entities.append(new_building)
+            self.buildings[place_x][place_y] = new_building
+
+            self.townhall_placed = True
+
+            self.map[place_x][place_y]["tile"] = "building"
+            self.map[place_x][place_y]["collision"] = True
+            self.map[place_x + 1][place_y]["tile"] = "building"
+            self.map[place_x + 1][place_y]["collision"] = True
+            self.map[place_x][place_y - 1]["tile"] = "building"
+            self.map[place_x][place_y - 1]["collision"] = True
+            self.map[place_x + 1][place_y - 1]["tile"] = "building"
+            self.map[place_x + 1][place_y - 1]["collision"] = True
