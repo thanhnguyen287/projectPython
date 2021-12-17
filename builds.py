@@ -37,7 +37,7 @@ class Town_center(Building):
         self.name = "Town center"
         self.sprite = pygame.image.load(os.path.join(assets_path, "town_center.png"))
 
-        self.construction_cost = [1000, 0, 0, 100]
+        self.construction_cost = [0, 0, 0, 0]
         self.construction_time = 150
 
         self.max_health = 100
@@ -54,7 +54,6 @@ class Town_center(Building):
         now = pygame.time.get_ticks()
         # every 5 secs :
         if now - self.resource_manager_cooldown > 5000:
-            self.current_health -= 5
             self.resource_manager_cooldown = now
 
     def create_villager(self, map):
@@ -81,7 +80,7 @@ class Farm(Building):
         self.construction_cost = [100, 0, 0, 0]
         self.construction_time = 1
 
-        self.max_health = 1
+        self.max_health = 10
         self.max_population_bonus = 0
 
         self.description = "Provides 50 food every 5 seconds."
@@ -93,8 +92,7 @@ class Farm(Building):
         now = pygame.time.get_ticks()
         # every 5 secs :
         if now - self.resource_manager_cooldown > 5000:
-            self.owner.resources[0] += 50
-            self.current_health-=1
+            self.owner.resources[2] += 50
             self.resource_manager_cooldown = now
 
 
@@ -123,7 +121,6 @@ class House(Building):
         now = pygame.time.get_ticks()
         # every 5 secs :
         if now - self.resource_manager_cooldown > 5000:
-            self.current_health-=2
             self.resource_manager_cooldown = now
 
 

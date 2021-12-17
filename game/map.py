@@ -170,7 +170,7 @@ class Map:
                     pass
 
         # right click, gathering and moving units (fighting in future)
-        if mouse_action[2]:
+        if mouse_action[2] and 0 <= grid_pos[0] <= 50 and 0 <= grid_pos[1] <= 50:
             if self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
                 villager_pos = self.hud.examined_tile.pos
 
