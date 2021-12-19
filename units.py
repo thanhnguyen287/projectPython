@@ -23,8 +23,9 @@ class Unit:
         self.searching_for_path = False
         self.dest = None
 
-    def move_to(self, new_tile, screen, camera):
-        if not new_tile["collision"]:
+    def move_to(self, new_tile):
+        print(new_tile["grid"])
+        if  self.map.collision_matrix[new_tile["grid"][1]][new_tile["grid"][0]] != 0:
             self.searching_for_path = True
             self.dest = new_tile
             self.grid = Grid(matrix=self.map.collision_matrix)
