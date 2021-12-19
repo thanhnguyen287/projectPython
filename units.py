@@ -4,8 +4,9 @@ from pathfinding.finder.a_star import AStarFinder
 from pathfinding.finder.a_star import DiagonalMovement
 from player import *
 
-class Unit:
 
+class Unit:
+    armor = 0
     def __init__(self, pos, player_owner_of_unit, map):
         self.owner = player_owner_of_unit
         self.map = map
@@ -72,7 +73,7 @@ class Unit:
 class Villager(Unit):
 
     # Training : 50 FOOD, 20s
-    description = "Your best friend. Can work, fight, get resources."
+    description = " Your best friend. Can work, fight and gather resources."
     construction_tooltip = " Train a Villager"
     construction_cost = [0, 10, 25, 0]
     training_time = 20
@@ -98,8 +99,7 @@ class Villager(Unit):
         self.construction_cost = [0, 10, 25, 0]
         self.training_time = 20
         self.population_produced = 1
-        self.description = "Your best friend. Can work, fight, get resources."
-        self.construction_tooltip = " Train a Villager"
+
         super().__init__(pos, player_owner_of_unit, map)
 
     def build(self, tile):
@@ -149,6 +149,8 @@ class Villager(Unit):
 
 
 class Bowman(Unit):
+
+
     def __init__(self, pos, player_owner_of_unit, map):
         super().__init__(pos, player_owner_of_unit, map)
 
@@ -170,6 +172,7 @@ class Bowman(Unit):
         self.population_produced = 1
         self.description = "Basic ranged unit."
         self.construction_tooltip = " Train a Bowman"
+
 
 class Clubman(Unit):
     def __init__(self, pos, player_owner_of_unit, map):

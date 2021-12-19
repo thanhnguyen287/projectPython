@@ -30,6 +30,15 @@ town_center_icon = pygame.image.load("resources/assets/icons./town_center_icon_h
 house_icon = pygame.image.load("resources/assets/icons/houseDE.png")
 villager_icon = pygame.image.load("resources/assets/icons/villagerde.bmp")
 
+#armor and attack classes icons
+armor_icon = pygame.image.load("resources/assets/icons/normal_armor.png")
+building_armor_icon = pygame.image.load("resources/assets/icons/building_armor.png")
+melee_attack_icon = pygame.image.load("resources/assets/icons/melee_attack.png")
+ranged_attack_icon = pygame.image.load("resources/assets/icons/ranged_attack.png")
+
+
+
+#ressources icons
 wood_cost = pygame.image.load("resources/assets/icons/wood_cost.png")
 food_cost = pygame.image.load("resources/assets/icons/food_cost.png")
 gold_cost = pygame.image.load("resources/assets/icons/gold_cost.png")

@@ -4,6 +4,7 @@ from units import Villager
 
 class Building:
     population_produced = 0
+    
 
     def __init__(self, pos, player_owner_of_unit):
         self.owner = player_owner_of_unit
@@ -27,10 +28,11 @@ class Building:
 
 
 class Town_center(Building):
-    description = "Used to create villagers."
+    description = " Used to create villagers."
     construction_tooltip = " Build a Town Center"
     construction_cost = [1000, 0, 0, 100]
     construction_time = 150
+    armor = 3
 
     def __init__(self, pos, player_owner_of_unit):
 
@@ -43,10 +45,6 @@ class Town_center(Building):
         self.max_health = 100
         self.working = True
         player_owner_of_unit.max_population += 5
-
-        self.description = "Used to create villagers."
-        self.construction_tooltip = " Build a Town Center"
-
 
         super().__init__(pos, player_owner_of_unit)
 
@@ -67,14 +65,15 @@ class Town_center(Building):
 
 
 class Farm(Building):
-    description = "Provides 50 food every 5 seconds."
+    description = " Provides 50 food every 5 seconds."
     construction_tooltip = " Build a Farm"
     construction_cost = [100, 0, 0, 0]
     construction_time = 1
+    armor = 0
 
     def __init__(self, pos, player_owner_of_unit):
 
-        self.name = "Farm"
+        self.name = " Farm"
         self.sprite = pygame.image.load(os.path.join(assets_path, "Farm.png"))
 
         self.construction_cost = [100, 0, 0, 0]
@@ -82,9 +81,6 @@ class Farm(Building):
 
         self.max_health = 10
         self.max_population_bonus = 0
-
-        self.description = "Provides 50 food every 5 seconds."
-        self.construction_tooltip = " Build a Farm"
 
         super().__init__(pos, player_owner_of_unit)
 
@@ -97,10 +93,11 @@ class Farm(Building):
 
 
 class House(Building):
-    description = "Each House increases the maximum population by 5."
+    description = " Each House increases the maximum population by 5."
     construction_tooltip = " Build a House"
     construction_cost = [600, 0, 0, 0]
     construction_time = 1
+    armor = -2
 
     def __init__(self, pos, player_owner_of_unit):
         self.name = "House"
@@ -111,9 +108,6 @@ class House(Building):
 
         self.max_health = 50
         player_owner_of_unit.max_population += 5
-
-        self.description = "Each House increases the maximum population by 5."
-        self.construction_tooltip = " Build a House"
 
         super().__init__(pos, player_owner_of_unit)
 

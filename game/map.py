@@ -71,7 +71,6 @@ class Map:
                 elif self.hud.examined_tile.name == "Town Center":
                     self.hud.bottom_left_menu = self.hud.town_hall_menu
 
-                print(str(self.hud.bottom_left_menu))
                 image = self.hud.selected_tile["image"].copy()
                 # setting transparency to make sure player understands it's not built
                 image.set_alpha(100)
@@ -309,6 +308,7 @@ class Map:
                             iso_poly = temp_coor["iso_poly"]
                             iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y) for x, y in iso_poly]
                             self.highlight_tile(iso_poly, screen, "WHITE")
+
         if self.temp_tile is not None:
             iso_poly = self.temp_tile["iso_poly"]
             iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y) for x, y in
@@ -400,6 +400,7 @@ class Map:
         grid_x = int(cart_x // TILE_SIZE)
         grid_y = int(cart_y // TILE_SIZE)
         return grid_x, grid_y
+
     def renderpos_to_grid(self, x, y):
         # 2 : we remove the isometric transformation to find cartesian coordinates
         cart_x, cart_y = iso_to_decarte(x, y)
@@ -407,6 +408,7 @@ class Map:
         grid_x = int(cart_x // TILE_SIZE)
         grid_y = int(cart_y // TILE_SIZE)
         return grid_x+1, grid_y
+
     def grid_to_renderpos(self, grid_x, grid_y):
         rect = [
             (grid_x * TILE_SIZE, grid_y * TILE_SIZE),
@@ -420,6 +422,7 @@ class Map:
         miny = min([y for x, y in iso_poly])
         render_pos = [minx, miny]
         return render_pos
+
     # takes tile "matrice" coordinates, returns center of tile
     def get_tile_center(self, tile_x, tile_y, scroll):
         top_left_corner = (tile_x * TILE_SIZE, tile_y * TILE_SIZE)
@@ -433,13 +436,13 @@ class Map:
         #tile_center_x = tile_center_x + scroll.x
         tile_center_y = tile_center_y + scroll.y
         return tile_center_x, tile_center_y
+
     # to check if we are able to place an object (collision)
     def can_place_tile(self, grid_pos):
         mouse_on_panel = False
         # we check if it is on the hud
-        for rect in [self.hud.build_rect, self.hud.select_rect]:
-            if rect.collidepoint(pygame.mouse.get_pos()):
-                mouse_on_panel = True
+        if self.hud.bottom_hud_rect.collidepoint(pygame.mouse.get_pos()):
+            mouse_on_panel = True
         # we check it is not outside the map
         map_bounds = (0 <= grid_pos[0] <= self.grid_length_x) and (0 <= grid_pos[1] <= self.grid_length_y)
         # if we are in the map and not on a hud, we can place it
@@ -447,6 +450,7 @@ class Map:
             return True
         else:
             return False
+
     # matrix of 1 and 0, will be used for pathfinding
     # 1 : possible tile
     # 0 : there's already something : collision

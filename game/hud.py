@@ -3,8 +3,8 @@ from settings import *
 import pygame
 from .utils import draw_text
 from player import playerOne
-from units import Villager
-from builds import Town_center, House, Farm
+from units import Villager, Unit
+from builds import Town_center, House, Farm, Building
 
 
 class Hud:
@@ -17,19 +17,26 @@ class Hud:
 
         #building hud - 3rd line is for collision
         self.build_surface = pygame.Surface((width * 0.15, height * 0.25), pygame.SRCALPHA)
-
         self.build_surface.fill(self.hud_color)
         self.build_rect = self.build_surface.get_rect(topleft=(0, self.height * 0.75))
 
         #select hud - same for collision
-        self.select_surface = pygame.Surface((width * 0.3, height * 0.2), pygame.SRCALPHA)
-        self.select_surface.fill(self.hud_color)
-        self.select_rect = self.select_surface.get_rect(topleft =(self.width * 0.35, self.height * 0.8))
+        #self.select_surface = pygame.Surface((width * 0.3, height * 0.2), pygame.SRCALPHA)
+        #self.select_surface.fill(self.hud_color)
+        #self.select_rect = self.select_surface.get_rect(topleft=(self.width * 0.35, self.height * 0.8))
+
+        #bottom hud
+        self.bottom_hud_surface = pygame.Surface((887, 182), pygame.SRCALPHA)
+        self.bottom_hud_surface.fill((0, 0, 0, 75))
+        self.bottom_hud_rect = self.build_surface.get_rect(topleft=(0, self.height * 0.75))
+
+
+
 
         #tooltip hud
         self.tooltip_surface = pygame.Surface((width * 0.2, height * 0.15), pygame.SRCALPHA)
         #grey
-        self.tooltip_color = (60, 60, 60, 145)
+        self.tooltip_color = (60, 60, 60, 100)
         self.tooltip_surface.fill(self.tooltip_color)
         self.tooltip_rect = self.tooltip_surface.get_rect(topleft=(0, self.height * 0.65))
 
@@ -178,14 +185,18 @@ class Hud:
         # resources bar
         playerOne.update_resources_bar_hd(screen)
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
+
         # build menu
 
         # old display
         #screen.blit(self.build_surface, (0, self.height * 0.75))
         #new one
-        screen.blit(bot_menu_building_hd, (0, self.height - 182))
+        #screen.blit(bot_menu_building_hd, (0, self.height - 182))
+        if self.examined_tile is not None:
+            screen.blit(bot_complet_menu_building_hd, (0, self.height - 182))
+            self.display_entity_description(screen)
 
-        #building selection inside the build menu
+        # building selection inside the build menu
         if self.bottom_left_menu is not None:
             for tile in self.bottom_left_menu:
                 icon = tile["icon"].copy()
@@ -197,22 +208,6 @@ class Hud:
                 screen.blit(icon, tile["rect"].topleft)
                 if tile["rect"].collidepoint(mouse_pos) and tile["affordable"]:
                     self.display_construction_tooltip(screen, tile["name"])
-
-        # selection (bottom middle menu)
-        if self.examined_tile is not None:
-            w, h = self.select_rect.width, self.select_rect.height
-            screen.blit(self.select_surface, (self.width * 0.35, self.height * 0.79))
-            # as we are scaling it, we make a copy
-            img = self.examined_tile.sprite.copy()
-            img_scaled = self.scale_image(img, h*0.7)
-            # for now, we display the picture of the object and its name
-            screen.blit(img_scaled, (self.width * 0.35, self.height * 0.79 + 30))
-            #name
-            draw_text(screen, self.examined_tile.name, 30, (255, 255, 255), self.select_rect.midtop)
-            #description
-            self.display_description(screen, self.examined_tile)
-            #lifebar and numbers
-            self.display_life(screen, self.examined_tile)
 
     def load_images(self):
         town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
@@ -252,12 +247,12 @@ class Hud:
         health_bar_length = 100
         hp_displayed = (entity.current_health / entity.max_health * health_bar_length)
 
-        pygame.draw.rect(screen, (255, 0, 0), (self.width * 0.36, self.height * 0.9 + 30, hp_displayed, 6))
-        pygame.draw.rect(screen, (25, 25, 25), (self.width*0.36, self.height * 0.9 + 30, health_bar_length, 6),2)
+        pygame.draw.rect(screen, (255, 0, 0), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+        pygame.draw.rect(screen, (25, 25, 25), (self.width * 0.185, self.height * 0.9 + 43, health_bar_length, 6),2)
 
         # health text
         health_text = str(entity.current_health) + " / " + str(entity.max_health)
-        draw_text(screen, health_text, 20, (255, 255, 255), (self.width*0.38, self.height*0.92 +30))
+        draw_text(screen, health_text, 16, (255, 255, 255), (self.width * 0.185+28, self.height*0.92 + 33))
 
     #used for bottom mid menu
     def display_description(self, screen, entity):
@@ -274,11 +269,10 @@ class Hud:
                          pygame.Rect(0, 0, self.tooltip_rect.width, self.tooltip_rect.height), 2)
         # tooltip
         if entity == "Villager":
-            print(str(Villager.construction_tooltip))
             draw_text(screen, Villager.construction_tooltip, 14, (220, 220, 220),
                   (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
+            #resources cost
             temp_pos = (27, self.height * 0.64 + 30)
-
             draw_text(screen, str(Villager.construction_cost[0]), 12, (255, 201, 14), temp_pos)
 
             temp_pos = (27 + 55, self.height * 0.64 + 30)
@@ -293,9 +287,13 @@ class Hud:
             temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
             draw_text(screen, str(Villager.population_produced), 12, (255, 201, 14), temp_pos)
 
+            #description
+            draw_text(screen, Villager.description, 14, (220, 220, 220), (self.tooltip_rect.topleft[0], temp_pos[1]+30))
+
         elif entity == "Town center":
             draw_text(screen, Town_center.construction_tooltip, 14, (220, 220, 220),
                   (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
+            #ressources cost display
             temp_pos = (27, self.height * 0.64 + 30)
             draw_text(screen, str(Town_center.construction_cost[0]), 12, (255, 201, 14), temp_pos)
 
@@ -310,6 +308,9 @@ class Hud:
 
             temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
             draw_text(screen, str(Town_center.population_produced), 12, (255, 201, 14), temp_pos)
+            # short description
+            draw_text(screen, Town_center.description, 14, (220, 220, 220),
+                      (self.tooltip_rect.topleft[0], temp_pos[1]+30))
 
         elif entity == "House":
             draw_text(screen, House.construction_tooltip, 14, (220, 220, 220),
@@ -329,6 +330,10 @@ class Hud:
             temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
             draw_text(screen, str(House.population_produced), 12, (255, 201, 14), temp_pos)
 
+            # description
+            draw_text(screen, House.description, 14, (220, 220, 220),
+                      (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
+
         elif entity == "Farm":
             draw_text(screen, Farm.construction_tooltip, 14, (220, 220, 220),
                   (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
@@ -347,7 +352,11 @@ class Hud:
             temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
             draw_text(screen, str(Farm.population_produced), 12, (255, 201, 14), temp_pos)
 
-        # construction/training resources costs
+            # description
+            draw_text(screen, Farm.description, 14, (220, 220, 220),
+                      (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
+
+        # construction/training resources costs icons
         screen.blit(wood_cost, (5, self.height * 0.64 + 25))
         screen.blit(food_cost, (0 + 55, self.height * 0.64 + 25))
         screen.blit(gold_cost, (0 + 110, self.height * 0.64 + 25))
@@ -372,3 +381,60 @@ class Hud:
         # grey line
         temp_pos = (5, self.height * 0.64 + 55)
         pygame.draw.line(screen, (192, 192, 192), temp_pos, (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))
+
+    def display_entity_description(self, screen):
+        # selection (bottom middle menu)
+        w, h = self.bottom_hud_rect.width, self.bottom_hud_rect.height
+        screen.blit(self.bottom_hud_surface, (0, self.height * 0.79))
+        # as we are scaling it, we make a copy
+        img = self.examined_tile.sprite.copy()
+        if type(self.examined_tile) == Farm:
+            img_scaled = self.scale_image(img, h * 0.60)
+            screen.blit(img_scaled, (self.width * 0.185 - 10, self.height * 0.79 + 58))
+        elif type(self.examined_tile) == House:
+            img_scaled = self.scale_image(img, h * 0.50)
+            screen.blit(img_scaled, (self.width * 0.185 - 10, self.height * 0.79 + 43))
+
+        elif type(self.examined_tile) == Town_center:
+            img_scaled = self.scale_image(img, h * 0.55)
+            screen.blit(img_scaled, (self.width * 0.185 - 10, self.height * 0.79 + 48))
+        # villager
+        else:
+            img_scaled = self.scale_image(img, h * 0.3)
+            screen.blit(img_scaled, (self.width * 0.185 + 10, self.height * 0.79 + 33))
+
+        # for now, we display the picture of the object and its name
+        # name
+        temp_pos = (self.width * 0.185 + 10, self.height * 0.79 + 20)
+        draw_text(screen, self.examined_tile.name, 20, (255, 255, 255), temp_pos)
+        temp_pos = (self.width * 0.185 + 120, self.height * 0.79 + 16)
+        pygame.draw.line(screen, (50, 50, 50), temp_pos,
+                         (temp_pos[0], temp_pos[1] + 150), 2)
+
+        # attack and armor display
+        temp_pos = (self.width * 0.185 + 175, self.height * 0.79 + 107)
+        text = "Armure : "
+        draw_text(screen, text, 15, (255, 201, 14), temp_pos)
+        temp_pos = (self.width * 0.185 + 178, self.height * 0.79 + 128)
+        draw_text(screen, str(self.examined_tile.armor), 12, (255, 255, 255), temp_pos)
+
+        # buildings
+        if issubclass(type(self.examined_tile), Building):
+            temp_pos = (self.width * 0.185 + 130, self.height * 0.79 + 110)
+            screen.blit(building_armor_icon, temp_pos)
+        # units
+        else:
+            temp_pos = (self.width * 0.185 + 130, self.height * 0.79 + 45)
+            screen.blit(melee_attack_icon, temp_pos)
+            temp_pos = (self.width * 0.185 + 130, self.height * 0.79 + 110)
+            screen.blit(armor_icon, temp_pos)
+
+            temp_pos = (self.width * 0.185 + 175, self.height * 0.79 + 45)
+            text = "Attaque : "
+            draw_text(screen, text, 15, (255, 201, 14), temp_pos)
+            temp_pos = (self.width * 0.185 + 178, self.height * 0.79 + 65)
+            draw_text(screen, str(self.examined_tile.attack_dmg) + " - " + str(self.examined_tile.attack_dmg + 1),
+                      12, (255, 255, 255), temp_pos)
+
+        # lifebar and numbers
+        self.display_life(screen, self.examined_tile)
