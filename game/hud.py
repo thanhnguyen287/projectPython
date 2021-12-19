@@ -463,7 +463,7 @@ class Hud:
             entity = Farm
         elif entity == "House":
             entity = House
-        else :
+        else:
             entity = Town_center
         w, h = self.tooltip_rect.width, self.tooltip_rect.height
         screen.blit(self.tooltip_surface, (0, self.height * 0.64))
@@ -477,7 +477,9 @@ class Hud:
         screen.blit(stone_cost, (0 + 165, self.height * 0.64 + 25))
         screen.blit(population_cost, (0 + 220, self.height * 0.64 + 25))
 
-        draw_text(screen, entity.construction_tooltip, 14, (220, 220, 220),
+
+        tooltip_text = entity.construction_tooltip + " (" + str(entity.construction_time) + "s)"
+        draw_text(screen, tooltip_text , 14, (220, 220, 220),
                   (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
 
         temp_pos = (27, self.height * 0.64 + 30)
