@@ -28,7 +28,7 @@ class Hud:
         #bottom hud
         self.bottom_hud_surface = pygame.Surface((887, 182), pygame.SRCALPHA)
         self.bottom_hud_surface.fill((0, 0, 0, 75))
-        self.bottom_hud_rect = self.build_surface.get_rect(topleft=(0, self.height * 0.75))
+        self.bottom_hud_rect = self.bottom_hud_surface.get_rect(topleft=(0, self.height - 182))
 
         #tooltip hud
         self.tooltip_surface = pygame.Surface((width * 0.2, height * 0.15), pygame.SRCALPHA)
@@ -183,17 +183,12 @@ class Hud:
 
     # display
     def draw(self, screen):
+        mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
 
         # resources bar
         playerOne.update_resources_bar_hd(screen)
-        mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
 
-        # build menu
-
-        # old display
-        #screen.blit(self.build_surface, (0, self.height * 0.75))
-        #new one
-        #screen.blit(bot_menu_building_hd, (0, self.height - 182))
+        # bottom menu
         if self.examined_tile is not None:
             screen.blit(bot_complet_menu_building_hd, (0, self.height - 182))
             self.display_entity_description(screen)

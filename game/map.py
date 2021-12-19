@@ -120,22 +120,6 @@ class Map:
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
-                    elif self.hud.selected_tile["name"] == "Villager":
-                        ...
-                        #render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
-                       # grid = self.renderpos_to_grid(render_pos[0], render_pos[1])
-                       # iso_poly = self.map[grid_pos[0]][grid_pos[1]]["iso_poly"]
-                      #  collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
-                      #  self.temp_ = {
-                      #      "grid" : grid,
-                      #      "render_pos": render_pos,
-                     #       "iso_poly": iso_poly,
-                     #       "collision": collision,
-                    #    }
-                   #     new_unit = Villager(self.temp_, playerOne, self)
-                   #     self.entities.append(new_unit)
-                   #     self.units[grid_pos[0]][grid_pos[1]] = new_unit
-
                     self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
                     self.collision_matrix[grid_pos[1]][grid_pos[0]] = 0
                     self.hud.selected_tile = None
@@ -145,8 +129,8 @@ class Map:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
                 collision2 = self.map[grid_pos[0]][grid_pos[1]]["collision"]
-                # we deselect the object examined when left-clicking
-                if mouse_action[0] and not collision2:
+                # we deselect the object examined when left-clicking if not on hud
+                if mouse_action[0] and not collision2 and not self.hud.bottom_hud_rect.collidepoint(mouse_pos):
                     self.examined_tile = None
                     self.hud.examined_tile = None
                     self.hud.bottom_left_menu = None
