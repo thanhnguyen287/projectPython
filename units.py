@@ -11,6 +11,7 @@ class Unit:
         self.owner = player_owner_of_unit
         self.map = map
         self.map.entities.append(self)
+        # pos is the tile position, for ex : (4,4)
         self.pos = pos
         self.current_health = self.max_health
         self.is_alive = True
@@ -27,7 +28,7 @@ class Unit:
             self.searching_for_path = True
             self.dest = new_tile
             self.grid = Grid(matrix=self.map.collision_matrix)
-            self.start = self.grid.node(self.pos["grid"][0], self.pos["grid"][1])
+            self.start = self.grid.node(self.pos[0], self.pos[1])
             self.end = self.grid.node(new_tile["grid"][0], new_tile["grid"][1])
             finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
             # how far along the path are we
@@ -36,22 +37,24 @@ class Unit:
 
     def change_tile(self, new_tile):
         # remove the unit from its current position on the map
-        self.map.units[self.pos["grid"][0]][self.pos["grid"][1]] = None
+        self.map.units[self.pos[0]][self.pos[1]] = None
         #remove collision from old position
-        self.map.collision_matrix[self.pos["grid"][1]][self.pos["grid"][0]] = 1
-        self.map.map[self.pos["grid"][0]][self.pos["grid"][1]]["collision"] = False
+        self.map.collision_matrix[self.pos[1]][self.pos[0]] = 1
+        self.map.map[self.pos[0]][self.pos[1]]["collision"] = False
         # update the map
         self.map.units[new_tile[0]][new_tile[1]] = self
-        self.pos = self.map.map[new_tile[0]][new_tile[1]]
+        self.pos = self.map.map[new_tile[0]][new_tile[1]]["grid"]
         #update collision for new tile
-        self.map.collision_matrix[self.pos["grid"][1]][self.pos["grid"][0]] = 0
-        self.map.map[self.pos["grid"][0]][self.pos["grid"][1]]["collision"] = True
+
+        self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
+        self.map.map[self.pos[0]][self.pos[1]]["collision"] = True
 
     def update(self):
         now = pygame.time.get_ticks()
         if now - self.move_timer > 1000 and self.searching_for_path:
             new_pos = self.path[self.path_index]
             #update positoin in the world
+
             self.change_tile(new_pos)
             self.path_index += 1
             self.move_timer = now
@@ -75,8 +78,9 @@ class Villager(Unit):
     # Training : 50 FOOD, 20s
     description = " Your best friend. Can work, fight and gather resources."
     construction_tooltip = " Train a Villager"
+    name = "Villager"
     construction_cost = [0, 10, 25, 0]
-    training_time = 20
+    construction_time = 5
     population_produced = 1
 
     def __init__(self, pos, player_owner_of_unit, map):
@@ -95,15 +99,12 @@ class Villager(Unit):
         self.target = None
         self.gathering = False
         self.fighting = False
-        #Training : 50 FOOD, 20s
+        #Training : 50 FOOD, 2s
         self.construction_cost = [0, 10, 25, 0]
-        self.training_time = 20
+        self.construction_time = 5
         self.population_produced = 1
 
         super().__init__(pos, player_owner_of_unit, map)
-
-    def build(self, tile):
-        ...
 
     def repair(self, building):
         if building.current_health != building.max_health:

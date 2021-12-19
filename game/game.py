@@ -13,25 +13,14 @@ class Game:
         self.clock = clock
         self.width, self.height = self.screen.get_size()
 
-
         # hud
         self.hud = Hud(self.width, self.height)
-
 
         # entities list (units, buildings, etc...)
         self.entities = []
 
-
         # map
         self.map = Map(self.hud, self.entities, 50, 50, self.width, self.height)
-
-        #start_unit = Villager(self.map.map[5][5], playerOne, self.map)
-        #self.map.units[5][5] = start_unit
-        #first villagers
-        start_unit = Villager(self.map.map[5][5], playerOne, self.map)
-        self.map.units[5][5] = start_unit
-        self.map.collision_matrix[start_unit.pos["grid"][1]][start_unit.pos["grid"][0]] = 0
-        self.map.map[start_unit.pos["grid"][0]][start_unit.pos["grid"][1]]["collision"] = True
 
         # camera
         self.camera = Camera(self.width, self.height)

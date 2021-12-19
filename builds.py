@@ -6,9 +6,12 @@ class Building:
     population_produced = 0
     
 
-    def __init__(self, pos, player_owner_of_unit):
+    def __init__(self, pos, map, player_owner_of_unit,):
         self.owner = player_owner_of_unit
         self.rect = self.sprite.get_rect(topleft=pos)
+        # pos is the tile position, for ex : (4,4)
+        self.pos = pos
+        self.map = map
 
         # will be used in the timer to increase resources of the player
         self.resource_manager_cooldown = pygame.time.get_ticks()
@@ -34,7 +37,7 @@ class Town_center(Building):
     construction_time = 150
     armor = 3
 
-    def __init__(self, pos, player_owner_of_unit):
+    def __init__(self, pos, map,  player_owner_of_unit):
 
         self.name = "Town center"
         self.sprite = pygame.image.load(os.path.join(assets_path, "town_center.png"))
@@ -43,25 +46,26 @@ class Town_center(Building):
         self.construction_time = 150
 
         self.max_health = 100
-        self.working = True
+        self.is_working = False
         player_owner_of_unit.max_population += 5
+        self.now = 0
+        self.resource_manager_cooldown = 0
 
-        super().__init__(pos, player_owner_of_unit)
+        super().__init__(pos, map, player_owner_of_unit)
 
+    #to create villagers, research techs and upgrade to second age
     def update(self):
-        now = pygame.time.get_ticks()
-        # every 5 secs :
-        if now - self.resource_manager_cooldown > 5000:
-            self.resource_manager_cooldown = now
+        self.now = pygame.time.get_ticks()
+        # if a villager is being created since 5 secs :
+        if self.is_working and self.now - self.resource_manager_cooldown > 5000:
+            self.is_working = False
+            self.resource_manager_cooldown = self.now
+            #create a new villager
+            self.map.units[self.pos[0]][self.pos[1] + 1] = Villager((self.pos[0], self.pos[1] + 1), self.owner, self.map)
+            self.map.buildings[self.pos[0]][self.pos[1] + 1] = None
 
-    def create_villager(self, map):
-        now = pygame.time.get_ticks()
-        # every 3 secs :
-        if now - self.resource_manager_cooldown > 3000 and self.working:
-            new_villager = Villager(self.pos, map)
-            print("villager created")
-            self.working = False
-            self.resource_manager_cooldown = now
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
 
 
 class Farm(Building):
@@ -71,7 +75,7 @@ class Farm(Building):
     construction_time = 1
     armor = 0
 
-    def __init__(self, pos, player_owner_of_unit):
+    def __init__(self, pos, map,  player_owner_of_unit):
 
         self.name = " Farm"
         self.sprite = pygame.image.load(os.path.join(assets_path, "Farm.png"))
@@ -82,7 +86,7 @@ class Farm(Building):
         self.max_health = 10
         self.max_population_bonus = 0
 
-        super().__init__(pos, player_owner_of_unit)
+        super().__init__(pos, map, player_owner_of_unit)
 
     def update(self):
         now = pygame.time.get_ticks()
@@ -99,7 +103,7 @@ class House(Building):
     construction_time = 1
     armor = -2
 
-    def __init__(self, pos, player_owner_of_unit):
+    def __init__(self, pos, map, player_owner_of_unit):
         self.name = "House"
         self.sprite = pygame.image.load(os.path.join(assets_path, "House.png"))
 
@@ -109,7 +113,7 @@ class House(Building):
         self.max_health = 50
         player_owner_of_unit.max_population += 5
 
-        super().__init__(pos, player_owner_of_unit)
+        super().__init__(pos, map, player_owner_of_unit)
 
     def update(self):
         now = pygame.time.get_ticks()

@@ -39,6 +39,11 @@ class Map:
         self.temp_tile = None
         # used when examinating elements of the map
         self.examined_tile = None
+        #starting unit
+        start_unit = Villager(self.map[5][5]["grid"], playerOne, self)
+        self.units[5][5] = start_unit
+        self.collision_matrix[start_unit.pos[1]][start_unit.pos[0]] = 0
+        self.map[start_unit.pos[0]][start_unit.pos[1]]["collision"] = True
 
     def create_map(self):
         map = []
@@ -94,14 +99,14 @@ class Map:
                     # we create an instance of the selected building
 
                     if self.hud.selected_tile["name"] == "Farm":
-                        new_building = Farm(render_pos, playerOne)
+                        new_building = Farm((grid_pos[0], grid_pos[1]), self, playerOne)
                         # to add it to the entities list on our map
                         self.entities.append(new_building)
                         # grid_pos 0 and grid_pos 1 means : grid_pos_x and grid_pos_y, not the specific tile near the origin
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
                     elif self.hud.selected_tile["name"] == "Town center":
-                        new_building = Town_center(render_pos, playerOne)
+                        new_building = Town_center((grid_pos[0], grid_pos[1]), self, playerOne)
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
                         # additional collision bc town center is 2x2 tile, not 1x1
@@ -111,24 +116,26 @@ class Map:
                         self.map[grid_pos[0]][grid_pos[1]]["2x2_collision"] = True
 
                     elif self.hud.selected_tile["name"] == "House":
-                        new_building = House(render_pos, playerOne)
+                        new_building = House((grid_pos[0], grid_pos[1]), self, playerOne)
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
                     elif self.hud.selected_tile["name"] == "Villager":
-                        render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
-                        grid = self.renderpos_to_grid(render_pos[0], render_pos[1])
-                        iso_poly = self.map[grid_pos[0]][grid_pos[1]]["iso_poly"]
-                        collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
-                        self.temp_ = {
-                            "grid" : grid,
-                            "render_pos": render_pos,
-                            "iso_poly": iso_poly,
-                            "collision": collision,
-                        }
-                        new_unit = Villager(self.temp_, playerOne, self)
-                        self.entities.append(new_unit)
-                        self.units[grid_pos[0]][grid_pos[1]] = new_unit
+                        ...
+                        #render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
+                       # grid = self.renderpos_to_grid(render_pos[0], render_pos[1])
+                       # iso_poly = self.map[grid_pos[0]][grid_pos[1]]["iso_poly"]
+                      #  collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
+                      #  self.temp_ = {
+                      #      "grid" : grid,
+                      #      "render_pos": render_pos,
+                     #       "iso_poly": iso_poly,
+                     #       "collision": collision,
+                    #    }
+                   #     new_unit = Villager(self.temp_, playerOne, self)
+                   #     self.entities.append(new_unit)
+                   #     self.units[grid_pos[0]][grid_pos[1]] = new_unit
+
                     self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
                     self.collision_matrix[grid_pos[1]][grid_pos[0]] = 0
                     self.hud.selected_tile = None
@@ -175,10 +182,10 @@ class Map:
 
                 # if the villager isnt gathering/planning to gather, and there is not collision on the tile we right click on, then he moves
                 if not self.map[grid_pos[0]][grid_pos[1]]["collision"] and not \
-                        self.units[villager_pos["grid"][0]][
-                            villager_pos["grid"][1]].gathering and self.units[villager_pos["grid"][0]][
-                    villager_pos["grid"][1]].target is None:
-                    self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
+                        self.units[villager_pos[0]][
+                            villager_pos[1]].gathering and self.units[villager_pos[0]][
+                    villager_pos[1]].target is None:
+                    self.units[villager_pos[0]][villager_pos[1]].move_to(
                         self.map[grid_pos[0]][grid_pos[1]], screen, camera)
 
                 # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving
@@ -186,44 +193,44 @@ class Map:
                 pos_x = pos_mouse[0]
                 pos_y = pos_mouse[1]
                 # if the tile next to him is a ressource and we right click on it and he is not moving, he will gather it
-                if not self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].searching_for_path \
+                if not self.units[villager_pos[0]][villager_pos[1]].searching_for_path \
                         and (self.map[pos_x][pos_y]["tile"] == "tree" or self.map[pos_x][pos_y][
                     "tile"] == "rock"):
 
-                    if (abs(pos_x - villager_pos["grid"][0]) <= 1 and abs(
-                            pos_y - villager_pos["grid"][1]) == 0) \
-                            or (abs(pos_x - villager_pos["grid"][0]) == 0 and abs(
-                        pos_y - villager_pos["grid"][1]) <= 1):
+                    if (abs(pos_x - villager_pos[0]) <= 1 and abs(
+                            pos_y - villager_pos[1]) == 0) \
+                            or (abs(pos_x - villager_pos[0]) == 0 and abs(
+                        pos_y - villager_pos[1]) <= 1):
 
-                        self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                        self.units[villager_pos[0]][villager_pos[1]].target = \
                         self.map[pos_x][pos_y]
-                        self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].gathering = True
+                        self.units[villager_pos[0]][villager_pos[1]].gathering = True
 
                     # if the tile we right click on is a ressource, he will travel to it and then gather it
                     else:
 
                         if self.map[pos_x - 1][pos_y]["tile"] == "":
-                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
+                            self.units[villager_pos[0]][villager_pos[1]].move_to(
                                 self.map[pos_x - 1][pos_y], screen, camera)
-                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                            self.units[villager_pos[0]][villager_pos[1]].target = \
                                 self.map[pos_x][pos_y]
                         elif self.map[pos_x + 1][pos_y]["tile"] == "":
-                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
+                            self.units[villager_pos[0]][villager_pos[1]].move_to(
                                 self.map[pos_x + 1][pos_y], screen, camera)
-                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                            self.units[villager_pos[0]][villager_pos[1]].target = \
                                 self.map[pos_x][pos_y]
                         elif self.map[pos_x][pos_y - 1]["tile"] == "":
-                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
+                            self.units[villager_pos[0]][villager_pos[1]].move_to(
                                 self.map[pos_x][pos_y - 1], screen, camera)
-                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                            self.units[villager_pos[0]][villager_pos[1]].target = \
                                 self.map[pos_x][pos_y]
                         elif self.map[pos_x][pos_y + 1]["tile"] == "":
-                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].move_to(
+                            self.units[villager_pos[0]][villager_pos[1]].move_to(
                                 self.map[pos_x][pos_y + 1], screen, camera)
-                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = \
+                            self.units[villager_pos[0]][villager_pos[1]].target = \
                                 self.map[pos_x][pos_y]
                         else:
-                            self.units[villager_pos["grid"][0]][villager_pos["grid"][1]].target = None
+                            self.units[villager_pos[0]][villager_pos[1]].target = None
 
 
     def draw(self, screen, camera):
@@ -485,7 +492,7 @@ class Map:
             self.place_x = place_x
             self.place_y = place_y
 
-            new_building = Town_center((place_x, place_y), playerOne)
+            new_building = Town_center((place_x, place_y), self, playerOne)
             self.entities.append(new_building)
             self.buildings[place_x][place_y] = new_building
 

@@ -30,13 +30,10 @@ class Hud:
         self.bottom_hud_surface.fill((0, 0, 0, 75))
         self.bottom_hud_rect = self.build_surface.get_rect(topleft=(0, self.height * 0.75))
 
-
-
-
         #tooltip hud
         self.tooltip_surface = pygame.Surface((width * 0.2, height * 0.15), pygame.SRCALPHA)
         #grey
-        self.tooltip_color = (60, 60, 60, 100)
+        self.tooltip_color = (60, 60, 60, 150)
         self.tooltip_surface.fill(self.tooltip_color)
         self.tooltip_rect = self.tooltip_surface.get_rect(topleft=(0, self.height * 0.65))
 
@@ -155,6 +152,7 @@ class Hud:
             )
 
             render_pos[0] += image_scale.get_width() + 5 #modifier le 20 pour que ça marche pour tout ecran
+        tiles.pop()
 
         return tiles
 
@@ -177,7 +175,11 @@ class Hud:
 
                 if button["rect"].collidepoint(mouse_pos) and button["affordable"]:
                     if mouse_action[0]:
-                        self.selected_tile = button
+                        if button["name"] == "Villager":
+                            self.examined_tile.is_working = True
+                            self.examined_tile.resource_manager_cooldown = pygame.time.get_ticks()
+                        else:
+                            self.selected_tile = button
 
     # display
     def draw(self, screen):
@@ -195,6 +197,8 @@ class Hud:
         if self.examined_tile is not None:
             screen.blit(bot_complet_menu_building_hd, (0, self.height - 182))
             self.display_entity_description(screen)
+            if type(self.examined_tile) == Town_center and self.examined_tile.is_working:
+                self.display_progress_bar(screen, Villager, self.examined_tile)
 
         # building selection inside the build menu
         if self.bottom_left_menu is not None:
@@ -413,7 +417,7 @@ class Hud:
 
         # attack and armor display
         temp_pos = (self.width * 0.185 + 175, self.height * 0.79 + 107)
-        text = "Armure : "
+        text = "Armor : "
         draw_text(screen, text, 15, (255, 201, 14), temp_pos)
         temp_pos = (self.width * 0.185 + 178, self.height * 0.79 + 128)
         draw_text(screen, str(self.examined_tile.armor), 12, (255, 255, 255), temp_pos)
@@ -430,7 +434,7 @@ class Hud:
             screen.blit(armor_icon, temp_pos)
 
             temp_pos = (self.width * 0.185 + 175, self.height * 0.79 + 45)
-            text = "Attaque : "
+            text = "Damage : "
             draw_text(screen, text, 15, (255, 201, 14), temp_pos)
             temp_pos = (self.width * 0.185 + 178, self.height * 0.79 + 65)
             draw_text(screen, str(self.examined_tile.attack_dmg) + " - " + str(self.examined_tile.attack_dmg + 1),
@@ -438,3 +442,19 @@ class Hud:
 
         # lifebar and numbers
         self.display_life(screen, self.examined_tile)
+
+    def display_progress_bar(self, screen, trained_entity, training_entity):
+        #health bar
+        # to get the same health bar size and not have huge ones, we use a ratio
+        progress_bar_length = 120
+        progress_displayed = ((training_entity.now - training_entity.resource_manager_cooldown) / (trained_entity.construction_time*1000) *progress_bar_length)
+
+        pygame.draw.rect(screen, (255, 201, 14), (self.width * 0.30+120, self.height * 0.8 + 43, progress_displayed, 6))
+        pygame.draw.rect(screen, (25, 25, 25), (self.width * 0.30+120, self.height * 0.8 + 43, progress_bar_length, 6),2)
+
+        temp_text = "Training a " + str(trained_entity.name) + "..."
+        draw_text(screen, temp_text, 13, (255, 255, 255), (self.width * 0.30+130, self.height*0.8 + 27))
+
+        # progress %
+        health_text = str(int((training_entity.now - training_entity.resource_manager_cooldown)/1000) * 20) + "%"
+        draw_text(screen, health_text, 12, (255, 255, 255), (self.width * 0.30+170, self.height*0.8 + 53))
