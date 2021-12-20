@@ -112,6 +112,10 @@ class Map:
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
                         # additional collision bc town center is 2x2 tile, not 1x1
+                        self.collision_matrix[grid_pos[1]][grid_pos[0] + 1] = 0
+                        self.collision_matrix[grid_pos[1] - 1][grid_pos[0] + 1] = 0
+                        self.collision_matrix[grid_pos[1] - 1][grid_pos[0]] = 0
+
                         self.map[grid_pos[0] + 1][grid_pos[1]]["collision"] = True
                         self.map[grid_pos[0]][grid_pos[1] - 1]["collision"] = True
                         self.map[grid_pos[0] + 1][grid_pos[1] - 1]["collision"] = True
