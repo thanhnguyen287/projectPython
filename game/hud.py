@@ -317,21 +317,6 @@ class Hud:
         screen.blit(stone_cost, (0 + 165, self.height * 0.64 + 25))
         screen.blit(population_cost, (0 + 220, self.height * 0.64 + 25))
 
-        # temp_pos = (27, self.height * 0.64 + 30)
-        # draw_text(screen, str(entity.construction_cost[0]), 12, (255, 201, 14), temp_pos)
-
-        # temp_pos = (27 + 55, self.height * 0.64 + 30)
-        # draw_text(screen, str(entity.construction_cost[1]), 12, (255, 201, 14), temp_pos)
-
-        # temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
-        # draw_text(screen, str(entity.construction_cost[2]), 12, (255, 201, 14), temp_pos)
-
-        # temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
-        # draw_text(screen, str(entity.construction_cost[3]), 12, (255, 201, 14), temp_pos)
-
-        # temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
-        # draw_text(screen, str(entity.population_produced), 12, (255, 201, 14), temp_pos)
-
         # grey line
         temp_pos = (5, self.height * 0.64 + 55)
         pygame.draw.line(screen, (192, 192, 192), temp_pos, (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))

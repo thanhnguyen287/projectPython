@@ -77,6 +77,7 @@ class Map:
                     self.hud.bottom_left_menu = self.hud.town_hall_menu
 
                 image = self.hud.selected_tile["image"].copy()
+                name = self.hud.selected_tile["name"]
                 # setting transparency to make sure player understands it's not built
                 image.set_alpha(100)
                 collision = None
@@ -86,6 +87,7 @@ class Map:
                     collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
 
                     self.temp_tile = {
+                        "name" : name,
                         "image": image,
                         "render_pos": render_pos,
                         "iso_poly": iso_poly,
@@ -269,6 +271,18 @@ class Map:
                                      y + render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
                                     for x, y in mask]
                             pygame.draw.polygon(screen, (255, 255, 255), mask, 3)
+
+                            if type(building) != TownCenter:
+                                temp_coor = self.grid_to_map(self.examined_tile[0], self.examined_tile[1])
+                                iso_poly = temp_coor["iso_poly"]
+                                iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y)
+                                            for x, y in iso_poly]
+                                self.highlight_tile(iso_poly, screen, "BLACK")
+                            else:
+                                building_pos = building.pos
+                                temp_iso_poly = self.get_2x2_tiles(building_pos[0], building_pos[1] - 1, camera.scroll)
+                                self.highlight_tile(temp_iso_poly, screen, "BLACK")
+
                 # HERE WE DRAW THE UNITS ON THE MAP
                 # we extract from the units list the building we want to display
                 unit = self.units[x][y]
@@ -299,17 +313,32 @@ class Map:
                                         for x, y in iso_poly]
                             self.highlight_tile(iso_poly, screen, "WHITE")
 
+        # temp tile is a dictionary containing name + image + render pos + iso_poly + collision
         if self.temp_tile is not None:
             iso_poly = self.temp_tile["iso_poly"]
             iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y) for x, y in
                         iso_poly]
-            # if we cannot place our building on the tile because there's already smth, we display the tile in red, else, in green
-            if self.temp_tile["collision"]:
-                self.highlight_tile(iso_poly, screen, "RED")
-            else:
-                self.highlight_tile(iso_poly, screen, "GREEN")
-            # display the potential building on the tile
             render_pos = self.temp_tile["render_pos"]
+
+            # if we cannot place our building on the tile because there's already smth, we display the tile in red, else, in green
+            # For towncenter, we have to display a 2x2 green/Red case, else we only need to highlight a 1x1 case
+            if self.temp_tile["name"] == "Town center":
+                grid = self.renderpos_to_grid(render_pos[0], render_pos[1])
+                temp_iso_poly = self.get_2x2_tiles(grid[0], grid[1] - 1, camera.scroll)
+                #collision matrix : 0 if collision, else 1, we check the 4 cases of the town center
+                if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or self.collision_matrix[grid[1] - 1][grid[0]] == 0:
+                    self.highlight_tile(temp_iso_poly, screen, "RED")
+                else:
+                    self.highlight_tile(temp_iso_poly, screen, "GREEN")
+
+            #for normal buildings (1x1)
+            else:
+                if self.temp_tile["collision"]:
+                    self.highlight_tile(iso_poly, screen, "RED")
+                else:
+                    self.highlight_tile(iso_poly, screen, "GREEN")
+
+            # display the potential building on the tile
             screen.blit(self.temp_tile["image"],
                         (  # we obviously have to reapply the offset + camera scroll
                             render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
@@ -428,6 +457,22 @@ class Map:
         # tile_center_x = tile_center_x + scroll.x
         tile_center_y = tile_center_y + scroll.y
         return tile_center_x, tile_center_y
+
+    def get_2x2_tiles(self, bottom_left_tile_x, bottom_left_tile_y, scroll):
+
+        top_left_corner = (bottom_left_tile_x * TILE_SIZE, bottom_left_tile_y * TILE_SIZE)
+        bottom_left_corner = (bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE)
+        bottom_right_corner = (bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
+        top_right_corner = (bottom_left_tile_x * TILE_SIZE, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
+
+        rect = [top_left_corner, bottom_left_corner, bottom_right_corner, top_right_corner]
+
+        # polygon
+        iso_poly = [decarte_to_iso(x, y) for x, y in rect]
+        iso_poly = [(x + self.grass_tiles.get_width() / 2 + scroll.x, y + scroll.y) for x, y in
+                    iso_poly]
+
+        return iso_poly
 
     # to check if we are able to place an object (collision)
     def can_place_tile(self, grid_pos):

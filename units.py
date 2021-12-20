@@ -24,7 +24,6 @@ class Unit:
         self.dest = None
 
     def move_to(self, new_tile):
-        print(new_tile["grid"])
         if self.map.collision_matrix[new_tile["grid"][1]][new_tile["grid"][0]] != 0:
             self.searching_for_path = True
             self.dest = new_tile
