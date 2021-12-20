@@ -19,8 +19,7 @@ class Building:
         self.current_health = self.max_health
         self.is_alive = True
 
-
-        self.image_select = pygame.image.load(os.path.join(assets_path,"image_select.png"))
+        self.image_select = pygame.image.load(os.path.join(assets_path, "image_select.png"))
         self.selected = False
 
         self.resource_manager_cooldown = pygame.time.get_ticks()
@@ -48,6 +47,7 @@ class Town_center(Building):
         self.max_health = 100
         self.is_working = False
         player_owner_of_unit.max_population += 5
+        self.queue = 0
         self.now = 0
         self.resource_manager_cooldown = 0
 
@@ -56,16 +56,20 @@ class Town_center(Building):
     #to create villagers, research techs and upgrade to second age
     def update(self):
         self.now = pygame.time.get_ticks()
-        # if a villager is being created since 5 secs :
-        if self.is_working and self.now - self.resource_manager_cooldown > 5000:
-            self.is_working = False
-            self.resource_manager_cooldown = self.now
-            #create a new villager
-            self.map.units[self.pos[0]][self.pos[1] + 1] = Villager((self.pos[0], self.pos[1] + 1), self.owner, self.map)
-            self.map.buildings[self.pos[0]][self.pos[1] + 1] = None
-
-            # update collision for new villager
-            self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
+        #add a button to stop the current action if the town center is working
+        if self.is_working:
+            # if a villager is being created since 5 secs :
+            if self.now - self.resource_manager_cooldown > 5000:
+                self.resource_manager_cooldown = self.now
+                #create a new villager
+                self.map.units[self.pos[0]][self.pos[1] + 1] = Villager((self.pos[0], self.pos[1] + 1), self.owner, self.map)
+                # update collision for new villager
+                self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
+                # decrease the queue
+                self.queue -= 1
+                #if there are now more villagers to train, we can stop there
+                if self.queue <= 0:
+                    self.is_working = False
 
 
 class Farm(Building):

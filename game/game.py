@@ -41,7 +41,9 @@ class Game:
             self.events()
             self.update()
             self.draw()
+
     def events(self):
+        mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         for event in pygame.event.get():
             # quit game
             if event.type == pygame.QUIT:
@@ -60,15 +62,34 @@ class Game:
                         ENABLE_HEALTH_BARS = True
                     else:
                         ENABLE_HEALTH_BARS = False
+
             # USER PRESSED A MOUSEBUTTON
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  #  LEFT CLICK
-                    pass
+                # the player left click to train a villager or build a building
+                if event.button == 1 and self.hud.bottom_left_menu is not None:
+                    for button in self.hud.bottom_left_menu:
+                        if button["rect"].collidepoint(mouse_pos):
+                            if button["name"] == "STOP":
+                                if self.hud.examined_tile.queue > 1:
+                                    self.hud.examined_tile.queue -= 1
+                                else:
+                                    self.hud.examined_tile.is_working = False
+                            else:
+                                if button["affordable"]:
+                                    if button["name"] == "Villager":
+                                        self.hud.examined_tile.is_working = True
+                                        self.hud.examined_tile.queue += 1
+                                        self.hud.examined_tile.resource_manager_cooldown = pygame.time.get_ticks()
+
+                                    else:
+                                        self.hud.selected_tile = button
+
                 elif event.button == 3:  # RIGHT CLICK
                     #if testUnit1.is_alive:
                         #testUnit2.attack(testUnit1)
                     player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
                     player.play()
+
     def update(self):
         self.camera.update()
         self.hud.update(self.screen)

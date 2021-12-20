@@ -36,7 +36,7 @@ building_armor_icon = pygame.image.load("resources/assets/icons/building_armor.p
 melee_attack_icon = pygame.image.load("resources/assets/icons/melee_attack.png")
 ranged_attack_icon = pygame.image.load("resources/assets/icons/ranged_attack.png")
 
-
+stop_icon = pygame.image.load("resources/assets/icons/STOP.png")
 
 #ressources icons
 wood_cost = pygame.image.load("resources/assets/icons/wood_cost.png")
