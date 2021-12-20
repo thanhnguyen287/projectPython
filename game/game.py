@@ -1,10 +1,8 @@
-import sys
 from .camera import Camera
 from .map import *
 from .utils import draw_text
 from .hud import Hud
 from.animation import *
-from units import *
 
 
 class Game:
@@ -32,7 +30,6 @@ class Game:
         cam_x = (iso_to_decarte(th_x*64, th_y*32)[0]) - 4050
         cam_y = (iso_to_decarte(th_x*64, th_y*32)[1]) - 1200
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
-
 
     def run(self):
         self.playing = True

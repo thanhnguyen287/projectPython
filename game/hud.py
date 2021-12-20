@@ -1,10 +1,9 @@
-import os
 from settings import *
 import pygame
-from .utils import draw_text
+from .utils import draw_text, scale_image
 from player import playerOne
-from units import Villager, Unit
-from builds import Town_center, House, Farm, Building
+from units import Villager
+from builds import TownCenter, House, Farm, Building
 
 
 class Hud:
@@ -19,11 +18,6 @@ class Hud:
         self.build_surface = pygame.Surface((width * 0.15, height * 0.25), pygame.SRCALPHA)
         self.build_surface.fill(self.hud_color)
         self.build_rect = self.build_surface.get_rect(topleft=(0, self.height * 0.75))
-
-        # select hud - same for collision
-        # self.select_surface = pygame.Surface((width * 0.3, height * 0.2), pygame.SRCALPHA)
-        # self.select_surface.fill(self.hud_color)
-        # self.select_rect = self.select_surface.get_rect(topleft=(self.width * 0.35, self.height * 0.8))
 
         # bottom hud
         self.bottom_hud_surface = pygame.Surface((887, 182), pygame.SRCALPHA)
@@ -44,7 +38,6 @@ class Hud:
         self.trained_unit_icon_rect = self.tooltip_surface.get_rect(topleft=self.trained_unit_icon_pos)
 
         self.images = self.load_images()
-        self.tiles = self.create_build_hud()
         self.town_hall_menu = self.create_train_menu_town_hall()
         self.villager_menu = self.create_build_hud()
 
@@ -81,46 +74,6 @@ class Hud:
         )
         return tiles
 
-    def create_build_interact_menu_villager(self):
-
-        render_pos = [0 + 15, self.height * 0.8 + 10]
-
-        tiles = []
-        image_scale = None
-        rect = None
-
-        for image_name, image in self.images.items():
-            pos = render_pos.copy()
-            if image_name == "Villager":
-                image_scale = villager_icon
-                rect = image_scale.get_rect(topleft=pos)
-
-            elif image_name == "Farm":
-                image_scale = farm_icon_hd
-                rect = image_scale.get_rect(topleft=pos)
-
-            elif image_name == "Town center":
-                image_scale = town_center_icon
-                rect = image_scale.get_rect(topleft=pos)
-
-            elif image_name == "House":
-                image_scale = house_icon
-                rect = image_scale.get_rect(topleft=pos)
-
-            tiles.append(
-                {
-                    "name": image_name,
-                    "icon": image_scale,
-                    "image": self.images[image_name],
-                    "rect": rect,
-                    "affordable": True
-                }
-
-            )
-            render_pos[0] += image_scale.get_width() + 5  # modifier le 20 pour que ça marche pour tout ecran
-
-        return tiles
-
     def create_build_hud(self):
 
         render_pos = [0 + 15, self.height * 0.8 + 10]
@@ -144,7 +97,7 @@ class Hud:
 
             else:
                 image_tmp = image.copy()
-                image_scale = self.scale_image(image_tmp, w=40)  # a modifier pour s'adapter a l'ecran
+                image_scale = scale_image(image_tmp, w=40)  # a modifier pour s'adapter a l'ecran
             rect = image_scale.get_rect(topleft=pos)
 
             tiles.append(
@@ -211,7 +164,7 @@ class Hud:
         if self.examined_tile is not None:
             screen.blit(bot_complet_menu_building_hd, (0, self.height - 182))
             self.display_entity_description(screen)
-            if type(self.examined_tile) == Town_center and self.examined_tile.is_working:
+            if type(self.examined_tile) == TownCenter and self.examined_tile.is_working:
                 self.display_progress_bar(screen, Villager, self.examined_tile)
 
         # building selection inside the build menu
@@ -241,23 +194,6 @@ class Hud:
             "Villager": villager
         }
         return images
-
-    def scale_image(self, image, w=None, h=None):
-
-        if (w == None) and (h == None):
-            pass
-        elif h == None:
-            scale = w / image.get_width()
-            h = scale * image.get_height()
-            image = pygame.transform.scale(image, (int(w), int(h)))
-        elif w == None:
-            scale = h / image.get_height()
-            w = scale * image.get_width()
-            image = pygame.transform.scale(image, (int(w), int(h)))
-        else:
-            image = pygame.transform.scale(image, (int(w), int(h)))
-
-        return image
 
     def display_life(self, screen, entity):
         # health bar
@@ -309,25 +245,25 @@ class Hud:
                       (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
 
         elif entity == "Town center":
-            draw_text(screen, Town_center.construction_tooltip, 14, (220, 220, 220),
+            draw_text(screen, TownCenter.construction_tooltip, 14, (220, 220, 220),
                       (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
             # ressources cost display
             temp_pos = (27, self.height * 0.64 + 30)
-            draw_text(screen, str(Town_center.construction_cost[0]), 12, (255, 201, 14), temp_pos)
+            draw_text(screen, str(TownCenter.construction_cost[0]), 12, (255, 201, 14), temp_pos)
 
             temp_pos = (27 + 55, self.height * 0.64 + 30)
-            draw_text(screen, str(Town_center.construction_cost[1]), 12, (255, 201, 14), temp_pos)
+            draw_text(screen, str(TownCenter.construction_cost[1]), 12, (255, 201, 14), temp_pos)
 
             temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
-            draw_text(screen, str(Town_center.construction_cost[2]), 12, (255, 201, 14), temp_pos)
+            draw_text(screen, str(TownCenter.construction_cost[2]), 12, (255, 201, 14), temp_pos)
 
             temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
-            draw_text(screen, str(Town_center.construction_cost[3]), 12, (255, 201, 14), temp_pos)
+            draw_text(screen, str(TownCenter.construction_cost[3]), 12, (255, 201, 14), temp_pos)
 
             temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
-            draw_text(screen, str(Town_center.population_produced), 12, (255, 201, 14), temp_pos)
+            draw_text(screen, str(TownCenter.population_produced), 12, (255, 201, 14), temp_pos)
             # short description
-            draw_text(screen, Town_center.description, 14, (220, 220, 220),
+            draw_text(screen, TownCenter.description, 14, (220, 220, 220),
                       (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
 
         elif entity == "House":
@@ -407,18 +343,18 @@ class Hud:
         # as we are scaling it, we make a copy
         img = self.examined_tile.sprite.copy()
         if type(self.examined_tile) == Farm:
-            img_scaled = self.scale_image(img, h * 0.60)
+            img_scaled = scale_image(img, h * 0.60)
             screen.blit(img_scaled, (self.width * 0.185 - 10, self.height * 0.79 + 58))
         elif type(self.examined_tile) == House:
-            img_scaled = self.scale_image(img, h * 0.50)
+            img_scaled = scale_image(img, h * 0.50)
             screen.blit(img_scaled, (self.width * 0.185 - 10, self.height * 0.79 + 43))
 
-        elif type(self.examined_tile) == Town_center:
-            img_scaled = self.scale_image(img, h * 0.55)
+        elif type(self.examined_tile) == TownCenter:
+            img_scaled = scale_image(img, h * 0.55)
             screen.blit(img_scaled, (self.width * 0.185 - 10, self.height * 0.79 + 48))
         # villager
         else:
-            img_scaled = self.scale_image(img, h * 0.3)
+            img_scaled = scale_image(img, h * 0.3)
             screen.blit(img_scaled, (self.width * 0.185 + 10, self.height * 0.79 + 33))
 
         # for now, we display the picture of the object and its name
@@ -504,7 +440,7 @@ class Hud:
         elif entity == "House":
             entity = House
         elif entity == "Town center":
-            entity = Town_center
+            entity = TownCenter
         else:
             display_tooltip_for_entity = False
 

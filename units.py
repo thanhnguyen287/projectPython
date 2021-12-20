@@ -1,4 +1,3 @@
-import pygame
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from pathfinding.finder.a_star import DiagonalMovement
@@ -7,6 +6,7 @@ from player import *
 
 class Unit:
     armor = 0
+
     def __init__(self, pos, player_owner_of_unit, map):
         self.owner = player_owner_of_unit
         self.map = map
@@ -25,7 +25,7 @@ class Unit:
 
     def move_to(self, new_tile):
         print(new_tile["grid"])
-        if  self.map.collision_matrix[new_tile["grid"][1]][new_tile["grid"][0]] != 0:
+        if self.map.collision_matrix[new_tile["grid"][1]][new_tile["grid"][0]] != 0:
             self.searching_for_path = True
             self.dest = new_tile
             self.grid = Grid(matrix=self.map.collision_matrix)
@@ -54,7 +54,7 @@ class Unit:
         now = pygame.time.get_ticks()
         if now - self.move_timer > 1000 and self.searching_for_path:
             new_pos = self.path[self.path_index]
-            #update positoin in the world
+            #update position in the world
 
             self.change_tile(new_pos)
             self.path_index += 1
@@ -113,7 +113,7 @@ class Villager(Unit):
         else:
             ...
 
-    def gatherRessources(self, tar):
+    def gather_ressources(self, tar):
         if (tar["tile"] == "tree" or tar["tile"] == "rock") and tar["health"] > 0:
             self.target["health"] -= 2
         else:
@@ -131,7 +131,6 @@ class Villager(Unit):
 
             #we need to update the collision matrix to
 
-
     def update(self):
         now = pygame.time.get_ticks()
         if now - self.move_timer > 500:
@@ -144,14 +143,13 @@ class Villager(Unit):
                     self.searching_for_path = False
 
             if (self.gathering or self.target is not None) and not self.searching_for_path:
-                self.gatherRessources(self.target)
+                self.gather_ressources(self.target)
 
             #always at the end to reset the timer
             self.move_timer = now
 
 
 class Bowman(Unit):
-
 
     def __init__(self, pos, player_owner_of_unit, map):
         super().__init__(pos, player_owner_of_unit, map)

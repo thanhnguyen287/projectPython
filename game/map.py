@@ -3,7 +3,7 @@ import noise
 import pygame.mouse
 from .utils import decarte_to_iso, iso_to_decarte
 from settings import *
-from builds import Farm, Town_center, House
+from builds import Farm, TownCenter, House
 from player import playerOne
 from New_ressources import *
 from units import Villager
@@ -33,13 +33,13 @@ class Map:
         # here we place the townhall randomly on the map
         self.place_townhall()
         self.collision_matrix = self.create_collision_matrix()
-        #new_villager = Villager((0, 0), playerOne, self.map)
-        #self.units[0][0] = new_villager
+        # new_villager = Villager((0, 0), playerOne, self.map)
+        # self.units[0][0] = new_villager
         # used when selecting a tile to build
         self.temp_tile = None
-        # used when examinating elements of the map
+        # used when examining elements of the map
         self.examined_tile = None
-        #starting unit
+        # starting unit
         start_unit = Villager(self.map[5][5]["grid"], playerOne, self)
         self.units[5][5] = start_unit
         self.collision_matrix[start_unit.pos[1]][start_unit.pos[0]] = 0
@@ -66,7 +66,7 @@ class Map:
         mouse_action = pygame.mouse.get_pressed()
         self.temp_tile = None
 
-        #the player selects a building in the hud
+        # the player selects a building in the hud
         if self.hud.selected_tile is not None and self.hud.examined_tile is not None:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             # if we can't place the building on the tile, there's no need to do the following
@@ -79,19 +79,20 @@ class Map:
                 image = self.hud.selected_tile["image"].copy()
                 # setting transparency to make sure player understands it's not built
                 image.set_alpha(100)
+                collision = None
                 if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
                     render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
                     iso_poly = self.map[grid_pos[0]][grid_pos[1]]["iso_poly"]
                     collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
-                                  
+
                     self.temp_tile = {
-                    "image": image,
-                    "render_pos": render_pos,
-                    "iso_poly": iso_poly,
-                    "collision": collision,
-                    "2x2_collision": False
+                        "image": image,
+                        "render_pos": render_pos,
+                        "iso_poly": iso_poly,
+                        "collision": collision,
+                        "2x2_collision": False
                     }
-                    
+
                 else:
                     pass
                 # if we left_click to build : we will place the building in the map if the targeted tile is empty
@@ -105,7 +106,7 @@ class Map:
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
                     elif self.hud.selected_tile["name"] == "Town center":
-                        new_building = Town_center((grid_pos[0], grid_pos[1]), self, playerOne)
+                        new_building = TownCenter((grid_pos[0], grid_pos[1]), self, playerOne)
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
                         # additional collision bc town center is 2x2 tile, not 1x1
@@ -186,7 +187,7 @@ class Map:
                         pos_y - villager_pos[1]) <= 1):
 
                         self.units[villager_pos[0]][villager_pos[1]].target = \
-                        self.map[pos_x][pos_y]
+                            self.map[pos_x][pos_y]
                         self.units[villager_pos[0]][villager_pos[1]].gathering = True
 
                     # if the tile we right click on is a ressource, he will travel to it and then gather it
@@ -214,7 +215,6 @@ class Map:
                                 self.map[pos_x][pos_y]
                         else:
                             self.units[villager_pos[0]][villager_pos[1]].target = None
-
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -246,7 +246,6 @@ class Map:
                                        render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10,
                                        render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y,
                                        self.map[x][y]["health"], self.map[x][y]["max_health"])
-
 
                 # HERE WE DRAW THE BUILDINGS ON THE MAP
                 # we extract from the buildings list the building we want to display
@@ -296,7 +295,8 @@ class Map:
                             # outline in white the object selected
                             temp_coor = self.grid_to_map(self.examined_tile[0], self.examined_tile[1])
                             iso_poly = temp_coor["iso_poly"]
-                            iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y) for x, y in iso_poly]
+                            iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y)
+                                        for x, y in iso_poly]
                             self.highlight_tile(iso_poly, screen, "WHITE")
 
         if self.temp_tile is not None:
@@ -336,11 +336,12 @@ class Map:
             "rock": rock,
             "block": block,
             "grass": grass_tile,
-            "grass_hd" : grass_hd,
-            "gold" : gold,
-            "Villager" : villager
+            "grass_hd": grass_hd,
+            "gold": gold,
+            "Villager": villager
         }
         return images
+
     # this function returns the isometric picture coordinates corresponding to a grid_tile
     def grid_to_map(self, grid_x, grid_y):
         rect = [
@@ -377,6 +378,7 @@ class Map:
             "health": 10
         }
         return out
+
     # From the mouse coordinates, we find the corresponding tile of our map (=grid position).
     # Almost does the "opposite" work of grid_to_map
     # x and y : position of mouse
@@ -397,7 +399,7 @@ class Map:
         # 3 : find the grid coordinates (we must get integers to make sense)
         grid_x = int(cart_x // TILE_SIZE)
         grid_y = int(cart_y // TILE_SIZE)
-        return grid_x+1, grid_y
+        return grid_x + 1, grid_y
 
     def grid_to_renderpos(self, grid_x, grid_y):
         rect = [
@@ -423,7 +425,7 @@ class Map:
         tile_center_y = tile_y + (TILE_SIZE / 2)
         tile_center_x, tile_center_y = decarte_to_iso(tile_center_x, tile_center_y)
         tile_center_x = tile_center_x + scroll.x + (self.grass_tiles.get_width() * 2)
-        #tile_center_x = tile_center_x + scroll.x
+        # tile_center_x = tile_center_x + scroll.x
         tile_center_y = tile_center_y + scroll.y
         return tile_center_x, tile_center_y
 
@@ -454,6 +456,7 @@ class Map:
                 if self.map[x][y]["collision"]:
                     collision_matrix[y][x] = 0
         return collision_matrix
+
     def highlight_tile(self, iso_poly, screen, color):
         if color == "WHITE":
             pygame.draw.polygon(screen, (255, 255, 255), iso_poly, 3)
@@ -475,7 +478,7 @@ class Map:
             self.place_x = place_x
             self.place_y = place_y
 
-            new_building = Town_center((place_x, place_y), self, playerOne)
+            new_building = TownCenter((place_x, place_y), self, playerOne)
             self.entities.append(new_building)
             self.buildings[place_x][place_y] = new_building
 

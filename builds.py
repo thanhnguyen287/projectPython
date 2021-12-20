@@ -4,7 +4,6 @@ from units import Villager
 
 class Building:
     population_produced = 0
-    
 
     def __init__(self, pos, map, player_owner_of_unit,):
         self.owner = player_owner_of_unit
@@ -29,7 +28,7 @@ class Building:
         pass
 
 
-class Town_center(Building):
+class TownCenter(Building):
     description = " Used to create villagers."
     construction_tooltip = " Build a Town Center"
     construction_cost = [1000, 0, 0, 100]
@@ -67,7 +66,7 @@ class Town_center(Building):
                 self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
                 # decrease the queue
                 self.queue -= 1
-                #if there are now more villagers to train, we can stop there
+                #if there are no more villagers to train, we can stop there
                 if self.queue <= 0:
                     self.is_working = False
 

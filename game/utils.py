@@ -2,15 +2,14 @@ import pygame
 
 
 def draw_text(screen, text, size, color, pos):
-#create a Font object from the system fonts
-#SysFont(name, size, bold=False, italic=False)
+    # create a Font object from the system fonts
+    # SysFont(name, size, bold=False, italic=False)
 
-    #font = pygame.font.SysFont(None, size)
-
+    # font = pygame.font.SysFont(None, size)
 
     font = pygame.font.SysFont('Times New Roman', size)
 
-    text_surface = font.render(text, True, color )
+    text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect(topleft=pos)
 
     screen.blit(text_surface, text_rect)
@@ -28,3 +27,19 @@ def iso_to_decarte(iso_x, iso_y):
     x = (2 * iso_y + iso_x) / 2
     return x, y
 
+
+def scale_image(image, w=None, h=None):
+    if (w is None) and (h is None):
+        pass
+    elif h is None:
+        scale = w / image.get_width()
+        h = scale * image.get_height()
+        image = pygame.transform.scale(image, (int(w), int(h)))
+    elif w is None:
+        scale = h / image.get_height()
+        w = scale * image.get_width()
+        image = pygame.transform.scale(image, (int(w), int(h)))
+    else:
+        image = pygame.transform.scale(image, (int(w), int(h)))
+
+    return image
