@@ -5,7 +5,7 @@ from units import Villager
 class Building:
     population_produced = 0
 
-    def __init__(self, pos, map, player_owner_of_unit,):
+    def __init__(self, pos, map, player_owner_of_unit, ):
         self.owner = player_owner_of_unit
         self.rect = self.sprite.get_rect(topleft=pos)
         # pos is the tile position, for ex : (4,4)
@@ -35,7 +35,7 @@ class TownCenter(Building):
     construction_time = 150
     armor = 3
 
-    def __init__(self, pos, map,  player_owner_of_unit):
+    def __init__(self, pos, map, player_owner_of_unit):
 
         self.name = "Town center"
         self.sprite = pygame.image.load(os.path.join(assets_path, "town_center.png"))
@@ -52,23 +52,125 @@ class TownCenter(Building):
 
         super().__init__(pos, map, player_owner_of_unit)
 
-    #to create villagers, research techs and upgrade to second age
+    # to create villagers, research techs and upgrade to second age
     def update(self):
         self.now = pygame.time.get_ticks()
-        #add a button to stop the current action if the town center is working
+        # add a button to stop the current action if the town center is working
         if self.is_working:
             # if a villager is being created since 5 secs :
             if self.now - self.resource_manager_cooldown > 5000:
                 self.resource_manager_cooldown = self.now
-                #create a new villager
-                self.map.units[self.pos[0]][self.pos[1] + 1] = Villager((self.pos[0], self.pos[1] + 1), self.owner, self.map)
-                # update collision for new villager
-                self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
+                # we determine the nearest free tile and spawn a villager on it
+                self.check_collision_and_spawn_villager_where_possible()
                 # decrease the queue
                 self.queue -= 1
-                #if there are no more villagers to train, we can stop there
+                # if there are no more villagers to train, we can stop there
                 if self.queue <= 0:
                     self.is_working = False
+
+    # we determine the nearest free tile, collision matrix has a 1 if the tile is free
+    # we try the 4 tiles under the town center, then the ones on the sides, then the ones above
+    # we also check if we stay in the map boundaries
+    def check_collision_and_spawn_villager_where_possible(self):
+        # UNDER
+        if 0 < self.pos[0] + 1 < 50 and 0 < self.pos[1] < 49 and self.map.collision_matrix[self.pos[1] + 1][
+            self.pos[0]] == 1:
+            # new villager
+            self.map.units[self.pos[0]][self.pos[1] + 1] = Villager((self.pos[0], self.pos[1] + 1), self.owner,
+                                                                    self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
+
+        elif 0 < self.pos[0] < 50 and 0 < self.pos[1] + 1 < 49 and self.map.collision_matrix[self.pos[1] + 1][
+            self.pos[0] + 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 1][self.pos[1] + 1] = Villager((self.pos[0] + 1, self.pos[1] + 1),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 1] = 0
+
+        elif 0 < self.pos[0] - 1 < 50 and 0 < self.pos[1] + 1 < 49 and \
+                self.map.collision_matrix[self.pos[1] + 1][self.pos[0] - 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] - 1][self.pos[1] + 1] = Villager((self.pos[0] - 1, self.pos[1] + 1),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] + 1][self.pos[0] - 1] = 0
+
+        elif 0 < self.pos[0] + 2 < 50 and 0 < self.pos[1] + 1 < 49 and \
+                self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 2] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 2][self.pos[1] + 1] = Villager((self.pos[0] + 2, self.pos[1] + 1),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 2] = 0
+
+        # SIDES
+        elif 0 < self.pos[0] - 1 < 50 and 0 < self.pos[1] < 49 and self.map.collision_matrix[self.pos[1]][
+            self.pos[0] - 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] - 1][self.pos[1]] = Villager((self.pos[0] - 1, self.pos[1]),
+                                                                    self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1]][self.pos[0] - 1] = 0
+
+        elif 0 < self.pos[0] + 2 < 50 and 0 < self.pos[1] < 49 and self.map.collision_matrix[self.pos[1]][
+            self.pos[0] + 2] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 2][self.pos[1]] = Villager((self.pos[0] + 2, self.pos[1]),
+                                                                    self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1]][self.pos[0] + 2] = 0
+
+        elif 0 < self.pos[0] - 1 < 50 and 0 < self.pos[1] - 1 < 49 and \
+                self.map.collision_matrix[self.pos[1] - 1][self.pos[0] - 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] - 1][self.pos[1] - 1] = Villager((self.pos[0] - 1, self.pos[1] - 1),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 1][self.pos[0] - 1] = 0
+
+        elif 0 < self.pos[0] + 2 < 50 and 0 < self.pos[1] - 1 < 49 and \
+                self.map.collision_matrix[self.pos[1] - 1][self.pos[0] + 2] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 2][self.pos[1] - 1] = Villager((self.pos[0] + 2, self.pos[1] - 1),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 1][self.pos[0] + 2] = 0
+
+
+        # ABOVE
+        elif 0 < self.pos[0] - 1 < 50 and 0 < self.pos[1] - 2 < 49 and \
+                self.map.collision_matrix[self.pos[1] - 2][self.pos[0] - 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] - 1][self.pos[1] - 2] = Villager((self.pos[0] - 1, self.pos[1] - 2),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 2][self.pos[0] - 1] = 0
+
+        elif 0 < self.pos[0] < 50 and 0 < self.pos[1] - 2 < 49 and self.map.collision_matrix[self.pos[1] - 2][
+            self.pos[0]] == 1:
+            # new villager
+            self.map.units[self.pos[0]][self.pos[1] - 2] = Villager((self.pos[0], self.pos[1] - 2),
+                                                                    self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 2][self.pos[0]] = 0
+
+        elif 0 < self.pos[0] + 1 < 50 and 0 < self.pos[1] - 2 < 49 and \
+                self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 1][self.pos[1] - 2] = Villager((self.pos[0] + 1, self.pos[1] - 2),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 1] = 0
+
+        elif 0 < self.pos[0] + 2 < 50 and 0 < self.pos[1] - 2 < 49 and \
+                self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 2] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 2][self.pos[1] - 2] = Villager((self.pos[0] + 2, self.pos[1] - 2),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 2] = 0
 
 
 class Farm(Building):
@@ -78,8 +180,7 @@ class Farm(Building):
     construction_time = 1
     armor = 0
 
-    def __init__(self, pos, map,  player_owner_of_unit):
-
+    def __init__(self, pos, map, player_owner_of_unit):
         self.name = " Farm"
         self.sprite = pygame.image.load(os.path.join(assets_path, "Farm.png"))
 
@@ -123,5 +224,4 @@ class House(Building):
         # every 5 secs :
         if now - self.resource_manager_cooldown > 5000:
             self.resource_manager_cooldown = now
-
 
