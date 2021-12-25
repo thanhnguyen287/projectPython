@@ -73,15 +73,14 @@ class TownCenter(Building):
     # we also check if we stay in the map boundaries
     def check_collision_and_spawn_villager_where_possible(self):
         # UNDER
-        if 0 < self.pos[0] + 1 < 50 and 0 < self.pos[1] < 49 and self.map.collision_matrix[self.pos[1] + 1][
-            self.pos[0]] == 1:
+        if 0 < self.pos[0] < 50 and 0 < self.pos[1] + 1 < 49 and self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] == 1:
             # new villager
             self.map.units[self.pos[0]][self.pos[1] + 1] = Villager((self.pos[0], self.pos[1] + 1), self.owner,
                                                                     self.map)
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
 
-        elif 0 < self.pos[0] < 50 and 0 < self.pos[1] + 1 < 49 and self.map.collision_matrix[self.pos[1] + 1][
+        elif 0 < self.pos[0] + 1 < 50 and 0 < self.pos[1] + 1 < 49 and self.map.collision_matrix[self.pos[1] + 1][
             self.pos[0] + 1] == 1:
             # new villager
             self.map.units[self.pos[0] + 1][self.pos[1] + 1] = Villager((self.pos[0] + 1, self.pos[1] + 1),

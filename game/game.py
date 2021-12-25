@@ -74,9 +74,10 @@ class Game:
                             else:
                                 if button["affordable"]:
                                     if button["name"] == "Villager":
-                                        self.hud.examined_tile.is_working = True
                                         self.hud.examined_tile.queue += 1
-                                        self.hud.examined_tile.resource_manager_cooldown = pygame.time.get_ticks()
+                                        if not self.hud.examined_tile.is_working:
+                                            self.hud.examined_tile.is_working = True
+                                            self.hud.examined_tile.resource_manager_cooldown = pygame.time.get_ticks()
 
                                     else:
                                         self.hud.selected_tile = button

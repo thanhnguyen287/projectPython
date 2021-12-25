@@ -14,11 +14,6 @@ class Hud:
         self.height = height
         self.hud_color = (198, 155, 93, 175)
 
-        # building hud - 3rd line is for collision
-        self.build_surface = pygame.Surface((width * 0.15, height * 0.25), pygame.SRCALPHA)
-        self.build_surface.fill(self.hud_color)
-        self.build_rect = self.build_surface.get_rect(topleft=(0, self.height * 0.75))
-
         # bottom hud
         self.bottom_hud_surface = pygame.Surface((887, 182), pygame.SRCALPHA)
         self.bottom_hud_surface.fill((0, 0, 0, 75))
@@ -77,7 +72,6 @@ class Hud:
     def create_build_hud(self):
 
         render_pos = [0 + 15, self.height * 0.8 + 10]
-        object_width = self.build_surface.get_width()
 
         tiles = []
         for image_name, image in self.images.items():
@@ -430,7 +424,6 @@ class Hud:
             display_tooltip_for_entity = False
 
         # display grey rectangle
-        w, h = self.tooltip_rect.width, self.tooltip_rect.height
         screen.blit(self.tooltip_surface, (0, self.height * 0.64))
         pygame.draw.rect(self.tooltip_surface, (255, 201, 14),
                          pygame.Rect(0, 0, self.tooltip_rect.width, self.tooltip_rect.height), 2)
@@ -483,4 +476,3 @@ class Hud:
             description_text = entity["description"]
             draw_text(screen, description_text, 14, (255, 255, 255),
                       (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
-
