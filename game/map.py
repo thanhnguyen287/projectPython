@@ -87,7 +87,7 @@ class Map:
                     collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
 
                     self.temp_tile = {
-                        "name" : name,
+                        "name": name,
                         "image": image,
                         "render_pos": render_pos,
                         "iso_poly": iso_poly,
@@ -99,8 +99,10 @@ class Map:
                     pass
                 # if we left_click to build : we will place the building in the map if the targeted tile is empty
                 if mouse_action[0] and not collision:
+                    building_type_built = Farm
                     # we create an instance of the selected building
                     if self.hud.selected_tile["name"] == "Farm":
+                        building_type_built = Farm
                         new_building = Farm((grid_pos[0], grid_pos[1]), self, playerOne)
                         # to add it to the entities list on our map
                         self.entities.append(new_building)
@@ -108,6 +110,7 @@ class Map:
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
                     elif self.hud.selected_tile["name"] == "Town center":
+                        building_type_built = TownCenter
                         new_building = TownCenter((grid_pos[0], grid_pos[1]), self, playerOne)
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
@@ -122,10 +125,15 @@ class Map:
                         self.map[grid_pos[0]][grid_pos[1]]["2x2_collision"] = True
 
                     elif self.hud.selected_tile["name"] == "House":
+                        building_type_built = House
                         new_building = House((grid_pos[0], grid_pos[1]), self, playerOne)
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
+                    #we pay the construction cost
+                    playerOne.pay_entity_cost_bis(building_type_built)
+
+                    # we actualize collision
                     self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
                     self.collision_matrix[grid_pos[1]][grid_pos[0]] = 0
                     self.hud.selected_tile = None
@@ -279,8 +287,9 @@ class Map:
                             if type(building) != TownCenter:
                                 temp_coor = self.grid_to_map(self.examined_tile[0], self.examined_tile[1])
                                 iso_poly = temp_coor["iso_poly"]
-                                iso_poly = [(x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y)
-                                            for x, y in iso_poly]
+                                iso_poly = [
+                                    (x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y)
+                                    for x, y in iso_poly]
                                 self.highlight_tile(iso_poly, screen, "BLACK")
                             else:
                                 building_pos = building.pos
@@ -329,13 +338,15 @@ class Map:
             if self.temp_tile["name"] == "Town center":
                 grid = self.renderpos_to_grid(render_pos[0], render_pos[1])
                 temp_iso_poly = self.get_2x2_tiles(grid[0], grid[1] - 1, camera.scroll)
-                #collision matrix : 0 if collision, else 1, we check the 4 cases of the town center
-                if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or self.collision_matrix[grid[1] - 1][grid[0]] == 0:
+                # collision matrix : 0 if collision, else 1, we check the 4 cases of the town center
+                if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or \
+                        self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or self.collision_matrix[grid[1] - 1][
+                    grid[0]] == 0:
                     self.highlight_tile(temp_iso_poly, screen, "RED")
                 else:
                     self.highlight_tile(temp_iso_poly, screen, "GREEN")
 
-            #for normal buildings (1x1)
+            # for normal buildings (1x1)
             else:
                 if self.temp_tile["collision"]:
                     self.highlight_tile(iso_poly, screen, "RED")
@@ -466,7 +477,8 @@ class Map:
 
         top_left_corner = (bottom_left_tile_x * TILE_SIZE, bottom_left_tile_y * TILE_SIZE)
         bottom_left_corner = (bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE)
-        bottom_right_corner = (bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
+        bottom_right_corner = (
+        bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
         top_right_corner = (bottom_left_tile_x * TILE_SIZE, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
 
         rect = [top_left_corner, bottom_left_corner, bottom_right_corner, top_right_corner]

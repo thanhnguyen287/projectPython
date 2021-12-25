@@ -62,12 +62,15 @@ class Player:
         for resource_type in range(4):
             self.resources[resource_type] -= entity.construction_cost[resource_type]
 
-    def refund_entity_cost(self, entity):
+    def pay_entity_cost_bis(self, entity_class):
         for resource_type in range(4):
-            self.resources[resource_type] += entity.construction_cost[resource_type]
-        self.current_population -= entity.population_produced
+            self.resources[resource_type] -= entity_class.construction_cost[resource_type]
+        self.current_population += entity_class.population_produced
 
-
+    def refund_entity_cost(self, entity_class):
+        for resource_type in range(4):
+            self.resources[resource_type] += entity_class.construction_cost[resource_type]
+        self.current_population -= entity_class.population_produced
 
     def update_resources_bar(self, screen):
         # resources display

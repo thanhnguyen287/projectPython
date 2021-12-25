@@ -67,21 +67,29 @@ class Game:
                     for button in self.hud.bottom_left_menu:
                         if button["rect"].collidepoint(mouse_pos):
                             if button["name"] == "STOP":
-                                if self.hud.examined_tile.queue > 1:
-                                    self.hud.examined_tile.queue -= 1
-                                else:
+                                unit_type_trained = self.hud.examined_tile.unit_type_currently_trained
+                                self.hud.examined_tile.owner.refund_entity_cost(unit_type_trained)
+                                self.hud.examined_tile.queue -= 1
+                                #no more units to create
+                                if self.hud.examined_tile.queue == 0:
                                     self.hud.examined_tile.is_working = False
+                                    self.hud.examined_tile.unit_type_currently_trained = None
                             else:
                                 if button["affordable"]:
                                     if button["name"] == "Villager":
                                         self.hud.examined_tile.queue += 1
+                                        #if the town center is not working
                                         if not self.hud.examined_tile.is_working:
+                                            self.hud.examined_tile.unit_type_currently_trained = Villager
                                             self.hud.examined_tile.is_working = True
                                             self.hud.examined_tile.resource_manager_cooldown = pygame.time.get_ticks()
+                                        #pay training cost
+                                        unit_type_trained = self.hud.examined_tile.unit_type_currently_trained
+                                        self.hud.examined_tile.owner.pay_entity_cost_bis(unit_type_trained)
 
                                     else:
                                         self.hud.selected_tile = button
-
+                #BOOM WHEN RIGHT CLICKING
                 elif event.button == 3:  # RIGHT CLICK
                     #if testUnit1.is_alive:
                         #testUnit2.attack(testUnit1)

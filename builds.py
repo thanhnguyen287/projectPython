@@ -22,7 +22,7 @@ class Building:
         self.selected = False
 
         self.resource_manager_cooldown = pygame.time.get_ticks()
-        self.owner.pay_entity_cost(self)
+        #self.owner.pay_entity_cost(self)
 
     def update(self):
         pass
@@ -44,8 +44,12 @@ class TownCenter(Building):
         self.construction_time = 150
 
         self.max_health = 100
+        #becomes true when you create villagers
         self.is_working = False
+        #class of unit being trained
+        self.unit_type_currently_trained = None
         player_owner_of_unit.max_population += 5
+        #used when you order the creation of multiples units
         self.queue = 0
         self.now = 0
         self.resource_manager_cooldown = 0

@@ -15,9 +15,6 @@ class Unit:
         self.pos = pos
         self.current_health = self.max_health
         self.is_alive = True
-        self.owner.pay_entity_cost(self)
-        # means current population +1
-        self.owner.update_resource(4, 1)
         #pathfinding
         self.move_timer = pygame.time.get_ticks()
         self.searching_for_path = False
