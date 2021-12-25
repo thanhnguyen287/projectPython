@@ -72,15 +72,16 @@ class TownCenter(Building):
     # we try the 4 tiles under the town center, then the ones on the sides, then the ones above
     # we also check if we stay in the map boundaries
     def check_collision_and_spawn_villager_where_possible(self):
+        print(self.pos)
         # UNDER
-        if 0 < self.pos[0] < 50 and 0 < self.pos[1] + 1 < 49 and self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] == 1:
+        if 0 <= self.pos[0] < 50 and 0 < self.pos[1] + 1 < 50 and self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] == 1:
             # new villager
             self.map.units[self.pos[0]][self.pos[1] + 1] = Villager((self.pos[0], self.pos[1] + 1), self.owner,
                                                                     self.map)
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
 
-        elif 0 < self.pos[0] + 1 < 50 and 0 < self.pos[1] + 1 < 49 and self.map.collision_matrix[self.pos[1] + 1][
+        elif 0 <= self.pos[0] + 1 < 50 and 0 < self.pos[1] + 1 < 50 and self.map.collision_matrix[self.pos[1] + 1][
             self.pos[0] + 1] == 1:
             # new villager
             self.map.units[self.pos[0] + 1][self.pos[1] + 1] = Villager((self.pos[0] + 1, self.pos[1] + 1),
@@ -88,7 +89,7 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 1] = 0
 
-        elif 0 < self.pos[0] - 1 < 50 and 0 < self.pos[1] + 1 < 49 and \
+        elif 0 <= self.pos[0] - 1 < 50 and 0 < self.pos[1] + 1 < 50 and \
                 self.map.collision_matrix[self.pos[1] + 1][self.pos[0] - 1] == 1:
             # new villager
             self.map.units[self.pos[0] - 1][self.pos[1] + 1] = Villager((self.pos[0] - 1, self.pos[1] + 1),
@@ -96,7 +97,7 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0] - 1] = 0
 
-        elif 0 < self.pos[0] + 2 < 50 and 0 < self.pos[1] + 1 < 49 and \
+        elif 0 <= self.pos[0] + 2 < 50 and 0 < self.pos[1] + 1 < 50 and \
                 self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 2] == 1:
             # new villager
             self.map.units[self.pos[0] + 2][self.pos[1] + 1] = Villager((self.pos[0] + 2, self.pos[1] + 1),
@@ -105,7 +106,7 @@ class TownCenter(Building):
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 2] = 0
 
         # SIDES
-        elif 0 < self.pos[0] - 1 < 50 and 0 < self.pos[1] < 49 and self.map.collision_matrix[self.pos[1]][
+        elif 0 <= self.pos[0] - 1 < 50 and 0 < self.pos[1] < 50 and self.map.collision_matrix[self.pos[1]][
             self.pos[0] - 1] == 1:
             # new villager
             self.map.units[self.pos[0] - 1][self.pos[1]] = Villager((self.pos[0] - 1, self.pos[1]),
@@ -113,7 +114,7 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1]][self.pos[0] - 1] = 0
 
-        elif 0 < self.pos[0] + 2 < 50 and 0 < self.pos[1] < 49 and self.map.collision_matrix[self.pos[1]][
+        elif 0 <= self.pos[0] + 2 < 50 and 0 < self.pos[1] < 50 and self.map.collision_matrix[self.pos[1]][
             self.pos[0] + 2] == 1:
             # new villager
             self.map.units[self.pos[0] + 2][self.pos[1]] = Villager((self.pos[0] + 2, self.pos[1]),
@@ -121,7 +122,7 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1]][self.pos[0] + 2] = 0
 
-        elif 0 < self.pos[0] - 1 < 50 and 0 < self.pos[1] - 1 < 49 and \
+        elif 0 <= self.pos[0] - 1 < 50 and 0 < self.pos[1] - 1 < 50 and \
                 self.map.collision_matrix[self.pos[1] - 1][self.pos[0] - 1] == 1:
             # new villager
             self.map.units[self.pos[0] - 1][self.pos[1] - 1] = Villager((self.pos[0] - 1, self.pos[1] - 1),
@@ -129,7 +130,7 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 1][self.pos[0] - 1] = 0
 
-        elif 0 < self.pos[0] + 2 < 50 and 0 < self.pos[1] - 1 < 49 and \
+        elif 0 <= self.pos[0] + 2 < 50 and 0 < self.pos[1] - 1 < 50 and \
                 self.map.collision_matrix[self.pos[1] - 1][self.pos[0] + 2] == 1:
             # new villager
             self.map.units[self.pos[0] + 2][self.pos[1] - 1] = Villager((self.pos[0] + 2, self.pos[1] - 1),
@@ -139,7 +140,7 @@ class TownCenter(Building):
 
 
         # ABOVE
-        elif 0 < self.pos[0] - 1 < 50 and 0 < self.pos[1] - 2 < 49 and \
+        elif 0 <= self.pos[0] - 1 < 50 and 0 < self.pos[1] - 2 < 50 and \
                 self.map.collision_matrix[self.pos[1] - 2][self.pos[0] - 1] == 1:
             # new villager
             self.map.units[self.pos[0] - 1][self.pos[1] - 2] = Villager((self.pos[0] - 1, self.pos[1] - 2),
@@ -147,7 +148,7 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] - 1] = 0
 
-        elif 0 < self.pos[0] < 50 and 0 < self.pos[1] - 2 < 49 and self.map.collision_matrix[self.pos[1] - 2][
+        elif 0 <= self.pos[0] < 50 and 0 < self.pos[1] - 2 < 50 and self.map.collision_matrix[self.pos[1] - 2][
             self.pos[0]] == 1:
             # new villager
             self.map.units[self.pos[0]][self.pos[1] - 2] = Villager((self.pos[0], self.pos[1] - 2),
@@ -155,7 +156,7 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0]] = 0
 
-        elif 0 < self.pos[0] + 1 < 50 and 0 < self.pos[1] - 2 < 49 and \
+        elif 0 <= self.pos[0] + 1 < 50 and 0 < self.pos[1] - 2 < 50 and \
                 self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 1] == 1:
             # new villager
             self.map.units[self.pos[0] + 1][self.pos[1] - 2] = Villager((self.pos[0] + 1, self.pos[1] - 2),
@@ -163,7 +164,7 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 1] = 0
 
-        elif 0 < self.pos[0] + 2 < 50 and 0 < self.pos[1] - 2 < 49 and \
+        elif 0 <= self.pos[0] + 2 < 50 and 0 < self.pos[1] - 2 < 50 and \
                 self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 2] == 1:
             # new villager
             self.map.units[self.pos[0] + 2][self.pos[1] - 2] = Villager((self.pos[0] + 2, self.pos[1] - 2),
