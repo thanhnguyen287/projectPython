@@ -77,7 +77,6 @@ class TownCenter(Building):
         # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
         if self.is_being_built:
             # the current life increases with the construction progress
-            print(self.current_health)
             progress_time = ((self.now - self.resource_manager_cooldown) / 1000)
             progress_time_pourcent = progress_time * 100 / self.construction_time
             if ceil(progress_time_pourcent * self.max_health*0.01) != 0:
@@ -101,7 +100,6 @@ class TownCenter(Building):
     # we try the 4 tiles under the town center, then the ones on the sides, then the ones above
     # we also check if we stay in the map boundaries
     def check_collision_and_spawn_villager_where_possible(self):
-        print(self.pos)
         # UNDER
         if 0 <= self.pos[0] < 50 and 0 < self.pos[1] + 1 < 50 and self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] == 1:
             # new villager
