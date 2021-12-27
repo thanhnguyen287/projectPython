@@ -198,7 +198,7 @@ class Hud:
         return images
 
     #display life of entity inside mid bottom menu (when examining smth)
-     #if below 25 pourcent, life bar in red, 25-50 : orange , 50-75 : yellow, 75-100 : green
+     #if below 25 pourcent, life bar in red, 25-40 : orange , 40-60 : yellow, 60-100 : light or dark green
     def display_life_hud(self, screen, entity):
         # health bar
         # to get the same health bar size and not have huge ones, we use a ratio
@@ -221,7 +221,6 @@ class Hud:
 
         else:
             pygame.draw.rect(screen, get_color_code("DARK_GREEN"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
-
 
         #outer rectangle for the shape of life bar, never changes
         pygame.draw.rect(screen, get_color_code("BLACK"), (self.width * 0.185, self.height * 0.9 + 43, health_bar_length, 6), 2)
