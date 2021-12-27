@@ -1,5 +1,6 @@
 from settings import *
 from units import Villager
+from math import floor, ceil
 
 
 class Building:
@@ -17,7 +18,7 @@ class Building:
         # will be used in the timer to increase resources of the player
         self.resource_manager_cooldown = pygame.time.get_ticks()
 
-        self.current_health = self.max_health
+        self.current_health = 1
         self.is_alive = True
 
         self.image_select = pygame.image.load(os.path.join(assets_path, "image_select.png"))
@@ -75,10 +76,19 @@ class TownCenter(Building):
 
         # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
         if self.is_being_built:
+            # the current life increases with the construction progress
+            print(self.current_health)
+            progress_time = ((self.now - self.resource_manager_cooldown) / 1000)
+            progress_time_pourcent = progress_time * 100 / self.construction_time
+            if ceil(progress_time_pourcent * self.max_health*0.01) != 0:
+                self.current_health = ceil(progress_time_pourcent * self.max_health*0.01)
+
             # if fully built we set is_being_built to 0, else change the progression attribute accordingly
             if self.now - self.resource_manager_cooldown > TownCenter.construction_time * 1000:
                 self.resource_manager_cooldown = self.now
                 self.construction_progress = 100
+                # to fix a little bug
+                self.current_health -= 1
                 self.is_being_built = False
             elif self.now - self.resource_manager_cooldown > TownCenter.construction_time * 750:
                 self.construction_progress = 75
@@ -214,10 +224,16 @@ class Farm(Building):
         self.now = pygame.time.get_ticks()
         # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
         if self.is_being_built:
+            progress_time = ((self.now - self.resource_manager_cooldown) / 1000)
+            progress_time_pourcent = progress_time * 100 / self.construction_time
+            if ceil(progress_time_pourcent * self.max_health * 0.01) != 0:
+                self.current_health = ceil(progress_time_pourcent * self.max_health * 0.01)
+
             # if fully built we set is_being_built to 0, else change the progression attribute accordingly
             if self.now - self.resource_manager_cooldown > Farm.construction_time * 1000:
                 self.resource_manager_cooldown = self.now
                 self.construction_progress = 100
+                self.current_health -= 1
                 self.is_being_built = False
             elif self.now - self.resource_manager_cooldown > Farm.construction_time * 750:
                 self.construction_progress = 75
@@ -248,10 +264,15 @@ class House(Building):
         self.now = pygame.time.get_ticks()
         # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
         if self.is_being_built:
+            progress_time = ((self.now - self.resource_manager_cooldown) / 1000)
+            progress_time_pourcent = progress_time * 100 / self.construction_time
+            if ceil(progress_time_pourcent * self.max_health*0.01) != 0:
+                self.current_health = ceil(progress_time_pourcent * self.max_health*0.01)
             # if fully built we set is_being_built to 0, else change the progression attribute accordingly
             if self.now - self.resource_manager_cooldown > House.construction_time * 1000:
                 self.resource_manager_cooldown = self.now
                 self.construction_progress = 100
+                self.current_health -= 1
                 self.is_being_built = False
             elif self.now - self.resource_manager_cooldown > House.construction_time * 750:
                 self.construction_progress = 75
