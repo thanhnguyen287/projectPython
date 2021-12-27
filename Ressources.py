@@ -56,6 +56,3 @@ class Ressource:
         pygame.draw.rect(screen, (255, 0, 0), (self.get_position()[0]-15, self.get_position()[1]-15, self.current_health * 3, 10))
         pygame.draw.rect(screen, (25, 25, 25), (self.get_position()[0]-15, self.get_position()[1]-15, self.max_health * 3, 10), 4)
 
-
-Test_tree = Ressource(1, 1)
-ressources = [Test_tree]

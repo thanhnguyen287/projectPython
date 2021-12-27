@@ -5,7 +5,6 @@ from .utils import decarte_to_iso, iso_to_decarte
 from settings import *
 from builds import Farm, TownCenter, House, Building
 from player import playerOne
-from New_ressources import *
 from units import Villager, Unit
 
 
