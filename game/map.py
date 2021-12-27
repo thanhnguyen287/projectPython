@@ -595,6 +595,8 @@ class Map:
             self.place_y = place_y
 
             new_building = TownCenter((place_x, place_y), self, playerOne)
+            new_building.is_being_built = False
+            new_building.construction_progress = 100
             self.entities.append(new_building)
             self.buildings[place_x][place_y] = new_building
 
