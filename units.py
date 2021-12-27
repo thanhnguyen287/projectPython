@@ -37,14 +37,12 @@ class Unit:
         self.map.units[self.pos[0]][self.pos[1]] = None
         #remove collision from old position
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 1
-        self.map.map[self.pos[0]][self.pos[1]]["collision"] = False
         # update the map
         self.map.units[new_tile[0]][new_tile[1]] = self
         self.pos = self.map.map[new_tile[0]][new_tile[1]]["grid"]
         #update collision for new tile
 
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
-        self.map.map[self.pos[0]][self.pos[1]]["collision"] = True
 
     def update(self):
         now = pygame.time.get_ticks()
