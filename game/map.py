@@ -1,7 +1,7 @@
 import random
 import noise
 import pygame.mouse
-from .utils import decarte_to_iso, iso_to_decarte, get_color
+from .utils import decarte_to_iso, iso_to_decarte, get_color_code
 from settings import *
 from buildings import Farm, TownCenter, House, Building
 from player import playerOne
@@ -514,7 +514,7 @@ class Map:
         return collision_matrix
 
     def highlight_tile(self, iso_poly, screen, color):
-            pygame.draw.polygon(screen, get_color(color), iso_poly, 3)
+            pygame.draw.polygon(screen, get_color_code(color), iso_poly, 3)
 
     # here is the fonction that places the townhall randomly on the map
     def place_townhall(self):

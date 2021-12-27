@@ -1,7 +1,7 @@
 from settings import *
 import pygame
 from math import ceil, floor
-from .utils import draw_text, scale_image
+from .utils import draw_text, scale_image, get_color_code
 from player import playerOne
 from units import Villager
 from buildings import TownCenter, House, Farm, Building
@@ -197,14 +197,34 @@ class Hud:
         }
         return images
 
-    def display_life(self, screen, entity):
+    #display life of entity inside mid bottom menu (when examining smth)
+     #if below 25 pourcent, life bar in red, 25-50 : orange , 50-75 : yellow, 75-100 : green
+    def display_life_hud(self, screen, entity):
         # health bar
         # to get the same health bar size and not have huge ones, we use a ratio
         health_bar_length = 100
         hp_displayed = (entity.current_health / entity.max_health * health_bar_length)
+        #from 1 to 100% of max health, used to know which color we use for the health bar
+        unit_pourcentage_of_max_hp = (entity.current_health / entity.max_health) * 100
 
-        pygame.draw.rect(screen, (255, 0, 0), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
-        pygame.draw.rect(screen, (25, 25, 25), (self.width * 0.185, self.height * 0.9 + 43, health_bar_length, 6), 2)
+        if 0 < unit_pourcentage_of_max_hp <= 25:
+            pygame.draw.rect(screen, get_color_code("RED"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+
+        elif 25 < unit_pourcentage_of_max_hp <= 40:
+            pygame.draw.rect(screen, get_color_code("ORANGE"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+
+        elif 40 < unit_pourcentage_of_max_hp <= 60:
+            pygame.draw.rect(screen, get_color_code("YELLOW"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+
+        elif 60 < unit_pourcentage_of_max_hp <= 85:
+            pygame.draw.rect(screen, get_color_code("GREEN"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+
+        else:
+            pygame.draw.rect(screen, get_color_code("DARK_GREEN"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+
+
+        #outer rectangle for the shape of life bar, never changes
+        pygame.draw.rect(screen, get_color_code("BLACK"), (self.width * 0.185, self.height * 0.9 + 43, health_bar_length, 6), 2)
 
         # health text
         health_text = str(entity.current_health) + " / " + str(entity.max_health)
@@ -378,7 +398,7 @@ class Hud:
                       12, (255, 255, 255), temp_pos)
 
         # lifebar and numbers
-        self.display_life(screen, self.examined_tile)
+        self.display_life_hud(screen, self.examined_tile)
 
     # display progress bar and icon of trained unit
     def display_progress_bar(self, screen, trained_entity, training_entity, building_built=None):

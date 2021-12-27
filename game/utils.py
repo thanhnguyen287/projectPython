@@ -45,8 +45,9 @@ def scale_image(image, w=None, h=None):
     return image
 
 
-    #returns RGB_code (x,y,z) corresponding to the color argument
-def get_color(color: str):
+    #returns RGB_code corresponding to the color argument(red,green,blue)
+    #red, green, blue going from 0 to 255, with 255 being the closer to full color and 0 to none/black
+def get_color_code(color: str):
 
     if color == "WHITE":
         return 255, 255, 255
@@ -63,8 +64,20 @@ def get_color(color: str):
     elif color == "GREEN":
         return 0, 255, 0
 
+    elif color == "DARK_GREEN":
+        return 0, 128, 0
+
     elif color == "RED":
         return 255, 0, 0
+
+    elif color == "DARK_RED":
+        return 138, 3, 3
+
+    elif color == "ORANGE":
+        return 255, 127, 0
+
+    elif color == "YELLOW":
+        return 255, 255, 0
 
     elif color == "GOLD":
         return 255, 201, 14
