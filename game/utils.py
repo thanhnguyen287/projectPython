@@ -43,3 +43,28 @@ def scale_image(image, w=None, h=None):
         image = pygame.transform.scale(image, (int(w), int(h)))
 
     return image
+
+
+    #returns RGB_code (x,y,z) corresponding to the color argument
+def get_color(color: str):
+
+    if color == "WHITE":
+        return 255, 255, 255
+
+    elif color == "BLACK":
+        return 0, 0, 0
+
+    elif color == "GREY":
+        return 60, 60, 60
+
+    elif color == "BLUE":
+        return 0, 0, 255
+
+    elif color == "GREEN":
+        return 0, 255, 0
+
+    elif color == "RED":
+        return 255, 0, 0
+
+    elif color == "GOLD":
+        return 255, 201, 14

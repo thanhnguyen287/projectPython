@@ -4,7 +4,7 @@ from math import ceil, floor
 from .utils import draw_text, scale_image
 from player import playerOne
 from units import Villager
-from builds import TownCenter, House, Farm, Building
+from buildings import TownCenter, House, Farm, Building
 
 
 class Hud:
@@ -505,6 +505,10 @@ class Hud:
             description_text = entity["description"]
             draw_text(screen, description_text, 14, (255, 255, 255),
                       (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
+
+    def display_resources_health(self, screen, x, y, health, max_health):
+        pygame.draw.rect(screen, (0, 255, 0), (x, y, health * 10, 10))
+        pygame.draw.rect(screen, (25, 25, 25), (x, y, max_health * 10, 10), 4)
 
     def display_building(self, screen, building, scroll, render_pos):
         # we either display the building fully constructed or being built ( 4 possible states )

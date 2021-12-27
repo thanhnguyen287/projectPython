@@ -1,9 +1,9 @@
 import random
 import noise
 import pygame.mouse
-from .utils import decarte_to_iso, iso_to_decarte
+from .utils import decarte_to_iso, iso_to_decarte, get_color
 from settings import *
-from builds import Farm, TownCenter, House, Building
+from buildings import Farm, TownCenter, House, Building
 from player import playerOne
 from units import Villager, Unit
 
@@ -252,11 +252,11 @@ class Map:
                     # here we display the health bar of the ressources
                     if (self.examined_tile is not None and x == self.examined_tile[0] and y == self.examined_tile[1]) \
                             or self.map[x][y]["health"] != self.map[x][y]["max_health"]:
-                        display_health(screen,
+                        self.hud.display_resources_health(screen,
                                        render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10,
                                        render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y,
                                        self.map[x][y]["health"], self.map[x][y]["max_health"])
-                        display_health(screen,
+                        self.hud.display_resources_health(screen,
                                        render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10,
                                        render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y,
                                        self.map[x][y]["health"], self.map[x][y]["max_health"])
@@ -514,16 +514,7 @@ class Map:
         return collision_matrix
 
     def highlight_tile(self, iso_poly, screen, color):
-        if color == "WHITE":
-            pygame.draw.polygon(screen, (255, 255, 255), iso_poly, 3)
-        elif color == "BLACK":
-            pygame.draw.polygon(screen, (0, 0, 0), iso_poly, 3)
-        elif color == "BLUE":
-            pygame.draw.polygon(screen, (0, 0, 255), iso_poly, 3)
-        elif color == "GREEN":
-            pygame.draw.polygon(screen, (0, 255, 0), iso_poly, 3)
-        elif color == "RED":
-            pygame.draw.polygon(screen, (255, 0, 0), iso_poly, 3)
+            pygame.draw.polygon(screen, get_color(color), iso_poly, 3)
 
     # here is the fonction that places the townhall randomly on the map
     def place_townhall(self):
