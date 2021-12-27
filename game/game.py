@@ -76,7 +76,7 @@ class Game:
                                     self.hud.examined_tile.unit_type_currently_trained = None
                             else:
                                 if button["affordable"]:
-                                    if button["name"] == "Villager":
+                                    if button["name"] == "Villager" and not self.hud.examined_tile.is_being_built:
                                         self.hud.examined_tile.queue += 1
                                         #if the town center is not working
                                         if not self.hud.examined_tile.is_working:
