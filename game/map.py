@@ -84,15 +84,14 @@ class Map:
                 if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
                     render_pos = self.map[grid_pos[0]][grid_pos[1]]["render_pos"]
                     iso_poly = self.map[grid_pos[0]][grid_pos[1]]["iso_poly"]
-                    collision = self.map[grid_pos[0]][grid_pos[1]]["collision"]
+                    collision = self.is_there_collision(grid_pos)
 
                     self.temp_tile = {
                         "name": name,
                         "image": image,
                         "render_pos": render_pos,
                         "iso_poly": iso_poly,
-                        "collision": collision,
-                        "2x2_collision": False
+                        "collision": collision
                     }
 
                 else:
@@ -122,7 +121,6 @@ class Map:
                         self.map[grid_pos[0] + 1][grid_pos[1]]["collision"] = True
                         self.map[grid_pos[0]][grid_pos[1] - 1]["collision"] = True
                         self.map[grid_pos[0] + 1][grid_pos[1] - 1]["collision"] = True
-                        self.map[grid_pos[0]][grid_pos[1]]["2x2_collision"] = True
 
                     elif self.hud.selected_tile["name"] == "House":
                         building_type_built = House
@@ -142,9 +140,8 @@ class Map:
         else:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
-                collision2 = self.map[grid_pos[0]][grid_pos[1]]["collision"]
                 # we deselect the object examined when left-clicking if not on hud
-                if mouse_action[0] and not collision2 and not self.hud.bottom_hud_rect.collidepoint(mouse_pos):
+                if mouse_action[0] and not self.is_there_collision(grid_pos) and not self.hud.bottom_hud_rect.collidepoint(mouse_pos):
                     self.examined_tile = None
                     self.hud.examined_tile = None
                     self.hud.bottom_left_menu = None
@@ -179,10 +176,7 @@ class Map:
                 villager_pos = self.hud.examined_tile.pos
 
                 # if the villager isnt gathering/planning to gather, and there is not collision on the tile we right click on, then he moves
-                if not self.map[grid_pos[0]][grid_pos[1]]["collision"] and not \
-                        self.units[villager_pos[0]][
-                            villager_pos[1]].gathering and self.units[villager_pos[0]][
-                    villager_pos[1]].target is None:
+                if not self.map[grid_pos[0]][grid_pos[1]]["collision"] and not self.units[villager_pos[0]][villager_pos[1]].gathering and self.units[villager_pos[0]][villager_pos[1]].target is None:
                     self.units[villager_pos[0]][villager_pos[1]].move_to(
                         self.map[grid_pos[0]][grid_pos[1]])
 
@@ -413,7 +407,6 @@ class Map:
             "render_pos": [minx, miny],
             "tile": tile,
             "collision": False if tile == "" else True,
-            "2x2_collision": False,
             "max_health": 10,
             "health": 10
         }
@@ -562,3 +555,7 @@ class Map:
             self.collision_matrix[entity.pos[1]][entity.pos[0]] = 1
         self.examined_tile = None
         self.hud.examined_tile = None
+
+    #returns true if there is collision, else False
+    def is_there_collision(self, grid_pos: tuple[int, int]):
+        return True if self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 else False

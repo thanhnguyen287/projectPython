@@ -58,4 +58,7 @@ IMPORTANT STUFF :
 11 - Save/Load method (Hard)
 - will probably force us to properly separate display and objects
 
+12 - Town center selection
+- we must be able to select town center when left clicking on all 4 tiles, not only the bottom left one
+
 ...

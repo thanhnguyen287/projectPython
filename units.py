@@ -21,7 +21,7 @@ class Unit:
         self.dest = None
 
     def move_to(self, new_tile):
-        if self.map.collision_matrix[new_tile["grid"][1]][new_tile["grid"][0]] != 0:
+        if not self.map.is_there_collision(new_tile["grid"]):
             self.searching_for_path = True
             self.dest = new_tile
             self.grid = Grid(matrix=self.map.collision_matrix)
@@ -34,6 +34,7 @@ class Unit:
 
     def change_tile(self, new_tile):
         # remove the unit from its current position on the map
+
         self.map.units[self.pos[0]][self.pos[1]] = None
         #remove collision from old position
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 1
@@ -41,7 +42,6 @@ class Unit:
         self.map.units[new_tile[0]][new_tile[1]] = self
         self.pos = self.map.map[new_tile[0]][new_tile[1]]["grid"]
         #update collision for new tile
-
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
 
     def update(self):
