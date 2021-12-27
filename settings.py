@@ -45,6 +45,19 @@ gold_cost = pygame.image.load("resources/assets/icons/gold_cost.png")
 stone_cost = pygame.image.load("resources/assets/icons/stone_cost.png")
 population_cost = pygame.image.load("resources/assets/icons/population_cost.png")
 
+#construction progression
+building_construction_1 = pygame.image.load("resources/assets/258_1.png")
+building_construction_2 = pygame.image.load("resources/assets/258_2.png")
+building_construction_3 = pygame.image.load("resources/assets/258_3.png")
+building_construction_4 = pygame.image.load("resources/assets/258_4.png")
+
+building_construction_1_2x2 = pygame.image.load("resources/assets/2x2_258_1.png")
+building_construction_2_2x2 = pygame.image.load("resources/assets/2x2_258_2.png")
+building_construction_3_2x2 = pygame.image.load("resources/assets/2x2_258_3.png")
+building_construction_4_2x2 = pygame.image.load("resources/assets/2x2_258_4.png")
+
+
+
 standard_cursor = pygame.image.load("resources/assets/standard_cursor.png")
 
 destination_flag = pygame.image.load("resources/assets/dflag.png")

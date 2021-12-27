@@ -4,6 +4,8 @@ from units import Villager
 
 class Building:
     population_produced = 0
+    is_being_built = True
+    construction_progress = 0
 
     def __init__(self, pos, map, player_owner_of_unit, ):
         self.owner = player_owner_of_unit
@@ -23,6 +25,7 @@ class Building:
 
         self.resource_manager_cooldown = pygame.time.get_ticks()
         #self.owner.pay_entity_cost(self)
+        self.now = 0
 
     def update(self):
         pass
@@ -32,7 +35,7 @@ class TownCenter(Building):
     description = " Used to create villagers."
     construction_tooltip = " Build a Town Center"
     construction_cost = [1000, 0, 0, 100]
-    construction_time = 150
+    construction_time = 8
     armor = 3
 
     def __init__(self, pos, map, player_owner_of_unit):
@@ -41,7 +44,6 @@ class TownCenter(Building):
         self.sprite = pygame.image.load(os.path.join(assets_path, "town_center.png"))
 
         self.construction_cost = [0, 0, 0, 0]
-        self.construction_time = 150
 
         self.max_health = 100
         #becomes true when you create villagers
@@ -51,7 +53,6 @@ class TownCenter(Building):
         player_owner_of_unit.max_population += 5
         #used when you order the creation of multiples units
         self.queue = 0
-        self.now = 0
         self.resource_manager_cooldown = 0
 
         super().__init__(pos, map, player_owner_of_unit)
@@ -60,7 +61,7 @@ class TownCenter(Building):
     def update(self):
         self.now = pygame.time.get_ticks()
         # add a button to stop the current action if the town center is working
-        if self.is_working:
+        if self.is_working and not self.is_being_built:
             # if a villager is being created since 5 secs :
             if self.now - self.resource_manager_cooldown > 5000:
                 self.resource_manager_cooldown = self.now
@@ -71,6 +72,20 @@ class TownCenter(Building):
                 # if there are no more villagers to train, we can stop there
                 if self.queue <= 0:
                     self.is_working = False
+
+        # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
+        if self.is_being_built:
+            # if fully built we set is_being_built to 0, else change the progression attribute accordingly
+            if self.now - self.resource_manager_cooldown > TownCenter.construction_time * 1000:
+                self.resource_manager_cooldown = self.now
+                self.construction_progress = 100
+                self.is_being_built = False
+            elif self.now - self.resource_manager_cooldown > TownCenter.construction_time * 750:
+                self.construction_progress = 75
+            elif self.now - self.resource_manager_cooldown > TownCenter.construction_time * 500:
+                self.construction_progress = 50
+            elif self.now - self.resource_manager_cooldown > TownCenter.construction_time * 250:
+                self.construction_progress = 25
 
     # we determine the nearest free tile, collision matrix has a 1 if the tile is free
     # we try the 4 tiles under the town center, then the ones on the sides, then the ones above
@@ -181,7 +196,7 @@ class Farm(Building):
     description = " Provides 50 food every 5 seconds."
     construction_tooltip = " Build a Farm"
     construction_cost = [100, 0, 0, 0]
-    construction_time = 1
+    construction_time = 4
     armor = 0
 
     def __init__(self, pos, map, player_owner_of_unit):
@@ -189,7 +204,6 @@ class Farm(Building):
         self.sprite = pygame.image.load(os.path.join(assets_path, "Farm.png"))
 
         self.construction_cost = [100, 0, 0, 0]
-        self.construction_time = 1
 
         self.max_health = 10
         self.max_population_bonus = 0
@@ -197,18 +211,27 @@ class Farm(Building):
         super().__init__(pos, map, player_owner_of_unit)
 
     def update(self):
-        now = pygame.time.get_ticks()
-        # every 5 secs :
-        if now - self.resource_manager_cooldown > 5000:
-            self.owner.resources[2] += 50
-            self.resource_manager_cooldown = now
+        self.now = pygame.time.get_ticks()
+        # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
+        if self.is_being_built:
+            # if fully built we set is_being_built to 0, else change the progression attribute accordingly
+            if self.now - self.resource_manager_cooldown > Farm.construction_time * 1000:
+                self.resource_manager_cooldown = self.now
+                self.construction_progress = 100
+                self.is_being_built = False
+            elif self.now - self.resource_manager_cooldown > Farm.construction_time * 750:
+                self.construction_progress = 75
+            elif self.now - self.resource_manager_cooldown > Farm.construction_time * 500:
+                self.construction_progress = 50
+            elif self.now - self.resource_manager_cooldown > Farm.construction_time * 250:
+                self.construction_progress = 25
 
 
 class House(Building):
     description = " Each House increases the maximum population by 5."
     construction_tooltip = " Build a House"
     construction_cost = [600, 0, 0, 0]
-    construction_time = 1
+    construction_time = 4
     armor = -2
 
     def __init__(self, pos, map, player_owner_of_unit):
@@ -216,16 +239,23 @@ class House(Building):
         self.sprite = pygame.image.load(os.path.join(assets_path, "House.png"))
 
         self.construction_cost = [600, 0, 0, 0]
-        self.construction_time = 1
-
         self.max_health = 50
         player_owner_of_unit.max_population += 5
 
         super().__init__(pos, map, player_owner_of_unit)
 
     def update(self):
-        now = pygame.time.get_ticks()
-        # every 5 secs :
-        if now - self.resource_manager_cooldown > 5000:
-            self.resource_manager_cooldown = now
-
+        self.now = pygame.time.get_ticks()
+        # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
+        if self.is_being_built:
+            # if fully built we set is_being_built to 0, else change the progression attribute accordingly
+            if self.now - self.resource_manager_cooldown > House.construction_time * 1000:
+                self.resource_manager_cooldown = self.now
+                self.construction_progress = 100
+                self.is_being_built = False
+            elif self.now - self.resource_manager_cooldown > House.construction_time * 750:
+                self.construction_progress = 75
+            elif self.now - self.resource_manager_cooldown > House.construction_time * 500:
+                self.construction_progress = 50
+            elif self.now - self.resource_manager_cooldown > House.construction_time * 250:
+                self.construction_progress = 25

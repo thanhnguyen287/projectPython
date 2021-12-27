@@ -1,5 +1,6 @@
 from settings import *
 import pygame
+from math import ceil, floor
 from .utils import draw_text, scale_image
 from player import playerOne
 from units import Villager
@@ -158,21 +159,28 @@ class Hud:
         if self.examined_tile is not None:
             screen.blit(bot_complet_menu_building_hd, (0, self.height - 182))
             self.display_entity_description(screen)
+
+            #if the town center is creating villager, we display the corresponding progression bar
             if type(self.examined_tile) == TownCenter and self.examined_tile.is_working:
                 self.display_progress_bar(screen, Villager, self.examined_tile)
+            #we display progression bar if a building is currently being built
+            elif issubclass(type(self.examined_tile), Building) and self.examined_tile.is_being_built:
+                self.display_progress_bar(screen, "Non_meaningful arg 1", "Non_meaningful arg 2", self.examined_tile)
 
-        # building selection inside the build menu
-        if self.bottom_left_menu is not None:
-            for tile in self.bottom_left_menu:
-                icon = tile["icon"].copy()
-                #if player cant affort to build/train entity, we make the icon transparent
-                if tile["name"] != "STOP" and not playerOne.can_afford(tile["name"]):
-                    icon.set_alpha(100)
-                screen.blit(icon, tile["rect"].topleft)
-                if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP"and tile["affordable"]:
-                    self.display_construction_tooltip(screen, tile["name"])
-                if tile["rect"].collidepoint(mouse_pos) and tile["name"] == "STOP":
-                    self.display_construction_tooltip(screen, tile)
+            # building selection inside the build menu
+            if self.bottom_left_menu is not None:
+                #if it is not a building in construction
+                if not issubclass(type(self.examined_tile), Building) or not self.examined_tile.is_being_built:
+                    for tile in self.bottom_left_menu:
+                        icon = tile["icon"].copy()
+                        #if player cant affort to build/train entity, we make the icon transparent
+                        if tile["name"] != "STOP" and not playerOne.can_afford(tile["name"]):
+                            icon.set_alpha(100)
+                        screen.blit(icon, tile["rect"].topleft)
+                        if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP"and tile["affordable"]:
+                            self.display_construction_tooltip(screen, tile["name"])
+                        if tile["rect"].collidepoint(mouse_pos) and tile["name"] == "STOP":
+                            self.display_construction_tooltip(screen, tile)
 
     def load_images(self):
         town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
@@ -373,41 +381,62 @@ class Hud:
         self.display_life(screen, self.examined_tile)
 
     # display progress bar and icon of trained unit
-    def display_progress_bar(self, screen, trained_entity, training_entity):
+    def display_progress_bar(self, screen, trained_entity, training_entity, building_built=None):
+        # if we get building_arg, it means we must display the construction progress, else it is units training
+        if building_built is not None:
+            progress_bar_length = 120
+            progress_displayed = ((building_built.now - building_built.resource_manager_cooldown) / (
+                    building_built.construction_time * 1000) * progress_bar_length)
 
-        if trained_entity == Villager:
-            icon = villager_icon
+            pygame.draw.rect(screen, (255, 201, 14),
+                             (self.width * 0.30 + 120, self.height * 0.8 + 43, progress_displayed, 6))
+            pygame.draw.rect(screen, (25, 25, 25),
+                             (self.width * 0.30 + 120, self.height * 0.8 + 43, progress_bar_length, 6), 2)
+
+            temp_text = "Construction progress..."
+            draw_text(screen, temp_text, 13, (255, 255, 255), (self.width * 0.30 + 120, self.height * 0.8 + 27))
+
+            # progress_time in secs
+            progress_time = ((building_built.now - building_built.resource_manager_cooldown) / 1000)
+            progress_time_pourcent = progress_time*100 / building_built.construction_time
+            progress_text = str(floor(progress_time_pourcent)) + "%"
+            draw_text(screen, progress_text, 12, (255, 255, 255), (self.width * 0.30 + 170, self.height * 0.8 + 53))
+
+        # no building_built, which means we have to display a training unit progress bar
         else:
-            icon = None
-        # health bar
-        # to get the same health bar size and not have huge ones, we use a ratio
-        progress_bar_length = 120
-        progress_displayed = ((training_entity.now - training_entity.resource_manager_cooldown) / (
-                    trained_entity.construction_time * 1000) * progress_bar_length)
+            if trained_entity == Villager:
+                icon = villager_icon
+            else:
+                icon = None
+            # health bar
+            # to get the same health bar size and not have huge ones, we use a ratio
+            progress_bar_length = 120
+            progress_displayed = ((training_entity.now - training_entity.resource_manager_cooldown) / (
+                        trained_entity.construction_time * 1000) * progress_bar_length)
 
-        pygame.draw.rect(screen, (255, 201, 14),
-                         (self.width * 0.30 + 120, self.height * 0.8 + 43, progress_displayed, 6))
-        pygame.draw.rect(screen, (25, 25, 25),
-                         (self.width * 0.30 + 120, self.height * 0.8 + 43, progress_bar_length, 6), 2)
+            pygame.draw.rect(screen, (255, 201, 14),
+                             (self.width * 0.30 + 120, self.height * 0.8 + 43, progress_displayed, 6))
+            pygame.draw.rect(screen, (25, 25, 25),
+                             (self.width * 0.30 + 120, self.height * 0.8 + 43, progress_bar_length, 6), 2)
 
-        temp_text = "Training a " + str(trained_entity.name) + "..."
-        draw_text(screen, temp_text, 13, (255, 255, 255), (self.width * 0.30 + 130, self.height * 0.8 + 27))
+            temp_text = "Training a " + str(trained_entity.name) + "..."
+            draw_text(screen, temp_text, 13, (255, 255, 255), (self.width * 0.30 + 130, self.height * 0.8 + 27))
 
-        # progress %
-        health_text = str(int((training_entity.now - training_entity.resource_manager_cooldown) / 1000) * 20) + "%"
-        draw_text(screen, health_text, 12, (255, 255, 255), (self.width * 0.30 + 170, self.height * 0.8 + 53))
+            # progress %
+            health_text = str(int((training_entity.now - training_entity.resource_manager_cooldown) / 1000) * 20) + "%"
+            draw_text(screen, health_text, 12, (255, 255, 255), (self.width * 0.30 + 170, self.height * 0.8 + 53))
 
-        # icon and number of units being trained
-        screen.blit(icon, self.trained_unit_icon_pos)
-        black_color = (0, 0, 0)
-        # Drawing little black rectangle to make it easier to read number of entities to train
-        little_black_square_surface = pygame.Surface((7, 11), pygame.SRCALPHA)
-        little_black_square_surface.fill(black_color)
-        screen.blit(little_black_square_surface,
-                    (self.trained_unit_icon_pos[0] + 42, self.trained_unit_icon_pos[1] + 38))
+            # icon and number of units being trained
+            screen.blit(icon, self.trained_unit_icon_pos)
+            black_color = (0, 0, 0)
+            # Drawing little black rectangle to make it easier to read number of entities to train
+            little_black_square_surface = pygame.Surface((7, 11), pygame.SRCALPHA)
+            little_black_square_surface.fill(black_color)
+            screen.blit(little_black_square_surface,
+                        (self.trained_unit_icon_pos[0] + 42, self.trained_unit_icon_pos[1] + 38))
 
-        draw_text(screen, str(training_entity.queue), 12, (255, 255, 255),
-                  (self.trained_unit_icon_pos[0] + 43, self.trained_unit_icon_pos[1] + 37))
+            draw_text(screen, str(training_entity.queue), 12, (255, 255, 255),
+                      (self.trained_unit_icon_pos[0] + 43, self.trained_unit_icon_pos[1] + 37))
 
     # display what entity, its costs, and a brief description
     def display_construction_tooltip(self, screen, entity):
