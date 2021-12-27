@@ -1,0 +1,61 @@
+                                TO DO LIST FOR OUR PROJECT :
+
+IMPORTANT STUFF :
+
+
+1 - Display_message_method (estimated difficulty : hard)
+- must display messages under the FPS
+- Grey semi-transparent background as for tooltips to make messages easier to read
+- "messages" fade after a few seconds of inactivity
+- a new message appears above the previous one
+- Old ones get deleted when reaching max_messages limit
+
+2 - Add gold, berry bush resources (easy)
+
+3 - Add water tile (easy)
+- Map should be surrounded by water
+- Add water inside the map (harder)
+- Water has collision
+
+4 - Starting menu (medium)
+- IS IT FINISHED ?
+- Must be able to load a game
+- Must be able to start a game and specify : the size of the map (50x50, 100x100, etc...), the starting resources for player, the civilization (only the standard one for us)
+
+5 - In-game menu (medium)
+- Display centered in game menu with "PAUSE", "OPTIONS", "SAVE", "LOAD", "QUIT"
+- Pause OPTIONAL FOR NOW
+- OPTIONS : nothing for now, maybe one or two random case you can check for later
+- SAVE : see 11
+- LOAD : same
+- QUIT : go back to main menu after asking "are you sure you want to quit this game ?"
+
+6 - Win/Lose menu (medium)
+- When we lose/win a game, should display a big "WIN" or "LOSE" message
+- Continue / QUIT buttons if you win
+- Quit if you lose
+- Display score screen when you QUIT, and go back to main menu after quitting SCORE screen
+
+7 - Update the way collision is managed in our code (easy)
+- We should only work with the collision matrix now and remove all the redondunt stuff (don't forget the collision matrix uses inversed x and y)
+
+8 - Properly implement attack method (medium-hard)
+- a unit attacks another one when right clicking on a ennemy unit. If not in range, get close enough to do. If its not possible, do nothing and display message : "Cant reach target ?"
+- maybe use remove_entity method to remove units/buildings when they die
+- display health bars of attacked units
+- make sure they attack xxx times per sec (see attack_speed for units)
+- implement projectile system for ranged units
+
+9 - Properly implement gather resource method (medium-hard)
+- villagers must gather x amount of resources, and go back to towncenter to give it to the player
+- villagers shouldn't stop gathering once they destroyed a tree/rock
+- put gather stuff inside a method to make it clearier
+
+10 - Properly implement build method (medium)
+- villagers must move to an adjacent tile before starting the creation of the building, and construction must stop if the villager stop working on it
+- must be able to cancel a building creation (Optional)
+
+11 - Save/Load method (Hard)
+- will probably force us to properly separate display and objects
+
+...
