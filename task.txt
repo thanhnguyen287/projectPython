@@ -36,7 +36,7 @@ IMPORTANT STUFF :
 - Quit if you lose
 - Display score screen when you QUIT, and go back to main menu after quitting SCORE screen
 
-7 - Update the way collision is managed in our code (easy)
+7 - Update the way collision is managed in our code (easy) - TRISTAN IS WORKING ON IT
 - We should only work with the collision matrix now and remove all the redondunt stuff (don't forget the collision matrix uses inversed x and y)
 
 8 - Properly implement attack method (medium-hard)
