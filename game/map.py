@@ -3,10 +3,10 @@ import noise
 import pygame.mouse
 from .utils import decarte_to_iso, iso_to_decarte
 from settings import *
-from builds import Farm, TownCenter, House
+from builds import Farm, TownCenter, House, Building
 from player import playerOne
 from New_ressources import *
-from units import Villager
+from units import Villager, Unit
 
 
 class Map:
@@ -131,7 +131,7 @@ class Map:
                         self.entities.append(new_building)
                         self.buildings[grid_pos[0]][grid_pos[1]] = new_building
 
-                    #we pay the construction cost
+                    # we pay the construction cost
                     playerOne.pay_entity_cost_bis(building_type_built)
 
                     # we actualize collision
@@ -265,100 +265,97 @@ class Map:
                 # HERE WE DRAW THE BUILDINGS ON THE MAP
                 # we extract from the buildings list the building we want to display
                 building = self.buildings[x][y]
-                if building is not None and building.current_health <= 0:
-                    self.buildings[x][y] = None
-                    self.map[x][y]["collision"] = False
-                    self.examined_tile = None
-                    self.hud.examined_tile = None
-
                 if building is not None:
-                    #we either display the building fully constructed or being built
-                    if building.construction_progress == 0:
-                        if type(building) == TownCenter:
-                            screen.blit(building_construction_1_2x2, (
-                                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                        )
-                        else:
-                            screen.blit(building_construction_1, (
-                                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                        )
-
-                    elif building.construction_progress == 25:
-                        if type(building) == TownCenter:
-                            screen.blit(building_construction_2_2x2, (
-                                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                        )
-                        else:
-                            screen.blit(building_construction_2, (
-                                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                        )
-                    elif building.construction_progress == 50:
-                        if type(building) == TownCenter:
-                            screen.blit(building_construction_3_2x2, (
-                                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                        )
-                        else:
-                            screen.blit(building_construction_3, (
-                            render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                            render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                    )
-                    elif building.construction_progress == 75:
-                        if type(building) == TownCenter:
-                            screen.blit(building_construction_4_2x2, (
-                                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                        )
-                        else:
-                            screen.blit(building_construction_4, (
-                                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                        )
-
-                        #building is fully built, we display its sprite
+                    if building.current_health <= 0:
+                        self.remove_entity(building)
                     else:
-                        screen.blit(building.sprite, (
-                            render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                            render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                )
+                        # we either display the building fully constructed or being built
+                        self.hud.display_building(screen, building, camera.scroll, render_pos)
+                        null_text = """            
+                        if building.construction_progress == 0:
+                            if type(building) == TownCenter:
+                                screen.blit(building_construction_1_2x2, (
+                                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                    render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                            )
+                            else:
+                                screen.blit(building_construction_1, (
+                                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                    render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                            )
 
-                    # have we clicked on this tile ? if yes we will highlight the building
+                        elif building.construction_progress == 25:
+                            if type(building) == TownCenter:
+                                screen.blit(building_construction_2_2x2, (
+                                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                    render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                            )
+                            else:
+                                screen.blit(building_construction_2, (
+                                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                    render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                            )
+                        elif building.construction_progress == 50:
+                            if type(building) == TownCenter:
+                                screen.blit(building_construction_3_2x2, (
+                                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                    render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                            )
+                            else:
+                                screen.blit(building_construction_3, (
+                                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                    render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                            )
+                        elif building.construction_progress == 75:
+                            if type(building) == TownCenter:
+                                screen.blit(building_construction_4_2x2, (
+                                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                    render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                            )
+                            else:
+                                screen.blit(building_construction_4, (
+                                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                    render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                            )
+
+                            # building is fully built, we display its sprite
+                        else:
+                            screen.blit(building.sprite, (
+                                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                        )
+"""
+                        # have we clicked on this tile ? if yes we will highlight the building
                         if self.examined_tile is not None:
                             if not building.is_being_built:
                                 if (x == self.examined_tile[0]) and (y == self.examined_tile[1]):
                                     if type(building) != TownCenter:
-                                        #to higlight tile in white
-                                        #temp_coor = self.grid_to_map(self.examined_tile[0], self.examined_tile[1])
-                                        #iso_poly = temp_coor["iso_poly"]
-                                        #iso_poly = [
+                                        # to higlight tile in white
+                                        # temp_coor = self.grid_to_map(self.examined_tile[0], self.examined_tile[1])
+                                        # iso_poly = temp_coor["iso_poly"]
+                                        # iso_poly = [
                                         #    (x + self.grass_tiles.get_width() / 2 + camera.scroll.x, y + camera.scroll.y)
                                         #    for x, y in iso_poly]
-                                        #self.highlight_tile(iso_poly, screen, "WHITE")
+                                        # self.highlight_tile(iso_poly, screen, "WHITE")
 
                                         # outline in white the object selected
                                         mask = pygame.mask.from_surface(building.sprite).outline()
                                         mask = [(x + render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                                                  y + render_pos[1] - (
-                                                             building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                                         building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
                                                 for x, y in mask]
                                         pygame.draw.polygon(screen, (255, 255, 255), mask, 3)
                                     else:
                                         building_pos = building.pos
-                                        temp_iso_poly = self.get_2x2_tiles(building_pos[0], building_pos[1] - 1, camera.scroll)
+                                        temp_iso_poly = self.get_2x2_tiles(building_pos[0], building_pos[1] - 1,
+                                                                           camera.scroll)
                                         self.highlight_tile(temp_iso_poly, screen, "WHITE")
 
                 # HERE WE DRAW THE UNITS ON THE MAP
                 # we extract from the units list the building we want to display
                 unit = self.units[x][y]
                 if unit is not None and unit.current_health <= 0:
-                    self.units[x][y] = None
-                    self.map[x][y]["collision"] = False
-                    self.examined_tile = None
-                    self.hud.examined_tile = None
+                    self.remove_entity(unit)
                 if unit is not None:
                     screen.blit(unit.sprite, (
                         render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
@@ -532,8 +529,7 @@ class Map:
 
         top_left_corner = (bottom_left_tile_x * TILE_SIZE, bottom_left_tile_y * TILE_SIZE)
         bottom_left_corner = (bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE)
-        bottom_right_corner = (
-        bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
+        bottom_right_corner = (bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
         top_right_corner = (bottom_left_tile_x * TILE_SIZE, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
 
         rect = [top_left_corner, bottom_left_corner, bottom_right_corner, top_right_corner]
@@ -610,3 +606,23 @@ class Map:
             self.map[place_x][place_y - 1]["collision"] = True
             self.map[place_x + 1][place_y - 1]["tile"] = "building"
             self.map[place_x + 1][place_y - 1]["collision"] = True
+
+    def remove_entity(self, entity):
+        if issubclass(type(entity), Building):
+            if type(entity) != TownCenter:
+                self.buildings[entity.pos[0]][entity.pos[1]] = None
+                self.buildings[entity.pos[0] + 1][entity.pos[1]] = None
+                self.buildings[entity.pos[0]][entity.pos[1] - 1] = None
+                self.buildings[entity.pos[0] + 1][entity.pos[1] - 1] = None
+                self.collision_matrix[entity.pos[1]][entity.pos[0]] = 1
+                self.collision_matrix[entity.pos[1]][entity.pos[0] + 1] = 1
+                self.collision_matrix[entity.pos[1] - 1][entity.pos[0] + 1] = 1
+                self.collision_matrix[entity.pos[1] - 1][entity.pos[0]] = 1
+            else:
+                self.buildings[entity.pos[0]][entity.pos[1]] = None
+                self.collision_matrix[entity.pos[1]][entity.pos[0]] = 1
+        elif issubclass(type(entity), Unit):
+            self.units[entity.pos[0]][entity.pos[1]] = None
+            self.collision_matrix[entity.pos[1]][entity.pos[0]] = 1
+        self.examined_tile = None
+        self.hud.examined_tile = None

@@ -505,3 +505,57 @@ class Hud:
             description_text = entity["description"]
             draw_text(screen, description_text, 14, (255, 255, 255),
                       (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
+
+    def display_building(self, screen, building, scroll, render_pos):
+        # we either display the building fully constructed or being built ( 4 possible states )
+        if not building.is_being_built:
+            screen.blit(building.sprite, (
+                render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                        )
+        else:
+            if building.construction_progress == 0:
+                if type(building) == TownCenter:
+                    screen.blit(building_construction_1_2x2, (
+                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                )
+                else:
+                    screen.blit(building_construction_1, (
+                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                )
+
+            elif building.construction_progress == 25:
+                if type(building) == TownCenter:
+                    screen.blit(building_construction_2_2x2, (
+                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                )
+                else:
+                    screen.blit(building_construction_2, (
+                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                )
+            elif building.construction_progress == 50:
+                if type(building) == TownCenter:
+                    screen.blit(building_construction_3_2x2, (
+                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                )
+                else:
+                    screen.blit(building_construction_3, (
+                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                )
+            elif building.construction_progress == 75:
+                if type(building) == TownCenter:
+                    screen.blit(building_construction_4_2x2, (
+                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                )
+                else:
+                    screen.blit(building_construction_4, (
+                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                            )
