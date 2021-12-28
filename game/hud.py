@@ -3,8 +3,8 @@ import pygame
 from math import ceil, floor
 from .utils import draw_text, scale_image, get_color_code
 from player import playerOne
-from units import Villager
-from buildings import TownCenter, House, Farm, Building
+from units import Villager, TownCenter, House, Farm, Building
+#from buildings import TownCenter, House, Farm, Building
 
 
 class Hud:

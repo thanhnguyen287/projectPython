@@ -2,6 +2,286 @@ from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from pathfinding.finder.a_star import DiagonalMovement
 from player import *
+from math import ceil
+
+
+class Building:
+    population_produced = 0
+    is_being_built = True
+    construction_progress = 0
+
+    def __init__(self, pos, map, player_owner_of_unit, ):
+        self.owner = player_owner_of_unit
+        self.rect = self.sprite.get_rect(topleft=pos)
+        # pos is the tile position, for ex : (4,4)
+        self.pos = pos
+        self.map = map
+
+        # will be used in the timer to increase resources of the player
+        self.resource_manager_cooldown = pygame.time.get_ticks()
+
+        self.current_health = 1
+        self.is_alive = True
+
+        self.image_select = pygame.image.load(os.path.join(assets_path, "image_select.png"))
+        self.selected = False
+
+        self.resource_manager_cooldown = pygame.time.get_ticks()
+        #self.owner.pay_entity_cost(self)
+        self.now = 0
+
+    def update(self):
+        pass
+
+
+class Farm(Building):
+    description = " Provides 50 food every 5 seconds."
+    construction_tooltip = " Build a Farm"
+    construction_cost = [100, 0, 0, 0]
+    construction_time = 4
+    armor = 0
+
+    sprite = pygame.image.load(os.path.join(assets_path, "Farm.png"))
+
+    def __init__(self, pos, map, player_owner_of_unit):
+        self.name = " Farm"
+
+        self.construction_cost = [100, 0, 0, 0]
+
+        self.max_health = 10
+        self.max_population_bonus = 0
+
+        super().__init__(pos, map, player_owner_of_unit)
+
+    def update(self):
+        self.now = pygame.time.get_ticks()
+        # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
+        if self.is_being_built:
+            progress_time = ((self.now - self.resource_manager_cooldown) / 1000)
+            progress_time_pourcent = progress_time * 100 / self.construction_time
+            if ceil(progress_time_pourcent * self.max_health * 0.01) != 0:
+                self.current_health = ceil(progress_time_pourcent * self.max_health * 0.01)
+
+            # if fully built we set is_being_built to 0, else change the progression attribute accordingly
+            if self.now - self.resource_manager_cooldown > Farm.construction_time * 1000:
+                self.resource_manager_cooldown = self.now
+                self.construction_progress = 100
+                self.current_health -= 1
+                self.is_being_built = False
+            elif self.now - self.resource_manager_cooldown > Farm.construction_time * 750:
+                self.construction_progress = 75
+            elif self.now - self.resource_manager_cooldown > Farm.construction_time * 500:
+                self.construction_progress = 50
+            elif self.now - self.resource_manager_cooldown > Farm.construction_time * 250:
+                self.construction_progress = 25
+
+
+class TownCenter(Building):
+    description = " Used to create villagers."
+    construction_tooltip = " Build a Town Center"
+    construction_cost = [1000, 0, 0, 100]
+    construction_time = 8
+    armor = 3
+    sprite = pygame.image.load(os.path.join(assets_path, "town_center.png"))
+
+    def __init__(self, pos, map, player_owner_of_unit):
+
+        self.name = "Town center"
+
+        self.construction_cost = [0, 0, 0, 0]
+
+        self.max_health = 100
+        #becomes true when you create villagers
+        self.is_working = False
+        #class of unit being trained
+        self.unit_type_currently_trained = None
+        player_owner_of_unit.max_population += 5
+        #used when you order the creation of multiples units
+        self.queue = 0
+        self.resource_manager_cooldown = 0
+
+        super().__init__(pos, map, player_owner_of_unit)
+
+    # to create villagers, research techs and upgrade to second age
+    def update(self):
+        self.now = pygame.time.get_ticks()
+        # add a button to stop the current action if the town center is working
+        if self.is_working and not self.is_being_built:
+            # if a villager is being created since 5 secs :
+            if self.now - self.resource_manager_cooldown > 5000:
+                self.resource_manager_cooldown = self.now
+                # we determine the nearest free tile and spawn a villager on it
+                self.check_collision_and_spawn_villager_where_possible()
+                # decrease the queue
+                self.queue -= 1
+                # if there are no more villagers to train, we can stop there
+                if self.queue <= 0:
+                    self.is_working = False
+
+        # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
+        if self.is_being_built:
+            # the current life increases with the construction progress
+            progress_time = ((self.now - self.resource_manager_cooldown) / 1000)
+            progress_time_pourcent = progress_time * 100 / self.construction_time
+            if ceil(progress_time_pourcent * self.max_health*0.01) != 0:
+                self.current_health = ceil(progress_time_pourcent * self.max_health*0.01)
+
+            # if fully built we set is_being_built to 0, else change the progression attribute accordingly
+            if self.now - self.resource_manager_cooldown > TownCenter.construction_time * 1000:
+                self.resource_manager_cooldown = self.now
+                self.construction_progress = 100
+                # to fix a little bug
+                self.current_health -= 1
+                self.is_being_built = False
+            elif self.now - self.resource_manager_cooldown > TownCenter.construction_time * 750:
+                self.construction_progress = 75
+            elif self.now - self.resource_manager_cooldown > TownCenter.construction_time * 500:
+                self.construction_progress = 50
+            elif self.now - self.resource_manager_cooldown > TownCenter.construction_time * 250:
+                self.construction_progress = 25
+
+    # we determine the nearest free tile, collision matrix has a 1 if the tile is free
+    # we try the 4 tiles under the town center, then the ones on the sides, then the ones above
+    # we also check if we stay in the map boundaries
+    def check_collision_and_spawn_villager_where_possible(self):
+        # UNDER
+        #check if the tile is in the map boundaries and if tile is empty
+        if 0 <= self.pos[0] < self.map.grid_length_x and 0 < self.pos[1] + 1 < self.map.grid_length_y and self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] == 1:
+            # new villager
+            self.map.units[self.pos[0]][self.pos[1] + 1] = Villager((self.pos[0], self.pos[1] + 1), self.owner,
+                                                                    self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
+
+        elif 0 <= self.pos[0] + 1 < self.map.grid_length_x and 0 < self.pos[1] + 1 < self.map.grid_length_y and self.map.collision_matrix[self.pos[1] + 1][
+            self.pos[0] + 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 1][self.pos[1] + 1] = Villager((self.pos[0] + 1, self.pos[1] + 1),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 1] = 0
+
+        elif 0 <= self.pos[0] - 1 < self.map.grid_length_x and 0 < self.pos[1] + 1 < self.map.grid_length_y and \
+                self.map.collision_matrix[self.pos[1] + 1][self.pos[0] - 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] - 1][self.pos[1] + 1] = Villager((self.pos[0] - 1, self.pos[1] + 1),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] + 1][self.pos[0] - 1] = 0
+
+        elif 0 <= self.pos[0] + 2 < self.map.grid_length_x and 0 < self.pos[1] + 1 < self.map.grid_length_y and \
+                self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 2] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 2][self.pos[1] + 1] = Villager((self.pos[0] + 2, self.pos[1] + 1),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 2] = 0
+
+        # SIDES
+        elif 0 <= self.pos[0] - 1 < self.map.grid_length_x and 0 < self.pos[1] < self.map.grid_length_y and self.map.collision_matrix[self.pos[1]][
+            self.pos[0] - 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] - 1][self.pos[1]] = Villager((self.pos[0] - 1, self.pos[1]),
+                                                                    self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1]][self.pos[0] - 1] = 0
+
+        elif 0 <= self.pos[0] + 2 < self.map.grid_length_x and 0 < self.pos[1] < self.map.grid_length_y and self.map.collision_matrix[self.pos[1]][
+            self.pos[0] + 2] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 2][self.pos[1]] = Villager((self.pos[0] + 2, self.pos[1]),
+                                                                    self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1]][self.pos[0] + 2] = 0
+
+        elif 0 <= self.pos[0] - 1 < self.map.grid_length_x and 0 < self.pos[1] - 1 < self.map.grid_length_y and \
+                self.map.collision_matrix[self.pos[1] - 1][self.pos[0] - 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] - 1][self.pos[1] - 1] = Villager((self.pos[0] - 1, self.pos[1] - 1),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 1][self.pos[0] - 1] = 0
+
+        elif 0 <= self.pos[0] + 2 < self.map.grid_length_x and 0 < self.pos[1] - 1 < self.map.grid_length_y and \
+                self.map.collision_matrix[self.pos[1] - 1][self.pos[0] + 2] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 2][self.pos[1] - 1] = Villager((self.pos[0] + 2, self.pos[1] - 1),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 1][self.pos[0] + 2] = 0
+
+
+        # ABOVE
+        elif 0 <= self.pos[0] - 1 < self.map.grid_length_x and 0 < self.pos[1] - 2 < self.map.grid_length_y and \
+                self.map.collision_matrix[self.pos[1] - 2][self.pos[0] - 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] - 1][self.pos[1] - 2] = Villager((self.pos[0] - 1, self.pos[1] - 2),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 2][self.pos[0] - 1] = 0
+
+        elif 0 <= self.pos[0] < self.map.grid_length_x and 0 < self.pos[1] - 2 < self.map.grid_length_y and self.map.collision_matrix[self.pos[1] - 2][
+            self.pos[0]] == 1:
+            # new villager
+            self.map.units[self.pos[0]][self.pos[1] - 2] = Villager((self.pos[0], self.pos[1] - 2),
+                                                                    self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 2][self.pos[0]] = 0
+
+        elif 0 <= self.pos[0] + 1 < self.map.grid_length_x and 0 < self.pos[1] - 2 < self.map.grid_length_y and \
+                self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 1] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 1][self.pos[1] - 2] = Villager((self.pos[0] + 1, self.pos[1] - 2),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 1] = 0
+
+        elif 0 <= self.pos[0] + 2 < self.map.grid_length_x and 0 < self.pos[1] - 2 < self.map.grid_length_y and \
+                self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 2] == 1:
+            # new villager
+            self.map.units[self.pos[0] + 2][self.pos[1] - 2] = Villager((self.pos[0] + 2, self.pos[1] - 2),
+                                                                        self.owner, self.map)
+            # update collision for new villager
+            self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 2] = 0
+
+
+class House(Building):
+    description = " Each House increases the maximum population by 5."
+    construction_tooltip = " Build a House"
+    construction_cost = [600, 0, 0, 0]
+    construction_time = 4
+    armor = -2
+    sprite = pygame.image.load(os.path.join(assets_path, "House.png"))
+
+    def __init__(self, pos, map, player_owner_of_unit):
+        self.name = "House"
+
+        self.construction_cost = [600, 0, 0, 0]
+        self.max_health = 50
+        player_owner_of_unit.max_population += 5
+
+        super().__init__(pos, map, player_owner_of_unit)
+
+    def update(self):
+        self.now = pygame.time.get_ticks()
+        # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
+        if self.is_being_built:
+            progress_time = ((self.now - self.resource_manager_cooldown) / 1000)
+            progress_time_pourcent = progress_time * 100 / self.construction_time
+            if ceil(progress_time_pourcent * self.max_health*0.01) != 0:
+                self.current_health = ceil(progress_time_pourcent * self.max_health*0.01)
+            # if fully built we set is_being_built to 0, else change the progression attribute accordingly
+            if self.now - self.resource_manager_cooldown > House.construction_time * 1000:
+                self.resource_manager_cooldown = self.now
+                self.construction_progress = 100
+                self.current_health -= 1
+                self.is_being_built = False
+            elif self.now - self.resource_manager_cooldown > House.construction_time * 750:
+                self.construction_progress = 75
+            elif self.now - self.resource_manager_cooldown > House.construction_time * 500:
+                self.construction_progress = 50
+            elif self.now - self.resource_manager_cooldown > House.construction_time * 250:
+                self.construction_progress = 25
 
 
 class Unit:
@@ -91,6 +371,8 @@ class Villager(Unit):
         # unit type : melee
         self.range = 0
         # used to gather ressources
+        self.is_moving_to_build_flag = False
+        self.building_to_create = None
         self.target = None
         self.gathering = False
         self.fighting = False
@@ -106,6 +388,36 @@ class Villager(Unit):
             ...
         else:
             ...
+
+    def build(self):
+        self.is_moving_to_build_flag = False
+        new_building = None
+        if self.building_to_create["type"] == Farm:
+            new_building = Farm((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
+                                playerOne)
+
+        elif self.building_to_create["type"] == TownCenter:
+            new_building = TownCenter((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
+                                      playerOne)
+            # additional collision bc town center is 2x2 tile, not 1x1
+            self.map.collision_matrix[self.building_to_create["pos"][1]][self.building_to_create["pos"][0] + 1] = 0
+            self.map.collision_matrix[self.building_to_create["pos"][1] - 1][self.building_to_create["pos"][0] + 1] = 0
+            self.map.collision_matrix[self.building_to_create["pos"][1] - 1][self.building_to_create["pos"][0]] = 0
+
+        elif self.building_to_create["type"] == House:
+            new_building = House((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
+                                 playerOne)
+
+        # to add it to the entities list on our map
+        self.map.entities.append(new_building)
+        self.map.buildings[self.building_to_create["pos"][0]][
+            self.building_to_create["pos"][1]] = new_building
+        # we pay the construction cost
+        playerOne.pay_entity_cost_bis(self.building_to_create["type"])
+        # we actualize collision
+        self.map.collision_matrix[self.building_to_create["pos"][1]][
+            self.building_to_create["pos"][0]] = 0
+        self.building_to_create = None
 
     def gather_ressources(self, tar):
         if (tar["tile"] == "tree" or tar["tile"] == "rock") and tar["health"] > 0:
@@ -135,6 +447,8 @@ class Villager(Unit):
                 self.path_index += 1
                 if self.path_index == len(self.path):
                     self.searching_for_path = False
+                    if self.is_moving_to_build_flag:
+                        self.build()
 
             if (self.gathering or self.target is not None) and not self.searching_for_path:
                 self.gather_ressources(self.target)
@@ -190,3 +504,4 @@ class Clubman(Unit):
         self.population_produced = 1
         self.description = "Basic melee unit."
         self.construction_tooltip = " Train a Clubman"
+

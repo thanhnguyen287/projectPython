@@ -3,9 +3,9 @@ import noise
 import pygame.mouse
 from .utils import decarte_to_iso, iso_to_decarte, get_color_code
 from settings import *
-from buildings import Farm, TownCenter, House, Building
+#from buildings import Farm, TownCenter, House, Building
 from player import playerOne
-from units import Villager, Unit
+from units import Villager, Unit, Farm, TownCenter, House, Building
 
 
 class Map:
@@ -96,44 +96,22 @@ class Map:
 
                 else:
                     pass
-                # if we left_click to build : we will place the building in the map if the targeted tile is empty
+                # if we left_click to build : the villager goes to an adjacent tile and the building is created
                 if mouse_action[0] and not collision:
-                    building_type_built = Farm
-                    # we create an instance of the selected building
+                    working_villager = self.hud.examined_tile
+                    if self.get_empty_adjacent_tiles(grid_pos):
+                        villager_dest = self.get_empty_adjacent_tiles(grid_pos)[0]
+                        working_villager.move_to(self.map[villager_dest[0]][villager_dest[1]])
+                        working_villager.is_moving_to_build_flag = True
+                    # we store the future building information inside building_to_create
                     if self.hud.selected_tile["name"] == "Farm":
-                        building_type_built = Farm
-                        new_building = Farm((grid_pos[0], grid_pos[1]), self, playerOne)
-                        # to add it to the entities list on our map
-                        self.entities.append(new_building)
-                        # grid_pos 0 and grid_pos 1 means : grid_pos_x and grid_pos_y, not the specific tile near the origin
-                        self.buildings[grid_pos[0]][grid_pos[1]] = new_building
+                        working_villager.building_to_create = {"type": Farm, "pos": grid_pos}
 
                     elif self.hud.selected_tile["name"] == "Town center":
-                        building_type_built = TownCenter
-                        new_building = TownCenter((grid_pos[0], grid_pos[1]), self, playerOne)
-                        self.entities.append(new_building)
-                        self.buildings[grid_pos[0]][grid_pos[1]] = new_building
-                        # additional collision bc town center is 2x2 tile, not 1x1
-                        self.collision_matrix[grid_pos[1]][grid_pos[0] + 1] = 0
-                        self.collision_matrix[grid_pos[1] - 1][grid_pos[0] + 1] = 0
-                        self.collision_matrix[grid_pos[1] - 1][grid_pos[0]] = 0
-
-                        self.map[grid_pos[0] + 1][grid_pos[1]]["collision"] = True
-                        self.map[grid_pos[0]][grid_pos[1] - 1]["collision"] = True
-                        self.map[grid_pos[0] + 1][grid_pos[1] - 1]["collision"] = True
+                        working_villager.building_to_create = {"type": TownCenter, "pos": grid_pos}
 
                     elif self.hud.selected_tile["name"] == "House":
-                        building_type_built = House
-                        new_building = House((grid_pos[0], grid_pos[1]), self, playerOne)
-                        self.entities.append(new_building)
-                        self.buildings[grid_pos[0]][grid_pos[1]] = new_building
-
-                    # we pay the construction cost
-                    playerOne.pay_entity_cost_bis(building_type_built)
-
-                    # we actualize collision
-                    self.map[grid_pos[0]][grid_pos[1]]["collision"] = True
-                    self.collision_matrix[grid_pos[1]][grid_pos[0]] = 0
+                        working_villager.building_to_create = {"type": House, "pos": grid_pos}
                     self.hud.selected_tile = None
 
         # the player hasn't selected something to build, he will interact with what's on the map
@@ -154,7 +132,7 @@ class Map:
                         self.examined_tile = grid_pos
                         if building is not None:
                             self.hud.examined_tile = building
-                            if building.name == "Town center":
+                            if type(building) == TownCenter:
                                 self.hud.bottom_left_menu = self.hud.town_hall_menu
                             else:
                                 self.hud.bottom_left_menu = None
@@ -162,7 +140,7 @@ class Map:
                         else:
                             if unit is not None:
                                 self.hud.examined_tile = unit
-                                if unit.name == "Villager":
+                                if type(unit) == Villager:
                                     self.hud.bottom_left_menu = self.hud.villager_menu
                                 else:
                                     self.hud.bottom_left_menu = None
@@ -295,6 +273,18 @@ class Map:
                 if unit is not None and unit.current_health <= 0:
                     self.remove_entity(unit)
                 if unit is not None:
+                    if type(unit) == Villager:
+                        # draw future buildings
+                        if unit.building_to_create is not None:
+                            future_building = unit.building_to_create
+                            future_building_render_pos = self.grid_to_renderpos(future_building["pos"][0], future_building["pos"][1])
+                            future_building_sprite = future_building["type"].sprite.copy()
+                            future_building_sprite.set_alpha(100)
+                            screen.blit(future_building_sprite, (
+                                future_building_render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                                future_building_render_pos[1] - (future_building_sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                        )
+
                     screen.blit(unit.sprite, (
                         render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                         render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
@@ -559,3 +549,22 @@ class Map:
     #returns true if there is collision, else False
     def is_there_collision(self, grid_pos: tuple[int, int]):
         return True if self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 else False
+
+    #return a list of empty tiles around origin
+    def get_empty_adjacent_tiles(self, origin_pos: tuple[int, int], origin_size = 1):
+        empty_adj_tiles = []
+        checked_tile = ()
+        if origin_size == 1:
+            #we check the tiles around the origin tile (rectangular shape)
+            for x in range(origin_pos[0] - 1, origin_pos[0] + 2):
+                for y in range(origin_pos[1] - 1, origin_pos[1] + 2):
+                    checked_tile = (x,y)
+                    if self.can_place_tile(checked_tile) and not self.is_there_collision(checked_tile):
+                        empty_adj_tiles.append(checked_tile)
+
+        elif origin_size ==2:
+            ...
+        else:
+            ...
+        return empty_adj_tiles
+

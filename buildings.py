@@ -2,7 +2,11 @@ from settings import *
 from units import Villager
 from math import floor, ceil
 
+############################################################################################
+#  DUE TO CIRCULAR IMPORTING ERROR I HAD TO MOVE THE BUILDINGS RELATED CODE TO UNITS.PY   #
+############################################################################################
 
+"""
 class Building:
     population_produced = 0
     is_being_built = True
@@ -279,3 +283,4 @@ class House(Building):
                 self.construction_progress = 50
             elif self.now - self.resource_manager_cooldown > House.construction_time * 250:
                 self.construction_progress = 25
+"""

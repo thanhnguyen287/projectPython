@@ -51,7 +51,7 @@ IMPORTANT STUFF :
 - villagers shouldn't stop gathering once they destroyed a tree/rock
 - put gather stuff inside a method to make it clearier
 
-10 - Properly implement build method (medium)
+10 - Properly implement build method (medium) - WORK IN PROGRESS TRISTAN
 - villagers must move to an adjacent tile before starting the creation of the building, and construction must stop if the villager stop working on it
 - must be able to cancel a building creation (Optional)
 
