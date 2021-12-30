@@ -3,7 +3,7 @@ import noise
 import pygame.mouse
 from .utils import decarte_to_iso, iso_to_decarte, get_color_code
 from settings import *
-#from buildings import Farm, TownCenter, House, Building
+# from buildings import Farm, TownCenter, House, Building
 from player import playerOne
 from units import Villager, Unit, Farm, TownCenter, House, Building
 
@@ -119,7 +119,8 @@ class Map:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
                 # we deselect the object examined when left-clicking if not on hud
-                if mouse_action[0] and not self.is_there_collision(grid_pos) and not self.hud.bottom_hud_rect.collidepoint(mouse_pos):
+                if mouse_action[0] and not self.is_there_collision(
+                        grid_pos) and not self.hud.bottom_hud_rect.collidepoint(mouse_pos):
                     self.examined_tile = None
                     self.hud.examined_tile = None
                     self.hud.bottom_left_menu = None
@@ -150,57 +151,50 @@ class Map:
 
         # right click, gathering and moving units (fighting in future)
         if mouse_action[2] and 0 <= grid_pos[0] <= 50 and 0 <= grid_pos[1] <= 50:
+
+            # There is a bug with collecting ressources on the side of the map !!!
+
             if self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
                 villager_pos = self.hud.examined_tile.pos
+                this_villager = self.units[villager_pos[0]][villager_pos[1]]
 
                 # if the villager isnt gathering/planning to gather, and there is not collision on the tile we right click on, then he moves
-                if not self.map[grid_pos[0]][grid_pos[1]]["collision"] and not self.units[villager_pos[0]][villager_pos[1]].gathering and self.units[villager_pos[0]][villager_pos[1]].target is None:
-                    self.units[villager_pos[0]][villager_pos[1]].move_to(
-                        self.map[grid_pos[0]][grid_pos[1]])
+                if not self.map[grid_pos[0]][grid_pos[1]][
+                    "collision"] and not this_villager.gathering and this_villager.target is None:
+                    this_villager.move_to(self.map[grid_pos[0]][grid_pos[1]])
 
                 # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving
                 pos_mouse = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
                 pos_x = pos_mouse[0]
                 pos_y = pos_mouse[1]
                 # if the tile next to him is a ressource and we right click on it and he is not moving, he will gather it
-                if not self.units[villager_pos[0]][villager_pos[1]].searching_for_path \
-                        and (self.map[pos_x][pos_y]["tile"] == "tree" or self.map[pos_x][pos_y][
-                    "tile"] == "rock"):
+                if not this_villager.searching_for_path \
+                        and (self.map[pos_x][pos_y]["tile"] == "tree" or self.map[pos_x][pos_y]["tile"] == "rock"):
 
                     if (abs(pos_x - villager_pos[0]) <= 1 and abs(
                             pos_y - villager_pos[1]) == 0) \
-                            or (abs(pos_x - villager_pos[0]) == 0 and abs(
-                        pos_y - villager_pos[1]) <= 1):
+                            or (abs(pos_x - villager_pos[0]) == 0 and abs(pos_y - villager_pos[1]) <= 1):
 
-                        self.units[villager_pos[0]][villager_pos[1]].target = \
-                            self.map[pos_x][pos_y]
-                        self.units[villager_pos[0]][villager_pos[1]].gathering = True
+                        this_villager.target = self.map[pos_x][pos_y]
+                        this_villager.gathering = True
 
                     # if the tile we right click on is a ressource, he will travel to it and then gather it
                     else:
 
                         if self.map[pos_x - 1][pos_y]["tile"] == "":
-                            self.units[villager_pos[0]][villager_pos[1]].move_to(
-                                self.map[pos_x - 1][pos_y])
-                            self.units[villager_pos[0]][villager_pos[1]].target = \
-                                self.map[pos_x][pos_y]
+                            this_villager.move_to(self.map[pos_x - 1][pos_y])
+                            this_villager.target = self.map[pos_x][pos_y]
                         elif self.map[pos_x + 1][pos_y]["tile"] == "":
-                            self.units[villager_pos[0]][villager_pos[1]].move_to(
-                                self.map[pos_x + 1][pos_y])
-                            self.units[villager_pos[0]][villager_pos[1]].target = \
-                                self.map[pos_x][pos_y]
+                            this_villager.move_to(self.map[pos_x + 1][pos_y])
+                            this_villager.target = self.map[pos_x][pos_y]
                         elif self.map[pos_x][pos_y - 1]["tile"] == "":
-                            self.units[villager_pos[0]][villager_pos[1]].move_to(
-                                self.map[pos_x][pos_y - 1])
-                            self.units[villager_pos[0]][villager_pos[1]].target = \
-                                self.map[pos_x][pos_y]
+                            this_villager.move_to(self.map[pos_x][pos_y - 1])
+                            this_villager.target = self.map[pos_x][pos_y]
                         elif self.map[pos_x][pos_y + 1]["tile"] == "":
-                            self.units[villager_pos[0]][villager_pos[1]].move_to(
-                                self.map[pos_x][pos_y + 1])
-                            self.units[villager_pos[0]][villager_pos[1]].target = \
-                                self.map[pos_x][pos_y]
+                            this_villager.move_to(self.map[pos_x][pos_y + 1])
+                            this_villager.target = self.map[pos_x][pos_y]
                         else:
-                            self.units[villager_pos[0]][villager_pos[1]].target = None
+                            this_villager.target = None
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -225,13 +219,17 @@ class Map:
                     if (self.examined_tile is not None and x == self.examined_tile[0] and y == self.examined_tile[1]) \
                             or self.map[x][y]["health"] != self.map[x][y]["max_health"]:
                         self.hud.display_resources_health(screen,
-                                       render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10,
-                                       render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y,
-                                       self.map[x][y]["health"], self.map[x][y]["max_health"])
+                                                          render_pos[
+                                                              0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10,
+                                                          render_pos[1] - (self.tiles[
+                                                                               tile].get_height() - TILE_SIZE) + camera.scroll.y,
+                                                          self.map[x][y]["health"], self.map[x][y]["max_health"])
                         self.hud.display_resources_health(screen,
-                                       render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10,
-                                       render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y,
-                                       self.map[x][y]["health"], self.map[x][y]["max_health"])
+                                                          render_pos[
+                                                              0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10,
+                                                          render_pos[1] - (self.tiles[
+                                                                               tile].get_height() - TILE_SIZE) + camera.scroll.y,
+                                                          self.map[x][y]["health"], self.map[x][y]["max_health"])
 
                 # HERE WE DRAW THE BUILDINGS ON THE MAP
                 # we extract from the buildings list the building we want to display
@@ -277,12 +275,14 @@ class Map:
                         # draw future buildings
                         if unit.building_to_create is not None:
                             future_building = unit.building_to_create
-                            future_building_render_pos = self.grid_to_renderpos(future_building["pos"][0], future_building["pos"][1])
+                            future_building_render_pos = self.grid_to_renderpos(future_building["pos"][0],
+                                                                                future_building["pos"][1])
                             future_building_sprite = future_building["type"].sprite.copy()
                             future_building_sprite.set_alpha(100)
                             screen.blit(future_building_sprite, (
                                 future_building_render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                future_building_render_pos[1] - (future_building_sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                future_building_render_pos[1] - (
+                                        future_building_sprite.get_height() - TILE_SIZE) + camera.scroll.y)
                                         )
 
                     screen.blit(unit.sprite, (
@@ -456,7 +456,8 @@ class Map:
 
         top_left_corner = (bottom_left_tile_x * TILE_SIZE, bottom_left_tile_y * TILE_SIZE)
         bottom_left_corner = (bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE)
-        bottom_right_corner = (bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
+        bottom_right_corner = (
+            bottom_left_tile_x * TILE_SIZE + TILE_SIZE * 2, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
         top_right_corner = (bottom_left_tile_x * TILE_SIZE, bottom_left_tile_y * TILE_SIZE + TILE_SIZE * 2)
 
         rect = [top_left_corner, bottom_left_corner, bottom_right_corner, top_right_corner]
@@ -497,7 +498,7 @@ class Map:
         return collision_matrix
 
     def highlight_tile(self, iso_poly, screen, color):
-            pygame.draw.polygon(screen, get_color_code(color), iso_poly, 3)
+        pygame.draw.polygon(screen, get_color_code(color), iso_poly, 3)
 
     # here is the fonction that places the townhall randomly on the map
     def place_townhall(self):
@@ -546,25 +547,24 @@ class Map:
         self.examined_tile = None
         self.hud.examined_tile = None
 
-    #returns true if there is collision, else False
+    # returns true if there is collision, else False
     def is_there_collision(self, grid_pos: tuple[int, int]):
         return True if self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 else False
 
-    #return a list of empty tiles around origin
-    def get_empty_adjacent_tiles(self, origin_pos: tuple[int, int], origin_size = 1):
+    # return a list of empty tiles around origin
+    def get_empty_adjacent_tiles(self, origin_pos: tuple[int, int], origin_size=1):
         empty_adj_tiles = []
         checked_tile = ()
         if origin_size == 1:
-            #we check the tiles around the origin tile (rectangular shape)
+            # we check the tiles around the origin tile (rectangular shape)
             for x in range(origin_pos[0] - 1, origin_pos[0] + 2):
                 for y in range(origin_pos[1] - 1, origin_pos[1] + 2):
-                    checked_tile = (x,y)
+                    checked_tile = (x, y)
                     if self.can_place_tile(checked_tile) and not self.is_there_collision(checked_tile):
                         empty_adj_tiles.append(checked_tile)
 
-        elif origin_size ==2:
+        elif origin_size == 2:
             ...
         else:
             ...
         return empty_adj_tiles
-
