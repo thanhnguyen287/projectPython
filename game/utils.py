@@ -1,4 +1,5 @@
 import pygame
+from units import *
 
 
 def draw_text(screen, text, size, color, pos):
@@ -81,3 +82,19 @@ def get_color_code(color: str):
 
     elif color == "GOLD":
         return 255, 201, 14
+
+
+def str_to_entity_class(name: str):
+    if name == "Town center":
+        return TownCenter
+    elif name == "House":
+        return House
+    elif name == "Farm":
+        return Farm
+
+    elif name == "Villager":
+        return Villager
+    elif name == "Clubman":
+        return Clubman
+    elif name == "Bowman":
+        return Bowman

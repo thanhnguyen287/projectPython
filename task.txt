@@ -37,10 +37,10 @@ IMPORTANT STUFF :
 - Display score screen when you QUIT, and go back to main menu after quitting SCORE screen
 
 7 - Update the way collision is managed in our code (easy)
-- We should only work with the collision matrix now and remove all the redondunt stuff (don't forget the collision matrix uses inversed x and y)
+- We should only work with the collision matrix now and remove all the redundant stuff (don't forget the collision matrix uses inversed x and y)
 
 8 - Properly implement attack method (medium-hard)
-- a unit attacks another one when right clicking on a ennemy unit. If not in range, get close enough to do. If its not possible, do nothing and display message : "Cant reach target ?"
+- a unit attacks another one when right-clicking on a enemy unit. If not in range, get close enough to do. If its not possible, do nothing and display message : "Cant reach target ?"
 - maybe use remove_entity method to remove units/buildings when they die
 - display health bars of attacked units
 - make sure they attack xxx times per sec (see attack_speed for units)
@@ -49,7 +49,7 @@ IMPORTANT STUFF :
 9 - Properly implement gather resource method (medium-hard)
 - villagers must gather x amount of resources, and go back to towncenter to give it to the player
 - villagers shouldn't stop gathering once they destroyed a tree/rock
-- put gather stuff inside a method to make it clearier
+- put gather stuff inside a method to make it clearer
 
 10 - Properly implement build method (medium) - WORK IN PROGRESS TRISTAN
 - villagers must move to an adjacent tile before starting the creation of the building, and construction must stop if the villager stop working on it
@@ -58,7 +58,7 @@ IMPORTANT STUFF :
 11 - Save/Load method (Hard)
 - will probably force us to properly separate display and objects
 
-12 - Town center selection
+12 - Town center selection - Tristan : DONE
 - we must be able to select town center when left clicking on all 4 tiles, not only the bottom left one
 
 ...

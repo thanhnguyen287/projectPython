@@ -1,7 +1,7 @@
 import random
 import noise
 import pygame.mouse
-from .utils import decarte_to_iso, iso_to_decarte, get_color_code
+from .utils import decarte_to_iso, iso_to_decarte, get_color_code, str_to_entity_class
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
 from player import playerOne
@@ -70,6 +70,7 @@ class Map:
         if self.hud.selected_tile is not None and self.hud.examined_tile is not None:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             # if we can't place the building on the tile, there's no need to do the following
+
             if self.can_place_tile(grid_pos):
                 if self.hud.examined_tile.name == "Villager":
                     self.hud.bottom_left_menu = self.hud.villager_menu
@@ -104,14 +105,8 @@ class Map:
                         working_villager.move_to(self.map[villager_dest[0]][villager_dest[1]])
                         working_villager.is_moving_to_build_flag = True
                     # we store the future building information inside building_to_create
-                    if self.hud.selected_tile["name"] == "Farm":
-                        working_villager.building_to_create = {"type": Farm, "pos": grid_pos}
-
-                    elif self.hud.selected_tile["name"] == "Town center":
-                        working_villager.building_to_create = {"type": TownCenter, "pos": grid_pos}
-
-                    elif self.hud.selected_tile["name"] == "House":
-                        working_villager.building_to_create = {"type": House, "pos": grid_pos}
+                    if self.hud.selected_tile["name"] == "Farm" or self.hud.selected_tile["name"] == "House" or self.hud.selected_tile["name"] == "Town center":
+                        working_villager.building_to_create = {"type": str_to_entity_class(self.hud.selected_tile["name"]), "pos": grid_pos}
                     self.hud.selected_tile = None
 
         # the player hasn't selected something to build, he will interact with what's on the map
@@ -119,8 +114,15 @@ class Map:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
                 # we deselect the object examined when left-clicking if not on hud
+                town_center_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(self.buildings[grid_pos[0]][grid_pos[1] + 1]) == TownCenter ) \
+                    or (self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(
+                            self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter) or (self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(
+                            self.buildings[grid_pos[0] - 1][grid_pos[1]]) == TownCenter)
+
                 if mouse_action[0] and not self.is_there_collision(
-                        grid_pos) and not self.hud.bottom_hud_rect.collidepoint(mouse_pos):
+                        grid_pos) and not self.hud.bottom_hud_rect.collidepoint(mouse_pos) and not town_center_check_condition:
+
+
                     self.examined_tile = None
                     self.hud.examined_tile = None
                     self.hud.bottom_left_menu = None
@@ -138,13 +140,27 @@ class Map:
                             else:
                                 self.hud.bottom_left_menu = None
 
+                        elif unit is not None:
+                            self.hud.examined_tile = unit
+                            if type(unit) == Villager:
+                                self.hud.bottom_left_menu = self.hud.villager_menu
+                            else:
+                                self.hud.bottom_left_menu = None
+
                         else:
-                            if unit is not None:
-                                self.hud.examined_tile = unit
-                                if type(unit) == Villager:
-                                    self.hud.bottom_left_menu = self.hud.villager_menu
-                                else:
-                                    self.hud.bottom_left_menu = None
+                            building = self.buildings[grid_pos[0]][grid_pos[1] + 1]
+                            if building and type(building) == TownCenter:
+                                self.hud.examined_tile = building
+                                self.examined_tile = (grid_pos[0], grid_pos[1] + 1)
+                                self.hud.bottom_left_menu = self.hud.town_hall_menu
+                            elif self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter:
+                                self.hud.examined_tile = self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]
+                                self.examined_tile = (grid_pos[0] - 1, grid_pos[1] + 1)
+                                self.hud.bottom_left_menu = self.hud.town_hall_menu
+                            elif self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(self.buildings[grid_pos[0] - 1][grid_pos[1]]) == TownCenter:
+                                self.hud.examined_tile = self.buildings[grid_pos[0] - 1][grid_pos[1]]
+                                self.examined_tile = (grid_pos[0] - 1, grid_pos[1])
+                                self.hud.bottom_left_menu = self.hud.town_hall_menu
 
                 else:
                     pass
@@ -244,6 +260,7 @@ class Map:
                             if not building.is_being_built:
                                 if (x == self.examined_tile[0]) and (y == self.examined_tile[1]):
                                     if type(building) != TownCenter:
+                                        self.highlight_image(building.sprite, screen, render_pos, camera.scroll)
                                         # to higlight tile in white
                                         # temp_coor = self.grid_to_map(self.examined_tile[0], self.examined_tile[1])
                                         # iso_poly = temp_coor["iso_poly"]
@@ -252,16 +269,8 @@ class Map:
                                         #    for x, y in iso_poly]
                                         # self.highlight_tile(iso_poly, screen, "WHITE")
 
-                                        # outline in white the object selected
-                                        mask = pygame.mask.from_surface(building.sprite).outline()
-                                        mask = [(x + render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                                 y + render_pos[1] - (
-                                                         building.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                                for x, y in mask]
-                                        pygame.draw.polygon(screen, (255, 255, 255), mask, 3)
                                     else:
-                                        building_pos = building.pos
-                                        temp_iso_poly = self.get_2x2_tiles(building_pos[0], building_pos[1] - 1,
+                                        temp_iso_poly = self.get_2x2_tiles(building.pos[0], building.pos[1] - 1,
                                                                            camera.scroll)
                                         self.highlight_tile(temp_iso_poly, screen, "WHITE")
 
@@ -296,7 +305,7 @@ class Map:
                             unit.dest["render_pos"][1] - (destination_flag.get_height() - TILE_SIZE) + camera.scroll.y)
                                     )
 
-                    # have we clicked on this tile ? if yes we will highlight the tile
+                    # have we selected this unit ? if yes we will highlight its tile
                     if self.examined_tile is not None:
                         if (x == self.examined_tile[0]) and (y == self.examined_tile[1]):
                             # outline in white the object selected
@@ -568,3 +577,15 @@ class Map:
         else:
             ...
         return empty_adj_tiles
+
+    #Outline in white the image. Can be used to show an entity is selected...
+    def highlight_image(self, image, screen, render_pos, scroll, color="WHITE"):
+        #transform color name to color code
+        color = get_color_code(color)
+        # outline in white the object selected with mask feature
+        mask = pygame.mask.from_surface(image).outline()
+        mask = [(x + render_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
+                 y + render_pos[1] - (
+                         image.get_height() - TILE_SIZE) + scroll.y)
+                for x, y in mask]
+        pygame.draw.polygon(screen, color, mask, 3)
