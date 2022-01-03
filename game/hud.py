@@ -1,6 +1,6 @@
 from settings import *
 import pygame
-from math import ceil, floor
+from math import floor
 from .utils import draw_text, scale_image, get_color_code
 from player import playerOne
 from units import Villager, TownCenter, House, Farm, Building
@@ -177,7 +177,7 @@ class Hud:
                         if tile["name"] != "STOP" and not playerOne.can_afford(tile["name"]):
                             icon.set_alpha(100)
                         screen.blit(icon, tile["rect"].topleft)
-                        if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP"and tile["affordable"]:
+                        if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP" and tile["affordable"]:
                             self.display_construction_tooltip(screen, tile["name"])
                         if tile["rect"].collidepoint(mouse_pos) and tile["name"] == "STOP":
                             self.display_construction_tooltip(screen, tile)

@@ -456,7 +456,9 @@ class Villager(Unit):
 
     def update(self):
         self.now = pygame.time.get_ticks()
+
         if self.now - self.move_timer > 500:
+            # movement
             if self.searching_for_path:
                 new_pos = self.path[self.path_index]
                 #update position in the world
@@ -469,17 +471,15 @@ class Villager(Unit):
                     elif self.is_moving_to_fight_flag:
                         self.is_fighting = True
                         self.is_moving_to_fight_flag = False
-
-            #if (self.gathering or self.target is not None) and not self.searching_for_path:
-                #self.gather_ressources(self.target)
+            #gathering
             if self.gathering and not self.searching_for_path:
                 self.gather_ressources(self.target)
 
             #always at the end to reset the timer
             self.move_timer = self.now
+            # fighting
         if self.is_fighting:
             self.attack()
-
 
 class Bowman(Unit):
 
