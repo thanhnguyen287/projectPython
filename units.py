@@ -434,15 +434,17 @@ class Villager(Unit):
         self.building_to_create = None
 
     def gather_ressources(self, tar):
-        if (tar["tile"] == "tree" or tar["tile"] == "rock") and tar["health"] > 0:
+        if (tar["tile"] == "tree" or tar["tile"] == "rock" or tar["tile"] == "gold") and tar["health"] > 0:
             self.target["health"] -= 2
             self.gathered_resources_stack += 1
         else:
             #we update the ressource of the player
             if tar["tile"] == "tree":
-                playerOne.update_resource(0, 10)
+                playerOne.update_resource("WOOD", 10)
             elif tar["tile"] == "rock":
-                playerOne.update_resource(1, 10)
+                playerOne.update_resource("STONE", 10)
+            elif tar["tile"] == "gold":
+                playerOne.update_resource("GOLD", 10)
 
             #we delete the tile
             tar["tile"] = ""

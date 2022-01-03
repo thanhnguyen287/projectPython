@@ -189,7 +189,7 @@ class Map:
                         this_villager.move_to(self.map[this_villager_dest[0]][this_villager_dest[1]])
                         this_villager.is_moving_to_attack_flag = True
 
-                # if the villager isnt gathering/planning to gather, and there is not collision on the tile we right click on, then he moves
+                # ONLY MOVEMENT
                 if not self.map[grid_pos[0]][grid_pos[1]][
                     "collision"] and not this_villager.gathering and this_villager.target is None:
                     this_villager.move_to(self.map[grid_pos[0]][grid_pos[1]])
@@ -197,7 +197,7 @@ class Map:
                 # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving
                 # if the tile next to him is a ressource and we right click on it and he is not moving, he will gather it
                 if not this_villager.searching_for_path \
-                        and (self.map[pos_x][pos_y]["tile"] == "tree" or self.map[pos_x][pos_y]["tile"] == "rock"):
+                        and (self.map[pos_x][pos_y]["tile"] == "tree" or self.map[pos_x][pos_y]["tile"] == "rock" or self.map[pos_x][pos_y]["tile"] == "gold"):
 
                     if (abs(pos_x - villager_pos[0]) <= 1 and abs(
                             pos_y - villager_pos[1]) == 0) \
@@ -397,6 +397,8 @@ class Map:
                 tile = "rock"
             elif r <= 2:
                 tile = "tree"
+            elif r <= 3:
+                tile = "gold"
             else:
                 tile = ""
         # perlin = noise.
@@ -518,19 +520,6 @@ class Map:
                     collision_matrix[y][x] = 0
         return collision_matrix
 
-    def highlight_tile(self, grid_x, grid_y, screen, color, scroll, multiple_tiles_tiles_flag=False):
-        #we have to highlight 1 tile
-        if not multiple_tiles_tiles_flag:
-            iso_poly = self.grid_to_iso_poly(grid_x, grid_y)
-            iso_poly = [
-                (x + self.grass_tiles.get_width() / 2 + scroll.x, y + scroll.y)
-                for x, y in iso_poly]
-        # for more than 1 tile. For now, only 2x2 highlight is supported.
-        else:
-            iso_poly = self.get_2x2_iso_poly(grid_x, grid_y, scroll)
-
-        pygame.draw.polygon(screen, get_color_code(color), iso_poly, 3)
-
 
     # here is the fonction that places the townhall randomly on the map
     def place_townhall(self):
@@ -612,6 +601,19 @@ class Map:
                          image.get_height() - TILE_SIZE) + scroll.y)
                 for x, y in mask]
         pygame.draw.polygon(screen, color, mask, 3)
+
+    def highlight_tile(self, grid_x, grid_y, screen, color, scroll, multiple_tiles_tiles_flag=False):
+        #we have to highlight 1 tile
+        if not multiple_tiles_tiles_flag:
+            iso_poly = self.grid_to_iso_poly(grid_x, grid_y)
+            iso_poly = [
+                (x + self.grass_tiles.get_width() / 2 + scroll.x, y + scroll.y)
+                for x, y in iso_poly]
+        # for more than 1 tile. For now, only 2x2 highlight is supported.
+        else:
+            iso_poly = self.get_2x2_iso_poly(grid_x, grid_y, scroll)
+
+        pygame.draw.polygon(screen, get_color_code(color), iso_poly, 3)
 
     #LAG A LOT DON'T TELL ME I HAVENT WARNED YOU
     def show_grid(self, scroll, screen):

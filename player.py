@@ -35,16 +35,20 @@ class Player:
 
         }
 
-    def update_resource(self, resource_type, amount):
-        # 0 for WOOD, 1 for FOOD, 2 for GOLD, 3 for STONE
-        if resource_type == 4:
+    def update_resource(self, resource_type: str, amount):
+
+        if resource_type == "WOOD":
+            self.resources[0] += amount
+        elif resource_type == "FOOD":
+            self.resources[1] += amount
+        elif resource_type == "GOLD":
+            self.resources[2] += amount
+        elif resource_type == "STONE":
+            self.resources[3] += amount
+        elif resource_type == "CURRENT_POP":
             self.current_population += amount
-
-        elif resource_type == 5:
+        elif resource_type == "MAX_POP":
             self.max_population += amount
-
-        else:
-            self.resources[resource_type] += amount
 
     def can_afford(self, entity):
         affordable = True
