@@ -404,6 +404,7 @@ class Hud:
         # if we get building_arg, it means we must display the construction progress, else it is units training
         if building_built is not None:
             progress_bar_length = 120
+            # to get the same health bar size and not have huge ones, we use a ratio
             progress_displayed = ((building_built.now - building_built.resource_manager_cooldown) / (
                     building_built.construction_time * 1000) * progress_bar_length)
 
