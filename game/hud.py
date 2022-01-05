@@ -44,6 +44,7 @@ class Hud:
         self.is_cancel_button_present = False
 
         #buildings sprites
+
         self.first_age_building_sprites = self.load_first_age_building_images()
         self.second_age_building_sprites = self.load_second_age_building_images()
         self.third_age_building_sprites = self.load_third_age_building_images()
@@ -343,120 +344,26 @@ class Hud:
         # warning - for now, you cannot render multiples lines
         draw_text(screen, entity.description, 15, (255, 255, 255), (self.width * 0.38 + 85, self.height * 0.92 - 70))
 
-    # No longer used. Display which entity, its costs, and a brief description. Kept because why not
-    def display_construction_tooltip_old(self, screen, entity):
-
-        w, h = self.tooltip_rect.width, self.tooltip_rect.height
-        screen.blit(self.tooltip_surface, (0, self.height * 0.64))
-        pygame.draw.rect(self.tooltip_surface, (255, 201, 14),
-                         pygame.Rect(0, 0, self.tooltip_rect.width, self.tooltip_rect.height), 2)
-        # tooltip
-        if entity == "Villager":
-            draw_text(screen, Villager.construction_tooltip, 14, (220, 220, 220),
-                      (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
-            # resources cost
-            temp_pos = (27, self.height * 0.64 + 30)
-            draw_text(screen, str(Villager.construction_cost[0]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55, self.height * 0.64 + 30)
-            draw_text(screen, str(Villager.construction_cost[1]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
-            draw_text(screen, str(Villager.construction_cost[2]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
-            draw_text(screen, str(Villager.construction_cost[3]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
-            draw_text(screen, str(Villager.population_produced), 12, (255, 201, 14), temp_pos)
-
-            # description
-            draw_text(screen, Villager.description, 14, (220, 220, 220),
-                      (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
-
-        elif entity == "Town center":
-            draw_text(screen, TownCenter.construction_tooltip, 14, (220, 220, 220),
-                      (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
-            # ressources cost display
-            temp_pos = (27, self.height * 0.64 + 30)
-            draw_text(screen, str(TownCenter.construction_cost[0]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55, self.height * 0.64 + 30)
-            draw_text(screen, str(TownCenter.construction_cost[1]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
-            draw_text(screen, str(TownCenter.construction_cost[2]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
-            draw_text(screen, str(TownCenter.construction_cost[3]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
-            draw_text(screen, str(TownCenter.population_produced), 12, (255, 201, 14), temp_pos)
-            # short description
-            draw_text(screen, TownCenter.description, 14, (220, 220, 220),
-                      (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
-
-        elif entity == "House":
-            draw_text(screen, House.construction_tooltip, 14, (220, 220, 220),
-                      (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
-            temp_pos = (27, self.height * 0.64 + 30)
-            draw_text(screen, str(House.construction_cost[0]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55, self.height * 0.64 + 30)
-            draw_text(screen, str(House.construction_cost[1]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
-            draw_text(screen, str(House.construction_cost[2]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
-            draw_text(screen, str(House.construction_cost[3]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
-            draw_text(screen, str(House.population_produced), 12, (255, 201, 14), temp_pos)
-
-            # description
-            draw_text(screen, House.description, 14, (220, 220, 220),
-                      (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
-
-        elif entity == "Farm":
-            draw_text(screen, Farm.construction_tooltip, 14, (220, 220, 220),
-                      (self.tooltip_rect.topleft[0], self.tooltip_rect.topleft[1] - 4))
-            temp_pos = (27, self.height * 0.64 + 30)
-            draw_text(screen, str(Farm.construction_cost[0]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55, self.height * 0.64 + 30)
-            draw_text(screen, str(Farm.construction_cost[1]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 2, self.height * 0.64 + 30)
-            draw_text(screen, str(Farm.construction_cost[2]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 3, self.height * 0.64 + 30)
-            draw_text(screen, str(Farm.construction_cost[3]), 12, (255, 201, 14), temp_pos)
-
-            temp_pos = (27 + 55 * 4, self.height * 0.64 + 30)
-            draw_text(screen, str(Farm.population_produced), 12, (255, 201, 14), temp_pos)
-
-            # description
-            draw_text(screen, Farm.description, 14, (220, 220, 220),
-                      (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
-
-        # construction/training resources costs icons
-        screen.blit(wood_cost, (5, self.height * 0.64 + 25))
-        screen.blit(food_cost, (0 + 55, self.height * 0.64 + 25))
-        screen.blit(gold_cost, (0 + 110, self.height * 0.64 + 25))
-        screen.blit(stone_cost, (0 + 165, self.height * 0.64 + 25))
-        screen.blit(population_cost, (0 + 220, self.height * 0.64 + 25))
-
-        # grey line
-        temp_pos = (5, self.height * 0.64 + 55)
-        pygame.draw.line(screen, (192, 192, 192), temp_pos, (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))
-
     def display_entity_description(self, screen, map):
         # selection (bottom middle menu)
         w, h = self.bottom_hud_rect.width, self.bottom_hud_rect.height
         screen.blit(self.bottom_hud_surface, (0, self.height * 0.79))
+        img = None
         # as we are scaling it, we make a copy
-        img = self.examined_tile.sprite.copy()
+        if isinstance(self.examined_tile, Building):
+            if self.examined_tile.owner.age == 1:
+                    img = self.first_age_building_sprites[self.examined_tile.__class__.__name__].copy()
+            elif self.examined_tile.owner.age == 2:
+                    img = self.second_age_building_sprites[self.examined_tile.__class__.__name__].copy()
+            elif self.examined_tile.owner.age == 3:
+                if isinstance(self.examined_tile, Building):
+                    img = self.third_age_building_sprites[self.examined_tile.__class__.__name__].copy()
+            elif self.examined_tile.owner.age == 4:
+                if isinstance(self.examined_tile, Building):
+                    img = self.fourth_age_building_sprites[self.examined_tile.__class__.__name__].copy()
+        else:
+            img = self.examined_tile.sprite.copy()
+
         if type(self.examined_tile) == Farm:
             img_scaled = scale_image(img, h * 0.60)
             screen.blit(img_scaled, (self.width * 0.185 - 10, self.height * 0.79 + 58))

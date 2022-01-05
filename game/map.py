@@ -277,7 +277,6 @@ class Map:
                                 if type(building) != TownCenter:
                                     self.highlight_tile(building.pos[0], building.pos[1], screen, "WHITE",
                                                             camera.scroll)
-
                                 else:
                                     self.highlight_tile(building.pos[0], building.pos[1] - 1, screen, "WHITE",
                                                             camera.scroll, multiple_tiles_tiles_flag=True)
@@ -326,8 +325,6 @@ class Map:
                             unit.dest["render_pos"][0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                             unit.dest["render_pos"][1] - (destination_flag.get_height() - TILE_SIZE) + camera.scroll.y)
                                     )
-
-
 
         # temp tile is a dictionary containing name + image + render pos + iso_poly + collision
         if self.temp_tile is not None:

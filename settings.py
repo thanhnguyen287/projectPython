@@ -51,10 +51,10 @@ building_construction_2 = pygame.image.load("resources/assets/258_2.png")
 building_construction_3 = pygame.image.load("resources/assets/258_3.png")
 building_construction_4 = pygame.image.load("resources/assets/258_4.png")
 
-building_construction_1_2x2 = pygame.image.load("resources/assets/2x2_258_1.png")
-building_construction_2_2x2 = pygame.image.load("resources/assets/2x2_258_2.png")
-building_construction_3_2x2 = pygame.image.load("resources/assets/2x2_258_3.png")
-building_construction_4_2x2 = pygame.image.load("resources/assets/2x2_258_4.png")
+building_construction_1_2x2 = pygame.image.load("resources/assets/Models/Buildings/b_all_construction_2x2_x2_1.png")
+building_construction_2_2x2 = pygame.image.load("resources/assets/Models/Buildings/b_all_construction_2x2_x2_2.png")
+building_construction_3_2x2 = pygame.image.load("resources/assets/Models/Buildings/b_all_construction_2x2_x2_3.png")
+building_construction_4_2x2 = pygame.image.load("resources/assets/Models/Buildings/b_all_construction_2x2_x2_4.png")
 
 
 
