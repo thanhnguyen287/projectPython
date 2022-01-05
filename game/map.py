@@ -112,7 +112,7 @@ class Map:
         # the player hasn't selected something to build, he will interact with what's on the map
         else:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
-            if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
+            if grid_pos[0] < self.grid_length_x - 1 and grid_pos[1] < self.grid_length_y - 1:
                 # we deselect the object examined when left-clicking if not on hud
                 town_center_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(self.buildings[grid_pos[0]][grid_pos[1] + 1]) == TownCenter ) \
                     or (self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(
@@ -190,8 +190,8 @@ class Map:
                         this_villager.is_moving_to_attack_flag = True
 
                 # ONLY MOVEMENT
-                if not self.map[grid_pos[0]][grid_pos[1]][
-                    "collision"] and not this_villager.gathering and this_villager.target is None:
+                if not self.map[grid_pos[0]][grid_pos[1]]["collision"] and \
+                        not this_villager.gathering and this_villager.target is None:
                     this_villager.move_to(self.map[grid_pos[0]][grid_pos[1]])
 
                 # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving
