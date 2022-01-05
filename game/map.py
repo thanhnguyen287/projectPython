@@ -251,10 +251,11 @@ class Map:
                 # Rendering what's on the map, if it is not a tree or rock then render nothing as we already had block with green grass
                 tile = self.map[x][y]["tile"]
 
-                # if the tile isnt empty and inst destroyed, we display it
-                if tile != "" and tile != "building":
 
-                    screen.blit(self.tiles[tile], (
+
+                # if the tile isnt empty and inst destroyed, we display it. All resources have slightly different models to add variety
+                if tile != "" and tile != "building":
+                    screen.blit(self.hud.resources_sprites[tile][str(self.map[x][y]["variation"])], (
                         render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                         render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y)
                                 )
@@ -357,14 +358,15 @@ class Map:
                         )
                         )
 
+
     def load_images(self):
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
-        tree = pygame.image.load("Resources/assets/Models/Map/tree.png").convert_alpha()
-        rock = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/stone7.png")).convert_alpha()
+        tree = pygame.image.load("Resources/assets/Models/Map/Trees/1.png").convert_alpha()
+        rock = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/7.png")).convert_alpha()
         grass_tile = scale_image(pygame.image.load("Resources/assets/Models/Map/grass_01.png").convert_alpha(), w=132)
         grass_hd = pygame.image.load(os.path.join(assets_path, "12.png")).convert_alpha()
-        gold = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/gold4.png")).convert_alpha()
-        berrybush = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/berrybush1.png")).convert_alpha()
+        gold = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/4.png")).convert_alpha()
+        berrybush = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/1.png")).convert_alpha()
 
         town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
         house = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png").convert_alpha()
@@ -401,19 +403,28 @@ class Map:
         miny = min([y for x, y in iso_poly])
         r = random.randint(1, 100)
         perlin = 100 * noise.pnoise2(grid_x / self.perlin_scale, grid_y / self.perlin_scale)
+        # variation is to have different models of the same resources, to add variety
+        variation = 0
         if (perlin >= 15) or (perlin <= -35):
             tile = "tree"
+            variation = random.randint(1, 4)
         else:
             if r <= 1:
                 tile = "rock"
+                variation = random.randint(1, 7)
             elif r <= 2:
                 tile = "tree"
+                variation = random.randint(1, 4)
             elif r <= 3:
                 tile = "gold"
+                variation = random.randint(1, 7)
             elif r == 4:
                 tile = "berrybush"
+                variation = random.randint(1, 3)
+
             else:
                 tile = ""
+
         # perlin = noise.
         out = {
             "grid": [grid_x, grid_y],
@@ -423,7 +434,8 @@ class Map:
             "tile": tile,
             "collision": False if tile == "" else True,
             "max_health": 10,
-            "health": 10
+            "health": 10,
+            "variation": variation if tile != "" else 0
         }
         return out
 

@@ -50,6 +50,9 @@ class Hud:
         self.third_age_building_sprites = self.load_third_age_building_images()
         self.fourth_age_building_sprites = self.load_fourth_age_building_images()
 
+        #resources sprites
+        self.resources_sprites = self.load_resources_images()
+
     def create_train_menu_town_hall(self):
         render_pos = [0 + 15, self.height * 0.8 + 10]
         object_width = 50
@@ -658,3 +661,43 @@ class Hud:
             "Farm": farm
         }
         return images
+
+    def load_resources_images(self):
+
+        rock_1 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/1.png")).convert_alpha()
+        rock_2 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/2.png")).convert_alpha()
+        rock_3 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/3.png")).convert_alpha()
+        rock_4 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/4.png")).convert_alpha()
+        rock_5 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/5.png")).convert_alpha()
+        rock_6 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/6.png")).convert_alpha()
+        rock_7 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/7.png")).convert_alpha()
+
+        rock_sprites = {"1": rock_1, "2": rock_2, "3": rock_3, "4": rock_4, "5": rock_5, "6": rock_6, "7": rock_7}
+
+        gold_1 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/1.png")).convert_alpha()
+        gold_2 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/2.png")).convert_alpha()
+        gold_3 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/3.png")).convert_alpha()
+        gold_4 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/4.png")).convert_alpha()
+        gold_5 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/5.png")).convert_alpha()
+        gold_6 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/6.png")).convert_alpha()
+        gold_7 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/7.png")).convert_alpha()
+
+        gold_sprites = {"1": gold_1, "2": gold_2, "3": gold_3, "4": gold_4, "5": gold_5, "6": gold_6, "7": gold_7}
+
+        berry_bush_1 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/1.png")).convert_alpha()
+        berry_bush_2 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/2.png")).convert_alpha()
+        berry_bush_3 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/3.png")).convert_alpha()
+
+        berry_bush_sprites = {"1": berry_bush_1, "2": berry_bush_2, "3": berry_bush_3}
+
+        tree_1 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Trees/1.png")).convert_alpha()
+        tree_2 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Trees/2.png")).convert_alpha()
+        tree_3 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Trees/3.png")).convert_alpha()
+        tree_4 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Trees/4.png")).convert_alpha()
+
+        tree_sprites = {"1": tree_1, "2": tree_2, "3": tree_3, "4": tree_4}
+
+        resources_sprites = {"rock": rock_sprites, "gold": gold_sprites, "berrybush": berry_bush_sprites,
+                             "tree": tree_sprites}
+
+        return resources_sprites
