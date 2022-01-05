@@ -18,6 +18,8 @@ class Player:
         self.unit_list = []
         self.unit_occupied = []
 
+        self.towncenter_pos = None
+
         self.civilization = civilization
 
         self.entity_costs = {

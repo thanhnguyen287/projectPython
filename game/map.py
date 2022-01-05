@@ -1,7 +1,7 @@
 import random
 import noise
 import pygame.mouse
-from .utils import decarte_to_iso, iso_to_decarte, get_color_code, str_to_entity_class
+from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
 from player import playerOne
@@ -49,6 +49,7 @@ class Map:
         playerOne.pay_entity_cost_bis(Villager)
         self.collision_matrix[start_unit.pos[1]][start_unit.pos[0]] = 0
         self.map[start_unit.pos[0]][start_unit.pos[1]]["collision"] = True
+
 
     def create_map(self):
         map = []
@@ -543,6 +544,8 @@ class Map:
             self.buildings[place_x][place_y] = new_building
 
             self.townhall_placed = True
+
+            playerOne.towncenter_pos = (place_x, place_y)
 
             self.map[place_x][place_y]["tile"] = "building"
             self.map[place_x][place_y]["collision"] = True

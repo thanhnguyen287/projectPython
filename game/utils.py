@@ -98,3 +98,46 @@ def str_to_entity_class(name: str):
         return Clubman
     elif name == "Bowman":
         return Bowman
+
+# this methode return a list of the x nearest free tiles
+def free_tile_founding(x, first_layer, layer_max, map, player):
+    list_of_tile = []
+    nb_of_tile_left_to_found = x
+    layer = first_layer
+    tc_pos = player.towncenter_pos
+    # while we dont have all the tiles we want or the layer max is reached, we keep going
+    while nb_of_tile_left_to_found > 0 and layer <= layer_max:
+        # we look at the top and bot side of the square formed by the tile of the
+        for j in range(layer * 2 + 2):
+            # if the tile is empty we add it to the list and we decrease the nb of tile left to found
+            pos_x = tc_pos[0] - layer + j
+            pos_y = tc_pos[1] - layer - 1
+            if 0 <= pos_x < 50 and 0 <= pos_y < 50 and not map[pos_x][pos_y]["collision"] and \
+                    nb_of_tile_left_to_found > 0:
+                list_of_tile.append((pos_x, pos_y))
+                nb_of_tile_left_to_found -= 1
+
+            pos_x = tc_pos[0] - layer + j
+            pos_y = tc_pos[1] + layer
+            if 0 <= pos_x < 50 and 0 <= pos_y < 50 and not map[pos_x][pos_y]["collision"] and \
+                    nb_of_tile_left_to_found > 0:
+                list_of_tile.append((pos_x, pos_y))
+                nb_of_tile_left_to_found -= 1
+
+        for k in range(1, layer * 2 + 1):
+            pos_x = tc_pos[0] - layer
+            pos_y = tc_pos[1] - layer - 1 + k
+            if 0 <= pos_x < 50 and 0 <= pos_y < 50 and not map[pos_x][pos_y]["collision"] and \
+                    nb_of_tile_left_to_found > 0:
+                list_of_tile.append((pos_x, pos_y))
+                nb_of_tile_left_to_found -= 1
+
+            pos_x = tc_pos[0] + layer + 1
+            pos_y = tc_pos[1] - layer - 1 + k
+            if 0 <= pos_x < 50 and 0 <= pos_y < 50 and not map[pos_x][pos_y]["collision"] and \
+                    nb_of_tile_left_to_found > 0:
+                list_of_tile.append((pos_x, pos_y))
+                nb_of_tile_left_to_found -= 1
+
+        layer += 1
+    return list_of_tile

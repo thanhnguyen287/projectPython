@@ -93,6 +93,7 @@ class Game:
                 elif event.button == 3:  # RIGHT CLICK
                     #if testUnit1.is_alive:
                         #testUnit2.attack(testUnit1)
+                    print(self.map.mouse_to_grid(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], self.camera.scroll))
                     player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
                     player.play()
 

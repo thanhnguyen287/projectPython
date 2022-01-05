@@ -1,13 +1,14 @@
 from player import player_list
 
-class IA:
 
+class IA:
 
     def __init__(self, player):
         self.player = player
         self.behaviour = "neutral"
         self.mode = "neutral"
 
+        self.tc_pos = self.player.towncenter_pos
 
     def chose_behaviour(self):
         for p in player_list:
@@ -18,7 +19,7 @@ class IA:
                     if self.mode == "defense":
                         break
                     # if a enemy unit is in a 10 tiles range of the towncenter
-                    if abs(p.towncenter_pos[0] - u.pos[0]) < 10 and abs(p.towncenter_pos[1] - u.pos[1]) < 10:  # in tiles
+                    if abs(self.tc_pos[0] - u.pos[0]) < 10 and abs(self.tc_pos[1] - u.pos[1]) < 10:  # in tiles
                         self.mode = "defense"
                         break
         if self.is_stronger():
@@ -26,7 +27,6 @@ class IA:
 
         else:
             self.mode = "neutral"
-
 
     def is_stronger(self):
         for p in player_list:
@@ -37,7 +37,6 @@ class IA:
                 else:
                     return False
 
-
     def run(self):
         self.chose_behaviour()  # looking at state of the game to chose mode (we should look every 5 seconds or so)
         if self.mode == "neutral":
@@ -46,7 +45,6 @@ class IA:
             self.defense_routine()
         elif self.mode == "attack":
             self.attack_routine()
-
 
     def neutral_routine(self):
         ressources = []
@@ -61,18 +59,15 @@ class IA:
         else:
             self.building_routine()
 
-
     # TODO
 
     def defense_routine(self):
         pass
 
-
     # TODO
 
     def attack_routine(self):
         pass
-
 
     # TODO
 
@@ -85,12 +80,20 @@ class IA:
                     u = self.player.unit_list[j]
                     if u is not None and self.player.unit_occupied[j] == 0 and u.name == "Villager":
                         pass
-                        #the unit needs to gather the nearest ressource of the type r
+                        # the unit needs to gather the nearest ressource of the type r
                         found = True
 
                     if found: break
-                    #we go out of the for because we found a villager that will gather
+                    # we go out of the for because we found a villager that will gather
 
     def building_routine(self):
-        pass
-        #TODO
+        # if we have more than 90% of our pop capacity that is occupied, we build a house
+        if self.player.current_population - self.player.max_population <= 0.1 * self.player.max_population:
+            pass
+            # build a house on the nearest free tile (near the townhall)
+
+        if self.player.current_population >= 0.5 * self.player.max_population:
+            pass
+            # build a farm on the nearest free tile (near the townhall)
+
+
