@@ -61,4 +61,8 @@ IMPORTANT STUFF :
 12 - Town center selection - Tristan : DONE
 - we must be able to select town center when left clicking on all 4 tiles, not only the bottom left one
 
+
+15 - Town center spawn :
+- spawn in a corner. Remove trees/stuff around it.
+
 ...

@@ -150,6 +150,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0]][self.pos[1] + 1] = Villager((self.pos[0], self.pos[1] + 1), self.owner,
                                                                     self.map)
+
+            #we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0]][self.pos[1] + 1])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
 
@@ -158,6 +163,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] + 1][self.pos[1] + 1] = Villager((self.pos[0] + 1, self.pos[1] + 1),
                                                                         self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0] + 1][self.pos[1] + 1])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 1] = 0
 
@@ -166,6 +176,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] - 1][self.pos[1] + 1] = Villager((self.pos[0] - 1, self.pos[1] + 1),
                                                                         self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0] - 1][self.pos[1] + 1])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0] - 1] = 0
 
@@ -174,6 +189,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] + 2][self.pos[1] + 1] = Villager((self.pos[0] + 2, self.pos[1] + 1),
                                                                         self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0] + 2][self.pos[1] + 1])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 2] = 0
 
@@ -183,6 +203,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] - 1][self.pos[1]] = Villager((self.pos[0] - 1, self.pos[1]),
                                                                     self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0] - 1][self.pos[1]])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1]][self.pos[0] - 1] = 0
 
@@ -191,6 +216,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] + 2][self.pos[1]] = Villager((self.pos[0] + 2, self.pos[1]),
                                                                     self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0] + 2][self.pos[1]])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1]][self.pos[0] + 2] = 0
 
@@ -199,6 +229,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] - 1][self.pos[1] - 1] = Villager((self.pos[0] - 1, self.pos[1] - 1),
                                                                         self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0] - 1][self.pos[1] - 1])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 1][self.pos[0] - 1] = 0
 
@@ -207,6 +242,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] + 2][self.pos[1] - 1] = Villager((self.pos[0] + 2, self.pos[1] - 1),
                                                                         self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0] + 2][self.pos[1] - 1])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 1][self.pos[0] + 2] = 0
 
@@ -217,6 +257,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] - 1][self.pos[1] - 2] = Villager((self.pos[0] - 1, self.pos[1] - 2),
                                                                         self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0] - 1][self.pos[1] - 2])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] - 1] = 0
 
@@ -225,6 +270,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0]][self.pos[1] - 2] = Villager((self.pos[0], self.pos[1] - 2),
                                                                     self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0]][self.pos[1] - 2])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0]] = 0
 
@@ -233,6 +283,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] + 1][self.pos[1] - 2] = Villager((self.pos[0] + 1, self.pos[1] - 2),
                                                                         self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0] + 1][self.pos[1] - 2])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 1] = 0
 
@@ -241,6 +296,11 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] + 2][self.pos[1] - 2] = Villager((self.pos[0] + 2, self.pos[1] - 2),
                                                                         self.owner, self.map)
+
+            # we add the unit we created to the list of units of the player
+            self.owner.unit_list.append(self.map.units[self.pos[0] + 2][self.pos[1] - 2])
+            self.owner.unit_occupied.append(0)
+
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 2] = 0
 
@@ -299,6 +359,7 @@ class Unit:
         self.move_timer = pygame.time.get_ticks()
         self.searching_for_path = False
         self.dest = None
+        self.attack_cooldown = 0
 
     def move_to(self, new_tile):
         if not self.map.is_there_collision(new_tile["grid"]):
@@ -311,6 +372,13 @@ class Unit:
             # how far along the path are we
             self.path_index = 0
             self.path, runs = finder.find_path(self.start, self.end, self.grid)
+
+    # returns True if entity is adjacent to unit/building calling it, else False
+    def is_adjacent_to(self, entity):
+        if (abs(self.pos[0] - entity.pos[0]) == 1 and abs(self.pos[1] - entity.pos[1]) == 0 ) or (abs(self.pos[0] - entity.pos[0]) == 0 and abs(self.pos[1] - entity.pos[1]) == 1 ):
+            return True
+        else:
+            return False
 
     def change_tile(self, new_tile):
         # remove the unit from its current position on the map
@@ -325,28 +393,16 @@ class Unit:
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
 
     def update(self):
-        now = pygame.time.get_ticks()
-        if now - self.move_timer > 1000 and self.searching_for_path:
+        self.now = pygame.time.get_ticks()
+        if self.searching_for_path and self.now - self.move_timer > 1000:
             new_pos = self.path[self.path_index]
             #update position in the world
 
             self.change_tile(new_pos)
             self.path_index += 1
-            self.move_timer = now
+            self.move_timer = self.now
             if self.path_index == len(self.path):
                 self.searching_for_path = False
-
-    def attack(self, targeted_unit):
-        targeted_unit.current_health -= self.attack_dmg
-        # pour tester
-        # print("hp de unit :", targeted_unit.current_health, " / ", targeted_unit.max_health)
-        # if target has less than 0 hp after attack, she dies
-        if targeted_unit.current_health < 0:
-            # print pour tester
-            # print(" unit DIED")
-            targeted_unit.is_alive = False
-            # del units_group[units_group.index(targeted_unit)]
-
 
 class Villager(Unit):
 
@@ -366,20 +422,23 @@ class Villager(Unit):
         # DATA
         self.max_health = 25
         self.attack_dmg = 3
-        self.attack_speed = 1.5
+        self.attack_speed = 1500
         self.movement_speed = 1.1
         # unit type : melee
         self.range = 0
         # used to gather ressources
         self.is_moving_to_build_flag = False
+        self.is_moving_to_fight_flag = False
         self.building_to_create = None
         self.target = None
         self.gathering = False
-        self.fighting = False
+        self.is_fighting = False
+        self.gathered_resources_stack = 0
         #Training : 50 FOOD, 2s
         self.construction_cost = [0, 10, 25, 0]
         self.construction_time = 5
         self.population_produced = 1
+        self.now = 0
 
         super().__init__(pos, player_owner_of_unit, map)
 
@@ -388,6 +447,21 @@ class Villager(Unit):
             ...
         else:
             ...
+
+    def attack(self):
+        #target has enough health to survive
+        if self.is_fighting and (self.now - self.attack_cooldown > self.attack_speed):
+
+            print(self.target.current_health)
+            if self.target.current_health > self.attack_dmg:
+                self.target.current_health -= self.attack_dmg
+                self.attack_cooldown = self.now
+
+            #unit doesnt survive attack
+            else:
+                self.map.remove_entity(self.target)
+                self.target = None
+                self.is_fighting = False
 
     def build(self):
         self.is_moving_to_build_flag = False
@@ -420,14 +494,17 @@ class Villager(Unit):
         self.building_to_create = None
 
     def gather_ressources(self, tar):
-        if (tar["tile"] == "tree" or tar["tile"] == "rock") and tar["health"] > 0:
+        if (tar["tile"] == "tree" or tar["tile"] == "rock" or tar["tile"] == "gold") and tar["health"] > 0:
             self.target["health"] -= 2
+            self.gathered_resources_stack += 1
         else:
             #we update the ressource of the player
             if tar["tile"] == "tree":
-                playerOne.update_resource(0, 10)
+                playerOne.update_resource("WOOD", 10)
             elif tar["tile"] == "rock":
-                playerOne.update_resource(1, 10)
+                playerOne.update_resource("STONE", 10)
+            elif tar["tile"] == "gold":
+                playerOne.update_resource("GOLD", 10)
 
             #we delete the tile
             tar["tile"] = ""
@@ -438,8 +515,10 @@ class Villager(Unit):
             #we need to update the collision matrix to
 
     def update(self):
-        now = pygame.time.get_ticks()
-        if now - self.move_timer > 500:
+        self.now = pygame.time.get_ticks()
+
+        if self.now - self.move_timer > 500:
+            # movement
             if self.searching_for_path:
                 new_pos = self.path[self.path_index]
                 #update position in the world
@@ -449,13 +528,18 @@ class Villager(Unit):
                     self.searching_for_path = False
                     if self.is_moving_to_build_flag:
                         self.build()
-
-            if (self.gathering or self.target is not None) and not self.searching_for_path:
+                    elif self.is_moving_to_fight_flag:
+                        self.is_fighting = True
+                        self.is_moving_to_fight_flag = False
+            #gathering
+            if self.gathering and not self.searching_for_path:
                 self.gather_ressources(self.target)
 
             #always at the end to reset the timer
-            self.move_timer = now
-
+            self.move_timer = self.now
+            # fighting
+        if self.is_fighting:
+            self.attack()
 
 class Bowman(Unit):
 
