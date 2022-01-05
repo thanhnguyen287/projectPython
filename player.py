@@ -15,6 +15,9 @@ class Player:
         self.current_population = 0
         self.max_population = 5
 
+        self.unit_list = []
+        self.unit_occupied = []
+
         self.civilization = civilization
 
         self.entity_costs = {

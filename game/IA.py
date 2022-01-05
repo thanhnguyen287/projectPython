@@ -6,6 +6,7 @@ class IA:
     def __init__(self, player):
         self.player = player
         self.behaviour = "neutral"
+        self.mode = "neutral"
 
 
     def chose_behaviour(self):
@@ -21,19 +22,20 @@ class IA:
                         self.mode = "defense"
                         break
         if self.is_stronger():
-            self.mode == "attack"
+            self.mode = "attack"
 
         else:
-            self.mode == "neutral"
+            self.mode = "neutral"
 
 
     def is_stronger(self):
         for p in player_list:
-            # we have at least 25% more units, only works without fog of war because we are looking at all enemy units
-            if len(self.unit_list) >= 1.25 * len(p.unit_list):
-                return True
-            else:
-                return False
+            if p != self.player:
+                # we have at least 25% more units, only works without fog of war because we are looking at all enemy units
+                if len(self.player.unit_list) >= 1.25 * len(p.unit_list):
+                    return True
+                else:
+                    return False
 
 
     def run(self):
@@ -47,7 +49,17 @@ class IA:
 
 
     def neutral_routine(self):
-        pass
+        ressources = []
+        for r in self.player.resources:
+            if r >= 1250:
+                ressources.append(True)
+            else:
+                ressources.append(False)
+
+        if False in ressources:
+            self.gathering_routine()
+        else:
+            self.building_routine()
 
 
     # TODO
@@ -65,5 +77,21 @@ class IA:
     # TODO
 
     def gathering_routine(self):
+        i = 0
+        found = False
+        for r in ["wood", "food", "gold", "stone"]:
+            if self.player.resources[i] < 1250:
+                for j in range(len(self.player.unit_list)):
+                    u = self.player.unit_list[j]
+                    if u is not None and self.player.unit_occupied[j] == 0 and u.name == "Villager":
+                        pass
+                        #the unit needs to gather the nearest ressource of the type r
+                        break
+                        found = True
+
+                    if found: break
+                    #we go out of the for because we found a villager that will gather
+
+    def building_routine(self):
         pass
-    # TODO
+        #TODO

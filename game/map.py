@@ -40,6 +40,11 @@ class Map:
         self.examined_tile = None
         # starting unit
         start_unit = Villager(self.map[5][5]["grid"], playerOne, self)
+
+        # we add the unit we created to the list of units of the player
+        playerOne.unit_list.append(start_unit)
+        playerOne.unit_occupied.append(0)
+
         self.units[5][5] = start_unit
         playerOne.pay_entity_cost_bis(Villager)
         self.collision_matrix[start_unit.pos[1]][start_unit.pos[0]] = 0
