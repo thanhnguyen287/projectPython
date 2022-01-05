@@ -86,7 +86,6 @@ class IA:
                     if u is not None and self.player.unit_occupied[j] == 0 and u.name == "Villager":
                         pass
                         #the unit needs to gather the nearest ressource of the type r
-                        break
                         found = True
 
                     if found: break
