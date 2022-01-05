@@ -43,6 +43,12 @@ class Hud:
         self.bottom_left_menu = None
         self.is_cancel_button_present = False
 
+        #buildings sprites
+        self.first_age_building_sprites = self.load_first_age_building_images()
+        self.second_age_building_sprites = self.load_second_age_building_images()
+        self.third_age_building_sprites = self.load_third_age_building_images()
+        self.fourth_age_building_sprites = self.load_fourth_age_building_images()
+
     def create_train_menu_town_hall(self):
         render_pos = [0 + 15, self.height * 0.8 + 10]
         object_width = 50
@@ -150,7 +156,7 @@ class Hud:
 
         # display
 
-    def draw(self, screen):
+    def draw(self, screen, map, camera):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
 
         # resources bar
@@ -158,7 +164,7 @@ class Hud:
         # bottom menu
         if self.examined_tile is not None:
             screen.blit(bot_complet_menu_building_hd, (0, self.height - 182))
-            self.display_entity_description(screen)
+            self.display_entity_description(screen, map)
 
             #if the town center is creating villager, we display the corresponding progression bar
             if type(self.examined_tile) == TownCenter and self.examined_tile.is_working:
@@ -183,9 +189,9 @@ class Hud:
                             self.display_construction_tooltip(screen, tile)
 
     def load_images(self):
-        town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/House.png").convert_alpha()
-        farm = pygame.image.load("Resources/assets/farm.png").convert_alpha()
+        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png").convert_alpha()
+        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
 
         villager = pygame.image.load("resources/assets/Villager.bmp").convert_alpha()
 
@@ -199,35 +205,138 @@ class Hud:
 
     #display life of entity inside mid bottom menu (when examining smth)
      #if below 25 pourcent, life bar in red, 25-40 : orange , 40-60 : yellow, 60-100 : light or dark green
-    def display_life_hud(self, screen, entity):
-        # health bar
-        # to get the same health bar size and not have huge ones, we use a ratio
-        health_bar_length = 100
-        hp_displayed = (entity.current_health / entity.max_health * health_bar_length)
-        #from 1 to 100% of max health, used to know which color we use for the health bar
-        unit_pourcentage_of_max_hp = (entity.current_health / entity.max_health) * 100
+    def display_life_bar(self, screen, entity, map, for_hud=True, camera=None, for_resource=False):
+        if for_hud:
+            # health bar
+            # to get the same health bar size and not have huge ones, we use a ratio
+            health_bar_length = 100
+            hp_displayed = (entity.current_health / entity.max_health * health_bar_length)
+            #from 1 to 100% of max health, used to know which color we use for the health bar
+            unit_pourcentage_of_max_hp = (entity.current_health / entity.max_health) * 100
+            bar_info = (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6)
 
-        if 0 < unit_pourcentage_of_max_hp <= 25:
-            pygame.draw.rect(screen, get_color_code("RED"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+            if 0 < unit_pourcentage_of_max_hp <= 25:
+                pygame.draw.rect(screen, get_color_code("RED"), bar_info)
 
-        elif 25 < unit_pourcentage_of_max_hp <= 40:
-            pygame.draw.rect(screen, get_color_code("ORANGE"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+            elif 25 < unit_pourcentage_of_max_hp <= 40:
+                pygame.draw.rect(screen, get_color_code("ORANGE"), bar_info)
 
-        elif 40 < unit_pourcentage_of_max_hp <= 60:
-            pygame.draw.rect(screen, get_color_code("YELLOW"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+            elif 40 < unit_pourcentage_of_max_hp <= 60:
+                pygame.draw.rect(screen, get_color_code("YELLOW"), bar_info)
 
-        elif 60 < unit_pourcentage_of_max_hp <= 85:
-            pygame.draw.rect(screen, get_color_code("GREEN"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+            elif 60 < unit_pourcentage_of_max_hp <= 85:
+                pygame.draw.rect(screen, get_color_code("GREEN"), bar_info)
 
-        else:
-            pygame.draw.rect(screen, get_color_code("DARK_GREEN"), (self.width * 0.185, self.height * 0.9 + 43, hp_displayed, 6))
+            else:
+                pygame.draw.rect(screen, get_color_code("DARK_GREEN"), bar_info)
 
-        #outer rectangle for the shape of life bar, never changes
-        pygame.draw.rect(screen, get_color_code("BLACK"), (self.width * 0.185, self.height * 0.9 + 43, health_bar_length, 6), 2)
+            #outer rectangle for the shape of life bar, never changes
+            pygame.draw.rect(screen, get_color_code("BLACK"), (self.width * 0.185, self.height * 0.9 + 43, health_bar_length, 6), 2)
 
-        # health text
-        health_text = str(entity.current_health) + " / " + str(entity.max_health)
-        draw_text(screen, health_text, 16, (255, 255, 255), (self.width * 0.185 + 28, self.height * 0.92 + 33))
+            # health text
+            health_text = str(entity.current_health) + " / " + str(entity.max_health)
+            draw_text(screen, health_text, 16, (255, 255, 255), (self.width * 0.185 + 28, self.height * 0.92 + 33))
+
+        # if for_hud is False, it means we must display the life bar above the entity
+        elif not for_hud and not for_resource:
+
+            # health bar size depends on the entity size : 1x1 tile, 2x2 tile, etc...
+            # for 2x2 entities
+            if type(entity) == TownCenter:
+                health_bar_length = 200
+                # bar_display_pos
+                display_pos_x = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[
+                                    0] + map.grass_tiles.get_width() / 2 + camera.scroll.x + 10
+
+                display_pos_y = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[1] - 55 + camera.scroll.y
+
+                hp_displayed = (entity.current_health / entity.max_health * health_bar_length)
+                # from 1 to 100% of max health, used to know which color we use for the health bar
+                unit_pourcentage_of_max_hp = (entity.current_health / entity.max_health) * 100
+                bar_info = (display_pos_x, display_pos_y, hp_displayed, 6)  # change this line to make it above the unit
+
+                if 0 < unit_pourcentage_of_max_hp <= 25:
+                    pygame.draw.rect(screen, get_color_code("RED"), bar_info)
+
+                elif 25 < unit_pourcentage_of_max_hp <= 40:
+                    pygame.draw.rect(screen, get_color_code("ORANGE"), bar_info)
+
+                elif 40 < unit_pourcentage_of_max_hp <= 60:
+                    pygame.draw.rect(screen, get_color_code("YELLOW"), bar_info)
+
+                elif 60 < unit_pourcentage_of_max_hp <= 85:
+                    pygame.draw.rect(screen, get_color_code("GREEN"), bar_info)
+
+                else:
+                    pygame.draw.rect(screen, get_color_code("DARK_GREEN"), bar_info)
+
+                # outer rectangle for the shape of life bar, never changes
+                pygame.draw.rect(screen, get_color_code("BLACK"),
+                                 (display_pos_x, display_pos_y, health_bar_length, 6), 2)  # change this too
+            #for 1x1 entities
+            else:
+                health_bar_length = 90
+                # bar_display_pos
+                display_pos_x = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[
+                                    0] + map.grass_tiles.get_width() / 2 + camera.scroll.x + 10
+
+                display_pos_y = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[1] + camera.scroll.y
+
+                hp_displayed = (entity.current_health / entity.max_health * health_bar_length)
+                # from 1 to 100% of max health, used to know which color we use for the health bar
+                unit_pourcentage_of_max_hp = (entity.current_health / entity.max_health) * 100
+                bar_info = (display_pos_x, display_pos_y, hp_displayed, 6)  # change this line to make it above the unit
+
+                if 0 < unit_pourcentage_of_max_hp <= 25:
+                    pygame.draw.rect(screen, get_color_code("RED"), bar_info)
+
+                elif 25 < unit_pourcentage_of_max_hp <= 40:
+                    pygame.draw.rect(screen, get_color_code("ORANGE"), bar_info)
+
+                elif 40 < unit_pourcentage_of_max_hp <= 60:
+                    pygame.draw.rect(screen, get_color_code("YELLOW"), bar_info)
+
+                elif 60 < unit_pourcentage_of_max_hp <= 85:
+                    pygame.draw.rect(screen, get_color_code("GREEN"), bar_info)
+
+                else:
+                    pygame.draw.rect(screen, get_color_code("DARK_GREEN"), bar_info)
+
+                # outer rectangle for the shape of life bar, never changes
+                pygame.draw.rect(screen, get_color_code("BLACK"),
+                                 (display_pos_x, display_pos_y, health_bar_length, 6), 2)
+
+        elif for_resource:
+            health_bar_length = 100
+            # bar_display_pos
+            display_pos_x = map.grid_to_renderpos(entity["grid"][0], entity["grid"][1])[
+                                0] + map.grass_tiles.get_width() / 2 + camera.scroll.x + 10
+
+            display_pos_y = map.grid_to_renderpos(entity["grid"][0], entity["grid"][1])[1] + camera.scroll.y - 20
+
+            hp_displayed = (entity["health"] / entity["max_health"] * health_bar_length)
+            # from 1 to 100% of max health, used to know which color we use for the health bar
+            resource_pourcentage_of_max_hp = (entity["health"] / entity["max_health"]) * 100
+            bar_info = (display_pos_x, display_pos_y, hp_displayed, 6)  # change this line to make it above the unit
+
+            if 0 < resource_pourcentage_of_max_hp <= 25:
+                pygame.draw.rect(screen, get_color_code("RED"), bar_info)
+
+            elif 25 < resource_pourcentage_of_max_hp <= 40:
+                pygame.draw.rect(screen, get_color_code("ORANGE"), bar_info)
+
+            elif 40 < resource_pourcentage_of_max_hp <= 60:
+                pygame.draw.rect(screen, get_color_code("YELLOW"), bar_info)
+
+            elif 60 < resource_pourcentage_of_max_hp <= 85:
+                pygame.draw.rect(screen, get_color_code("GREEN"), bar_info)
+
+            else:
+                pygame.draw.rect(screen, get_color_code("DARK_GREEN"), bar_info)
+
+            # outer rectangle for the shape of life bar, never changes
+            pygame.draw.rect(screen, get_color_code("BLACK"),
+                             (display_pos_x, display_pos_y, health_bar_length, 6), 2)  # change this too
 
     # used for bottom mid menu
     def display_description(self, screen, entity):
@@ -342,7 +451,7 @@ class Hud:
         temp_pos = (5, self.height * 0.64 + 55)
         pygame.draw.line(screen, (192, 192, 192), temp_pos, (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))
 
-    def display_entity_description(self, screen):
+    def display_entity_description(self, screen, map):
         # selection (bottom middle menu)
         w, h = self.bottom_hud_rect.width, self.bottom_hud_rect.height
         screen.blit(self.bottom_hud_surface, (0, self.height * 0.79))
@@ -397,7 +506,7 @@ class Hud:
                       12, (255, 255, 255), temp_pos)
 
         # lifebar and numbers
-        self.display_life_hud(screen, self.examined_tile)
+        self.display_life_bar(screen, self.examined_tile, map)
 
     # display progress bar and icon of trained unit
     def display_progress_bar(self, screen, trained_entity, training_entity, building_built=None):
@@ -533,10 +642,20 @@ class Hud:
     def display_building(self, screen, building, scroll, render_pos):
         # we either display the building fully constructed or being built ( 4 possible states )
         if not building.is_being_built:
-            screen.blit(building.sprite, (
+            if building.owner.age == 1:
+                sprite_to_display = self.first_age_building_sprites[building.__class__.__name__]
+            elif building.owner.age == 2:
+                sprite_to_display = self.second_age_building_sprites[building.__class__.__name__]
+            elif building.owner.age == 3:
+                sprite_to_display = self.third_age_building_sprites[building.__class__.__name__]
+            elif building.owner.age == 4:
+                sprite_to_display = self.fourth_age_building_sprites[building.__class__.__name__]
+
+            screen.blit(sprite_to_display, (
                 render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
                 render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
                         )
+
         else:
             if building.construction_progress == 0:
                 if type(building) == TownCenter:
@@ -583,3 +702,52 @@ class Hud:
                         render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
                         render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
                             )
+
+
+    def load_first_age_building_images(self):
+        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png").convert_alpha()
+        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
+
+        images = {
+            "TownCenter": town_center,
+            "House": house,
+            "Farm": farm
+        }
+        return images
+
+    def load_second_age_building_images(self):
+        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x2.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_2.png").convert_alpha()
+        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
+
+        images = {
+            "TownCenter": town_center,
+            "House": house,
+            "Farm": farm
+        }
+        return images
+
+    def load_third_age_building_images(self):
+        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x3.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_3.png").convert_alpha()
+        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
+
+        images = {
+            "TownCenter": town_center,
+            "House": house,
+            "Farm": farm
+        }
+        return images
+
+    def load_fourth_age_building_images(self):
+        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x4.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_4.png").convert_alpha()
+        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
+
+        images = {
+            "TownCenter": town_center,
+            "House": house,
+            "Farm": farm
+        }
+        return images

@@ -112,7 +112,7 @@ class Game:
         #the map display was moved inside the hud class
         self.map.draw(self.screen, self.camera)
         # drawing the hud, must be last but before fps and cursor
-        self.hud.draw(self.screen)
+        self.hud.draw(self.screen, self.map, self.camera)
         # MOUSE CURSOR - we disable the default one and create a new one at the current position of the mouse
         # MUST BE LAST TO SEE IT AND NOT BE HIDDEN BEHIND OTHER THINGS
         #pygame.mouse.set_visible(False)

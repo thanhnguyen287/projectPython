@@ -66,7 +66,7 @@ def get_color_code(color: str):
         return 0, 255, 0
 
     elif color == "DARK_GREEN":
-        return 0, 128, 0
+        return 0, 190, 20
 
     elif color == "RED":
         return 255, 0, 0

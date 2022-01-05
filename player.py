@@ -11,7 +11,7 @@ class Player:
         self.is_human = controller
         #self.resources = {"wood": 0, "food": 0, "gold": 0, "stone": 0}
         self.resources = starting_resources
-
+        self.age = 1
         self.current_population = 0
         self.max_population = 5
 
@@ -105,5 +105,7 @@ class Player:
 
 
 playerOne = Player("Tristan", True, [5000, 5000, 250, 1000], "GREEK")
+playerOne.age = 4
+players = [playerOne]
 player_list = [playerOne]
 #  INIT FOR RESSOURCES DISPLAY
