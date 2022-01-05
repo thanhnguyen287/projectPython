@@ -557,11 +557,11 @@ class Map:
         self.hud.examined_tile = None
 
     # returns true if there is collision, else False
-    def is_there_collision(self, grid_pos: tuple[int, int]):
+    def is_there_collision(self, grid_pos: [int, int]):
         return True if self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 else False
 
     # return a list of empty tiles around origin
-    def get_empty_adjacent_tiles(self, origin_pos: tuple[int, int], origin_size=1):
+    def get_empty_adjacent_tiles(self, origin_pos: [int, int], origin_size=1):
         empty_adj_tiles = []
         checked_tile = ()
         if origin_size == 1:
