@@ -113,7 +113,7 @@ class Player:
         screen.blit(myfont.render(population_text, True, (255, 255, 255)), (resource_text_pos, 11))
 
 
-playerOne = Player("Tristan", True, [5000, 5000, 250, 1000], "GREEK")
+playerOne = Player("Tristan", True, [0, 5000, 250, 1000], "GREEK")
 playerOne.age = 3
 players = [playerOne]
 player_list = [playerOne]
