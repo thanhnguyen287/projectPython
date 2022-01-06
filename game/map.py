@@ -111,8 +111,7 @@ class Map:
                         working_villager.is_moving_to_build = True
                     # we store the future building information inside building_to_create
                     if self.hud.selected_tile["name"] == "Farm" or self.hud.selected_tile["name"] == "House" or self.hud.selected_tile["name"] == "TownCenter":
-                        working_villager.building_to_create = {"type": str_to_entity_class(self.hud.selected_tile["name"]), "pos": grid_pos}
-                        print(working_villager.building_to_create)
+                        working_villager.building_to_create = {"name": self.hud.selected_tile["name"], "pos": grid_pos}
                     self.hud.selected_tile = None
 
         # the player hasn't selected something to build, he will interact with what's on the map
@@ -261,13 +260,16 @@ class Map:
                             future_building = unit.building_to_create
                             future_building_render_pos = self.grid_to_renderpos(future_building["pos"][0],
                                                                                 future_building["pos"][1])
-                            future_building_sprite = future_building["type"].sprite.copy()
-                            future_building_sprite.set_alpha(100)
-                            screen.blit(future_building_sprite, (
-                                future_building_render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                future_building_render_pos[1] - (
-                                        future_building_sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                        )
+                            self.hud.display_building(screen, future_building, camera.scroll, future_building_render_pos,
+                                                      is_hypothetical_building=True, is_build_possibility_display=True)
+                            #future_building_sprite = self.hud.display_building(screen, future_building, camera.scroll, render_pos, is_hypothetical_building=True, is_build_possibility_display=True)
+
+                            #future_building_sprite.set_alpha(100)
+                           # screen.blit(future_building_sprite, (
+                            #    future_building_render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                            #    future_building_render_pos[1] - (
+                            #            future_building_sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                             #           )
 
                     screen.blit(unit.sprite, (
                         render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
@@ -303,7 +305,7 @@ class Map:
                 else:
                     self.highlight_tile(grid[0], grid[1], screen, "GREEN", camera.scroll)
 
-            # display the potential building on the tile
+            # display the buildable building on the tile
             self.hud.display_building(screen, self.temp_tile, camera.scroll, render_pos, is_hypothetical_building=True)
 
         #building display

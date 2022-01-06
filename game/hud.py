@@ -549,7 +549,7 @@ class Hud:
         pygame.draw.rect(screen, (0, 255, 0), (x, y, health * 10, 10))
         pygame.draw.rect(screen, (25, 25, 25), (x, y, max_health * 10, 10), 4)
 
-    def display_building(self, screen, building, scroll, render_pos, is_hypothetical_building=False):
+    def display_building(self, screen, building, scroll, render_pos, is_hypothetical_building=False, is_build_possibility_display=False):
         # we either display the building fully constructed or being built ( 4 possible states )
         if not is_hypothetical_building:
             if not building.is_being_built:
@@ -624,6 +624,11 @@ class Hud:
                 sprite_to_display = self.third_age_building_sprites[building["name"]]
             else:
                 sprite_to_display = self.fourth_age_building_sprites[building["name"]]
+
+            if is_build_possibility_display:
+                sprite_to_display = sprite_to_display.copy()
+                sprite_to_display.set_alpha(100)
+
             screen.blit(sprite_to_display,
                         (  # we obviously have to reapply the offset + camera scroll
                             render_pos[0] + 6400 / 2 + scroll.x,

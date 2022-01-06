@@ -1,4 +1,6 @@
 from settings import *
+from units import House
+from game.utils import str_to_entity_class
 
 
 class Player:
@@ -75,6 +77,10 @@ class Player:
             self.resources[resource_type] -= entity.construction_cost[resource_type]
 
     def pay_entity_cost_bis(self, entity_class):
+        if entity_class == "House":
+            entity_class = House
+        elif type(entity_class) == str:
+            entity_class = str_to_entity_class(entity_class)
         for resource_type in range(4):
             self.resources[resource_type] -= entity_class.construction_cost[resource_type]
         self.current_population += entity_class.population_produced

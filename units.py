@@ -2,7 +2,9 @@ from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from pathfinding.finder.a_star import DiagonalMovement
 
-from player import *
+#from player import *
+import os
+import pygame
 from math import ceil
 
 
@@ -25,7 +27,7 @@ class Building:
         self.current_health = 1
         self.is_alive = True
 
-        self.image_select = pygame.image.load(os.path.join(assets_path, "image_select.png"))
+        #self.image_select = pygame.image.load(os.path.join(assets_path, "image_select.png"))
         self.selected = False
 
         self.resource_manager_cooldown = pygame.time.get_ticks()
@@ -406,6 +408,7 @@ class Unit:
             if self.path_index == len(self.path):
                 self.searching_for_path = False
 
+
 class Villager(Unit):
 
     # Training : 50 FOOD, 20s
@@ -468,28 +471,28 @@ class Villager(Unit):
     def build(self):
         self.is_moving_to_build = False
         new_building = None
-        if self.building_to_create["type"] == Farm:
+        if self.building_to_create["name"] == "Farm":
             new_building = Farm((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
-                                playerOne)
+                                self.owner)
 
-        elif self.building_to_create["type"] == TownCenter:
+        elif self.building_to_create["name"] == "TownCenter":
             new_building = TownCenter((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
-                                      playerOne)
+                                      self.owner)
             # additional collision bc town center is 2x2 tile, not 1x1
             self.map.collision_matrix[self.building_to_create["pos"][1]][self.building_to_create["pos"][0] + 1] = 0
             self.map.collision_matrix[self.building_to_create["pos"][1] - 1][self.building_to_create["pos"][0] + 1] = 0
             self.map.collision_matrix[self.building_to_create["pos"][1] - 1][self.building_to_create["pos"][0]] = 0
 
-        elif self.building_to_create["type"] == House:
+        elif self.building_to_create["name"] == "House":
             new_building = House((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
-                                 playerOne)
+                                 self.owner)
 
         # to add it to the entities list on our map
         self.map.entities.append(new_building)
         self.map.buildings[self.building_to_create["pos"][0]][
             self.building_to_create["pos"][1]] = new_building
         # we pay the construction cost
-        playerOne.pay_entity_cost_bis(self.building_to_create["type"])
+        self.owner.pay_entity_cost_bis(self.building_to_create["name"])
         # we actualize collision
         self.map.collision_matrix[self.building_to_create["pos"][1]][
             self.building_to_create["pos"][0]] = 0
