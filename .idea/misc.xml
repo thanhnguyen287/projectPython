@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-<<<<<<< HEAD
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.7 (projectPython)" project-jdk-type="Python SDK" />
-=======
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.7 (projectPython) (2)" project-jdk-type="Python SDK" />
->>>>>>> parent of 97ce12b (AI can now build by herself on random free tiles in her range. She can also expand to increase her range when she is the strongest or when there is a lack of ressources.)
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.7 (projectPython) (3)" project-jdk-type="Python SDK" />
 </project>
