@@ -651,5 +651,8 @@ class Map:
                     pygame.draw.circle(screen, "BlACK", (mini[1][0], mini[1][1]), 1)
                 elif tile == "gold":
                     pygame.draw.circle(screen, "YELLOW", (mini[1][0], mini[1][1]), 1)
+                elif tile == "berrybush":
+                    pygame.draw.circle(screen, "RED", (mini[1][0], mini[1][1]), 1)
+
 
 
