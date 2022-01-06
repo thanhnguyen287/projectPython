@@ -9,7 +9,6 @@ class IA:
         self.player = player
         self.map = map
         self.tc_pos = self.player.towncenter_pos
-
         self.behaviour = "neutral"
 
         # the range (in layers) that the AI will go to. It increase when the AI becomes stronger
@@ -60,8 +59,6 @@ class IA:
 
             if False in ressources_available:
                 self.range += 1
-
-        print(self.range)
 
     def is_stronger(self):
         for p in player_list:
@@ -115,6 +112,7 @@ class IA:
                     r = ["wood", "food", "gold", "stone"][indice]
                     if self.player.resources[indice] < 150:
                         tiles_to_gather = tile_founding(1, 1, self.range, self.map, self.player, r)
+                        print(tiles_to_gather)
                         if tiles_to_gather:
                             u.go_to_ressource(tiles_to_gather[0])
 
