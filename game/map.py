@@ -1,10 +1,10 @@
 import random
 import noise
 import pygame.mouse
-from .utils import decarte_to_iso, iso_to_decarte, get_color_code, str_to_entity_class
+from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
-from player import playerOne
+from player import playerOne, player_list
 from units import Villager, Unit, Farm, TownCenter, House, Building
 
 
@@ -108,10 +108,10 @@ class Map:
                     if self.get_empty_adjacent_tiles(grid_pos):
                         villager_dest = self.get_empty_adjacent_tiles(grid_pos)[0]
                         working_villager.move_to(self.map[villager_dest[0]][villager_dest[1]])
-                        working_villager.is_moving_to_build_flag = True
+                        working_villager.is_moving_to_build = True
                     # we store the future building information inside building_to_create
-                    if self.hud.selected_tile["name"] == "Farm" or self.hud.selected_tile["name"] == "House" or self.hud.selected_tile["name"] == "Town center":
-                        working_villager.building_to_create = {"type": str_to_entity_class(self.hud.selected_tile["name"]), "pos": grid_pos}
+                    if self.hud.selected_tile["name"] == "Farm" or self.hud.selected_tile["name"] == "House" or self.hud.selected_tile["name"] == "TownCenter":
+                        working_villager.building_to_create = {"name": self.hud.selected_tile["name"], "pos": grid_pos}
                     self.hud.selected_tile = None
 
         # the player hasn't selected something to build, he will interact with what's on the map
@@ -153,7 +153,8 @@ class Map:
                                 self.hud.bottom_left_menu = None
 
                         else:
-                            building = self.buildings[grid_pos[0]][grid_pos[1] + 1]
+                            if grid_pos[1] + 1 < self.grid_length_y:
+                                building = self.buildings[grid_pos[0]][grid_pos[1] + 1]
                             if building and type(building) == TownCenter:
                                 self.hud.examined_tile = building
                                 self.examined_tile = (grid_pos[0], grid_pos[1] + 1)
@@ -192,42 +193,20 @@ class Map:
                     else:
                         this_villager_dest = self.get_empty_adjacent_tiles((pos_x, pos_y))[0]
                         this_villager.move_to(self.map[this_villager_dest[0]][this_villager_dest[1]])
-                        this_villager.is_moving_to_attack_flag = True
+                        this_villager.is_moving_to_attack = True
 
                 # ONLY MOVEMENT
                 if not self.map[grid_pos[0]][grid_pos[1]]["collision"] and \
-                        not this_villager.gathering and this_villager.target is None:
+                        not this_villager.is_gathering and this_villager.target is None:
                     this_villager.move_to(self.map[grid_pos[0]][grid_pos[1]])
 
                 # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving
                 # if the tile next to him is a ressource and we right click on it and he is not moving, he will gather it
                 if not this_villager.searching_for_path \
-                        and (self.map[pos_x][pos_y]["tile"] == "tree" or self.map[pos_x][pos_y]["tile"] == "rock" or self.map[pos_x][pos_y]["tile"] == "gold"):
+                        and (self.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"]):
 
-                    if (abs(pos_x - villager_pos[0]) <= 1 and abs(
-                            pos_y - villager_pos[1]) == 0) \
-                            or (abs(pos_x - villager_pos[0]) == 0 and abs(pos_y - villager_pos[1]) <= 1):
-
-                        this_villager.target = self.map[pos_x][pos_y]
-                        this_villager.gathering = True
-
-                    # if the tile we right click on is a ressource, he will travel to it and then gather it
-                    else:
-                        if self.map[pos_x - 1][pos_y]["tile"] == "":
-                            this_villager.move_to(self.map[pos_x - 1][pos_y])
-                            this_villager.target = self.map[pos_x][pos_y]
-                        elif self.map[pos_x + 1][pos_y]["tile"] == "":
-                            this_villager.move_to(self.map[pos_x + 1][pos_y])
-                            this_villager.target = self.map[pos_x][pos_y]
-                        elif self.map[pos_x][pos_y - 1]["tile"] == "":
-                            this_villager.move_to(self.map[pos_x][pos_y - 1])
-                            this_villager.target = self.map[pos_x][pos_y]
-                        elif self.map[pos_x][pos_y + 1]["tile"] == "":
-                            this_villager.move_to(self.map[pos_x][pos_y + 1])
-                            this_villager.target = self.map[pos_x][pos_y]
-                        else:
-                            this_villager.target = None
-
+                    this_villager.go_to_ressource((pos_x, pos_y))
+                    print("go to")
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -235,6 +214,8 @@ class Map:
         # display grid
         #self.show_grid(camera.scroll, screen)
         # FOR THE MAP
+
+
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
                 render_pos = self.map[x][y]["render_pos"]
@@ -243,10 +224,11 @@ class Map:
                 # Rendering what's on the map, if it is not a tree or rock then render nothing as we already had block with green grass
                 tile = self.map[x][y]["tile"]
 
-                # if the tile isnt empty and inst destroyed, we display it
-                if tile != "" and tile != "building":
 
-                    screen.blit(self.tiles[tile], (
+
+                # if the tile isnt empty and inst destroyed, we display it. All resources have slightly different models to add variety
+                if tile != "" and tile != "building":
+                    screen.blit(self.hud.resources_sprites[tile][str(self.map[x][y]["variation"])], (
                         render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                         render_pos[1] - (self.tiles[tile].get_height() - TILE_SIZE) + camera.scroll.y)
                                 )
@@ -254,59 +236,43 @@ class Map:
                     # here we display the health bar of the ressources
                     if (self.examined_tile is not None and x == self.examined_tile[0] and y == self.examined_tile[1]) \
                             or self.map[x][y]["health"] != self.map[x][y]["max_health"]:
-                        self.hud.display_resources_health(screen,
-                                                          render_pos[
-                                                              0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10,
-                                                          render_pos[1] - (self.tiles[
-                                                                               tile].get_height() - TILE_SIZE) + camera.scroll.y,
-                                                          self.map[x][y]["health"], self.map[x][y]["max_health"])
-                        self.hud.display_resources_health(screen,
-                                                          render_pos[
-                                                              0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10,
-                                                          render_pos[1] - (self.tiles[
-                                                                               tile].get_height() - TILE_SIZE) + camera.scroll.y,
-                                                          self.map[x][y]["health"], self.map[x][y]["max_health"])
-
-                # HERE WE DRAW THE BUILDINGS ON THE MAP
-                # we extract from the buildings list the building we want to display
-                building = self.buildings[x][y]
-                if building is not None:
-                    if building.current_health <= 0:
-                        self.remove_entity(building)
-                    else:
-                        self.hud.display_building(screen, building, camera.scroll, render_pos)
-                        # have we clicked on this tile ? if yes we will highlight the building
-                        if self.examined_tile is not None:
-                            if not building.is_being_built:
-                                if (x == self.examined_tile[0]) and (y == self.examined_tile[1]):
-                                    if type(building) != TownCenter:
-                                        self.highlight_image(building.sprite, screen, render_pos, camera.scroll, )
-
-                                    else:
-                                        self.highlight_tile(building.pos[0], building.pos[1] - 1, screen, "WHITE", camera.scroll, multiple_tiles_tiles_flag=True)
+                        self.hud.display_life_bar(screen, self.map[x][y], self, camera=camera, for_hud=False, for_resource=True)
 
                 # HERE WE DRAW THE UNITS ON THE MAP
-                # we extract from the units list the building we want to display
+                # we extract from the units list the unit we want to display
                 unit = self.units[x][y]
                 if unit is not None and unit.current_health <= 0:
                     self.remove_entity(unit)
                 if unit is not None:
-                    if unit.is_fighting or unit.is_moving_to_fight_flag:
+                    # have we selected this unit ? if yes we will highlight its tile
+                    if self.examined_tile is not None:
+                        if (x == self.examined_tile[0]) and (y == self.examined_tile[1]):
+                            self.highlight_tile(self.examined_tile[0], self.examined_tile[1], screen, "WHITE",
+                                                camera.scroll)
+                    if unit.target is not None:
+                        target = unit.map.map[unit.target[0]][unit.target[1]]
+                    if unit.is_fighting or unit.is_moving_to_fight:
                         # target highlighted in dark red
-                        self.highlight_tile(unit.target.pos[0], unit.target.pos[1], screen, "DARK_RED", camera.scroll)
+                        self.highlight_tile(target.pos[0], target.pos[1], screen, "DARK_RED", camera.scroll)
+                    elif unit.is_gathering or unit.is_moving_to_gather:
+                        self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
+
                     if type(unit) == Villager:
                         # draw future buildings
                         if unit.building_to_create is not None:
                             future_building = unit.building_to_create
                             future_building_render_pos = self.grid_to_renderpos(future_building["pos"][0],
                                                                                 future_building["pos"][1])
-                            future_building_sprite = future_building["type"].sprite.copy()
-                            future_building_sprite.set_alpha(100)
-                            screen.blit(future_building_sprite, (
-                                future_building_render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                                future_building_render_pos[1] - (
-                                        future_building_sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                                        )
+                            self.hud.display_building(screen, future_building, camera.scroll, future_building_render_pos,
+                                                      is_hypothetical_building=True, is_build_possibility_display=True)
+                            #future_building_sprite = self.hud.display_building(screen, future_building, camera.scroll, render_pos, is_hypothetical_building=True, is_build_possibility_display=True)
+
+                            #future_building_sprite.set_alpha(100)
+                           # screen.blit(future_building_sprite, (
+                            #    future_building_render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                            #    future_building_render_pos[1] - (
+                            #            future_building_sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                             #           )
 
                     screen.blit(unit.sprite, (
                         render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
@@ -319,11 +285,6 @@ class Map:
                             unit.dest["render_pos"][1] - (destination_flag.get_height() - TILE_SIZE) + camera.scroll.y)
                                     )
 
-                    # have we selected this unit ? if yes we will highlight its tile
-                    if self.examined_tile is not None:
-                        if (x == self.examined_tile[0]) and (y == self.examined_tile[1]):
-                            self.highlight_tile(self.examined_tile[0], self.examined_tile[1], screen, "WHITE", camera.scroll)
-
         # temp tile is a dictionary containing name + image + render pos + iso_poly + collision
         if self.temp_tile is not None:
             render_pos = self.temp_tile["render_pos"]
@@ -331,7 +292,7 @@ class Map:
 
             # if we cannot place our building on the tile because there's already smth, we display the tile in red, else, in green
             # For towncenter, we have to display a 2x2 green/Red case, else we only need to highlight a 1x1 case
-            if self.temp_tile["name"] == "Town center":
+            if self.temp_tile["name"] == "TownCenter":
                 # collision matrix : 0 if collision, else 1, we check the 4 cases of the town center
                 if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or \
                         self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or self.collision_matrix[grid[1] - 1][
@@ -347,27 +308,46 @@ class Map:
                 else:
                     self.highlight_tile(grid[0], grid[1], screen, "GREEN", camera.scroll)
 
-            # display the potential building on the tile
-            screen.blit(self.temp_tile["image"],
-                        (  # we obviously have to reapply the offset + camera scroll
-                            render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                            render_pos[1] - (self.temp_tile["image"].get_height() - TILE_SIZE) + camera.scroll.y
-                        )
-                        )
+            # display the buildable building on the tile
+            self.hud.display_building(screen, self.temp_tile, camera.scroll, render_pos, is_hypothetical_building=True)
+
+        #building display
+        for player in player_list:
+            for building in player.building_list:
+                if building.current_health <= 0:
+                    self.remove_entity(building)
+
+                 #have we clicked on this tile ? if yes we will highlight the building
+                if self.examined_tile is not None:
+                    if not building.is_being_built:
+                        if (building.pos[0] == self.examined_tile[0]) and (building.pos[1] == self.examined_tile[1]):
+                            if type(building) != TownCenter:
+                                self.highlight_tile(building.pos[0], building.pos[1], screen, "WHITE",
+                                    camera.scroll)
+                            else:
+                                self.highlight_tile(building.pos[0], building.pos[1] - 1, screen, "WHITE",
+                                    camera.scroll, multiple_tiles_tiles_flag=True)
+                self.hud.display_building(screen, building, camera.scroll,
+                                          self.grid_to_renderpos(building.pos[0], building.pos[1]))
+                if building.current_health != building.max_health:
+                    self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
 
     def load_images(self):
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
-        tree = pygame.image.load(os.path.join(assets_path, "tree_2_resized_2.png")).convert_alpha()
-        rock = pygame.image.load(os.path.join(assets_path, "stone1.png")).convert_alpha()
-        grass_tile = pygame.image.load(os.path.join(assets_path, "grass.png")).convert_alpha()
+        tree = pygame.image.load("Resources/assets/Models/Map/Trees/1.png").convert_alpha()
+        rock = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/7.png")).convert_alpha()
+        grass_tile = scale_image(pygame.image.load("Resources/assets/Models/Map/grass_01.png").convert_alpha(), w=132)
         grass_hd = pygame.image.load(os.path.join(assets_path, "12.png")).convert_alpha()
-        gold = pygame.image.load(os.path.join(assets_path, "gold.png")).convert_alpha()
-        town_center = pygame.image.load("Resources/assets/town_center.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/House_2.png").convert_alpha()
-        farm = pygame.image.load("Resources/assets/farm.png").convert_alpha()
+        gold = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/4.png")).convert_alpha()
+        berrybush = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/1.png")).convert_alpha()
+
+        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png").convert_alpha()
+        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
         villager = pygame.image.load("resources/assets/Villager.bmp").convert_alpha()
+
         images = {
-            "Town center": town_center,
+            "TownCenter": town_center,
             "House": house,
             "Farm": farm,
             "tree": tree,
@@ -376,6 +356,7 @@ class Map:
             "grass": grass_tile,
             "grass_hd": grass_hd,
             "gold": gold,
+            "berrybush": berrybush,
             "Villager": villager
         }
         return images
@@ -395,17 +376,28 @@ class Map:
         miny = min([y for x, y in iso_poly])
         r = random.randint(1, 100)
         perlin = 100 * noise.pnoise2(grid_x / self.perlin_scale, grid_y / self.perlin_scale)
+        # variation is to have different models of the same resources, to add variety
+        variation = 0
         if (perlin >= 15) or (perlin <= -35):
             tile = "tree"
+            variation = random.randint(1, 4)
         else:
             if r <= 1:
                 tile = "rock"
+                variation = random.randint(1, 7)
             elif r <= 2:
                 tile = "tree"
+                variation = random.randint(1, 4)
             elif r <= 3:
                 tile = "gold"
+                variation = random.randint(1, 7)
+            elif r == 4:
+                tile = "berrybush"
+                variation = random.randint(1, 3)
+
             else:
                 tile = ""
+
         # perlin = noise.
         out = {
             "grid": [grid_x, grid_y],
@@ -415,7 +407,8 @@ class Map:
             "tile": tile,
             "collision": False if tile == "" else True,
             "max_health": 10,
-            "health": 10
+            "health": 10,
+            "variation": variation if tile != "" else 0
         }
         return out
 
@@ -543,6 +536,8 @@ class Map:
             self.buildings[place_x][place_y] = new_building
 
             self.townhall_placed = True
+
+            playerOne.towncenter_pos = (place_x, place_y)
 
             self.map[place_x][place_y]["tile"] = "building"
             self.map[place_x][place_y]["collision"] = True

@@ -1,4 +1,6 @@
 from settings import *
+from units import House
+from game.utils import str_to_entity_class
 
 
 class Player:
@@ -11,19 +13,24 @@ class Player:
         self.is_human = controller
         #self.resources = {"wood": 0, "food": 0, "gold": 0, "stone": 0}
         self.resources = starting_resources
-
+        self.age = 1
         self.current_population = 0
         self.max_population = 5
 
         self.unit_list = []
+
         self.unit_occupied = []
+
+        self.building_list = []
+
+        self.towncenter_pos = None
 
         self.civilization = civilization
 
         self.entity_costs = {
             "Farm": {"wood": 100, "stone": 0, "food": 0, "gold": 0},
             "House": {"wood": 600, "stone": 0, "food": 0, "gold": 0},
-            "Town center": {"wood": 1000, "stone": 0, "food": 0, "gold": 0},
+            "TownCenter": {"wood": 1000, "stone": 0, "food": 0, "gold": 0},
 
             "Villager": {"wood": 0, "stone": 0, "food": 10, "gold": 25}
 
@@ -32,7 +39,7 @@ class Player:
         self.entity_population_cost = {
             "Farm": 0,
             "House": 0,
-            "Town center": 0,
+            "TownCenter": 0,
 
             "Villager": 1
 
@@ -70,6 +77,10 @@ class Player:
             self.resources[resource_type] -= entity.construction_cost[resource_type]
 
     def pay_entity_cost_bis(self, entity_class):
+        if entity_class == "House":
+            entity_class = House
+        elif type(entity_class) == str:
+            entity_class = str_to_entity_class(entity_class)
         for resource_type in range(4):
             self.resources[resource_type] -= entity_class.construction_cost[resource_type]
         self.current_population += entity_class.population_produced
@@ -102,6 +113,8 @@ class Player:
         screen.blit(myfont.render(population_text, True, (255, 255, 255)), (resource_text_pos, 11))
 
 
-playerOne = Player("Tristan", True, [5000, 5000, 250, 1000], "GREEK")
+playerOne = Player("Tristan", True, [0, 5000, 250, 1000], "GREEK")
+playerOne.age = 3
+players = [playerOne]
 player_list = [playerOne]
 #  INIT FOR RESSOURCES DISPLAY

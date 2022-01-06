@@ -1,7 +1,10 @@
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from pathfinding.finder.a_star import DiagonalMovement
-from player import *
+
+#from player import *
+import os
+import pygame
 from math import ceil
 
 
@@ -12,6 +15,7 @@ class Building:
 
     def __init__(self, pos, map, player_owner_of_unit, ):
         self.owner = player_owner_of_unit
+        self.owner.building_list.append(self)
         self.rect = self.sprite.get_rect(topleft=pos)
         # pos is the tile position, for ex : (4,4)
         self.pos = pos
@@ -23,11 +27,10 @@ class Building:
         self.current_health = 1
         self.is_alive = True
 
-        self.image_select = pygame.image.load(os.path.join(assets_path, "image_select.png"))
+        #self.image_select = pygame.image.load(os.path.join(assets_path, "image_select.png"))
         self.selected = False
 
         self.resource_manager_cooldown = pygame.time.get_ticks()
-        #self.owner.pay_entity_cost(self)
         self.now = 0
 
     def update(self):
@@ -41,7 +44,7 @@ class Farm(Building):
     construction_time = 4
     armor = 0
 
-    sprite = pygame.image.load(os.path.join(assets_path, "Farm.png"))
+    sprite = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png")
 
     def __init__(self, pos, map, player_owner_of_unit):
         self.name = " Farm"
@@ -82,7 +85,8 @@ class TownCenter(Building):
     construction_cost = [1000, 0, 0, 100]
     construction_time = 8
     armor = 3
-    sprite = pygame.image.load(os.path.join(assets_path, "town_center.png"))
+    sprite = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png")
+
 
     def __init__(self, pos, map, player_owner_of_unit):
 
@@ -311,7 +315,7 @@ class House(Building):
     construction_cost = [600, 0, 0, 0]
     construction_time = 4
     armor = -2
-    sprite = pygame.image.load(os.path.join(assets_path, "House.png"))
+    sprite = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png")
 
     def __init__(self, pos, map, player_owner_of_unit):
         self.name = "House"
@@ -331,18 +335,17 @@ class House(Building):
             if ceil(progress_time_pourcent * self.max_health*0.01) != 0:
                 self.current_health = ceil(progress_time_pourcent * self.max_health*0.01)
             # if fully built we set is_being_built to 0, else change the progression attribute accordingly
-            if self.now - self.resource_manager_cooldown > House.construction_time * 1000:
+            if progress_time_pourcent > 100:
                 self.resource_manager_cooldown = self.now
                 self.construction_progress = 100
                 self.current_health -= 1
                 self.is_being_built = False
-            elif self.now - self.resource_manager_cooldown > House.construction_time * 750:
+            elif progress_time_pourcent > 75:
                 self.construction_progress = 75
-            elif self.now - self.resource_manager_cooldown > House.construction_time * 500:
+            elif progress_time_pourcent > 50:
                 self.construction_progress = 50
-            elif self.now - self.resource_manager_cooldown > House.construction_time * 250:
+            elif progress_time_pourcent > 25:
                 self.construction_progress = 25
-
 
 class Unit:
     armor = 0
@@ -375,7 +378,8 @@ class Unit:
 
     # returns True if entity is adjacent to unit/building calling it, else False
     def is_adjacent_to(self, entity):
-        if (abs(self.pos[0] - entity.pos[0]) == 1 and abs(self.pos[1] - entity.pos[1]) == 0 ) or (abs(self.pos[0] - entity.pos[0]) == 0 and abs(self.pos[1] - entity.pos[1]) == 1 ):
+        if (abs(self.pos[0] - entity.pos[0]) == 1 and abs(self.pos[1] - entity.pos[1]) == 0) or \
+                (abs(self.pos[0] - entity.pos[0]) == 0 and abs(self.pos[1] - entity.pos[1]) == 1):
             return True
         else:
             return False
@@ -404,6 +408,7 @@ class Unit:
             if self.path_index == len(self.path):
                 self.searching_for_path = False
 
+
 class Villager(Unit):
 
     # Training : 50 FOOD, 20s
@@ -427,11 +432,12 @@ class Villager(Unit):
         # unit type : melee
         self.range = 0
         # used to gather ressources
-        self.is_moving_to_build_flag = False
-        self.is_moving_to_fight_flag = False
+        self.is_moving_to_build = False
+        self.is_moving_to_fight = False
         self.building_to_create = None
+        self.is_moving_to_gather = False
         self.target = None
-        self.gathering = False
+        self.is_gathering = False
         self.is_fighting = False
         self.gathered_resources_stack = 0
         #Training : 50 FOOD, 2s
@@ -452,7 +458,6 @@ class Villager(Unit):
         #target has enough health to survive
         if self.is_fighting and (self.now - self.attack_cooldown > self.attack_speed):
 
-            print(self.target.current_health)
             if self.target.current_health > self.attack_dmg:
                 self.target.current_health -= self.attack_dmg
                 self.attack_cooldown = self.now
@@ -464,55 +469,95 @@ class Villager(Unit):
                 self.is_fighting = False
 
     def build(self):
-        self.is_moving_to_build_flag = False
+        self.is_moving_to_build = False
         new_building = None
-        if self.building_to_create["type"] == Farm:
+        if self.building_to_create["name"] == "Farm":
             new_building = Farm((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
-                                playerOne)
+                                self.owner)
 
-        elif self.building_to_create["type"] == TownCenter:
+        elif self.building_to_create["name"] == "TownCenter":
             new_building = TownCenter((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
-                                      playerOne)
+                                      self.owner)
             # additional collision bc town center is 2x2 tile, not 1x1
             self.map.collision_matrix[self.building_to_create["pos"][1]][self.building_to_create["pos"][0] + 1] = 0
             self.map.collision_matrix[self.building_to_create["pos"][1] - 1][self.building_to_create["pos"][0] + 1] = 0
             self.map.collision_matrix[self.building_to_create["pos"][1] - 1][self.building_to_create["pos"][0]] = 0
 
-        elif self.building_to_create["type"] == House:
+        elif self.building_to_create["name"] == "House":
             new_building = House((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
-                                 playerOne)
+                                 self.owner)
 
         # to add it to the entities list on our map
         self.map.entities.append(new_building)
         self.map.buildings[self.building_to_create["pos"][0]][
             self.building_to_create["pos"][1]] = new_building
         # we pay the construction cost
-        playerOne.pay_entity_cost_bis(self.building_to_create["type"])
+        self.owner.pay_entity_cost_bis(self.building_to_create["name"])
         # we actualize collision
         self.map.collision_matrix[self.building_to_create["pos"][1]][
             self.building_to_create["pos"][0]] = 0
         self.building_to_create = None
 
-    def gather_ressources(self, tar):
-        if (tar["tile"] == "tree" or tar["tile"] == "rock" or tar["tile"] == "gold") and tar["health"] > 0:
-            self.target["health"] -= 2
-            self.gathered_resources_stack += 1
+
+    def go_to_ressource(self, pos):
+        # if the ressource is near us, we directly gather it
+        if (abs(pos[0] - self.pos[0]) <= 1 and abs(pos[1] - self.pos[1]) == 0) or \
+                (abs(pos[0] - self.pos[0]) == 0 and abs(pos[1] - self.pos[1]) <= 1):
+            self.target = (pos[0], pos[1])
+            self.is_gathering = True
+
+        # else we go to an adjacent tile
         else:
-            #we update the ressource of the player
-            if tar["tile"] == "tree":
-                playerOne.update_resource("WOOD", 10)
-            elif tar["tile"] == "rock":
-                playerOne.update_resource("STONE", 10)
-            elif tar["tile"] == "gold":
-                playerOne.update_resource("GOLD", 10)
+            if 0 <= pos[0] - 1 <= self.map.grid_length_x and self.map.map[pos[0] - 1][pos[1]]["tile"] == "":
+                self.move_to(self.map.map[pos[0] - 1][pos[1]])
+                self.target = (pos[0], pos[1])
+                self.is_moving_to_gather = True
 
-            #we delete the tile
-            tar["tile"] = ""
-            tar["collision"] = False
-            self.target = None
-            self.gathering = False
+            elif 0 <= pos[0] + 1 <= self.map.grid_length_x and self.map.map[pos[0] + 1][pos[1]]["tile"] == "":
+                self.move_to(self.map.map[pos[0] + 1][pos[1]])
+                self.target = (pos[0], pos[1])
+                self.is_moving_to_gather = True
 
-            #we need to update the collision matrix to
+            elif 0 <= pos[1] - 1 <= self.map.grid_length_y and self.map.map[pos[0]][pos[1] - 1]["tile"] == "":
+                self.move_to(self.map.map[pos[0]][pos[1] - 1])
+                self.target = (pos[0], pos[1])
+                self.is_moving_to_gather = True
+
+            elif 0 <= pos[0] + 1 <= self.map.grid_length_y and self.map.map[pos[0]][pos[1] + 1]["tile"] == "":
+                self.move_to(self.map.map[pos[0]][pos[1] + 1])
+                self.target = (pos[0], pos[1])
+                self.is_moving_to_gather = True
+
+            else:
+                self.target = None
+
+
+    def gather_ressources(self):
+        this_target = self.map.map[self.target[0]][self.target[1]]
+        if self.is_gathering and (self.now - self.attack_cooldown > self.attack_speed):
+
+            if this_target["health"] > self.attack_dmg:
+                this_target["health"] -= self.attack_dmg
+                self.attack_cooldown = self.now
+                self.gathered_resources_stack += 1
+            # no resource is remaining, we destroy it and give resource to the player:
+            else:
+                if this_target["tile"] == "tree":
+                    self.owner.update_resource("WOOD", 10)
+                elif this_target["tile"] == "rock":
+                    self.owner.update_resource("STONE", 10)
+                elif this_target["tile"] == "gold":
+                    self.owner.update_resource("GOLD", 10)
+                elif this_target["tile"] == "berrybush":
+                    self.owner.update_resource("FOOD", 10)
+
+                this_target["tile"] = ""
+                this_target["collision"] = False
+                self.map.collision_matrix[this_target["grid"][1]][this_target["grid"][0]] = 1
+                self.target = None
+                self.is_gathering = False
+
+        #if (tar["tile"] == "tree" or tar["tile"] == "rock" or tar["tile"] == "gold" or tar["tile"] == "berrybush") and tar["health"] > 0:
 
     def update(self):
         self.now = pygame.time.get_ticks()
@@ -526,20 +571,25 @@ class Villager(Unit):
                 self.path_index += 1
                 if self.path_index == len(self.path):
                     self.searching_for_path = False
-                    if self.is_moving_to_build_flag:
+                    if self.is_moving_to_build:
                         self.build()
-                    elif self.is_moving_to_fight_flag:
+                    elif self.is_moving_to_fight:
                         self.is_fighting = True
-                        self.is_moving_to_fight_flag = False
-            #gathering
-            if self.gathering and not self.searching_for_path:
-                self.gather_ressources(self.target)
+                        self.is_moving_to_fight = False
+                    elif self.is_moving_to_gather:
+                        self.is_gathering = True
+                        self.is_moving_to_gather = False
 
             #always at the end to reset the timer
             self.move_timer = self.now
+
+        if self.is_gathering:
+            self.gather_ressources()
+
             # fighting
         if self.is_fighting:
             self.attack()
+
 
 class Bowman(Unit):
 

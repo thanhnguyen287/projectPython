@@ -2,7 +2,8 @@ from .camera import Camera
 from .map import *
 from .utils import draw_text
 from .hud import Hud
-from.animation import *
+from .animation import *
+from .IA import IA
 
 
 class Game:
@@ -31,6 +32,9 @@ class Game:
         cam_y = (iso_to_decarte(th_x*64, th_y*32)[1]) - 1200
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
 
+        # IA
+        self.IA = IA(playerOne, self.map.map)
+
     def run(self):
         self.playing = True
         while self.playing:
@@ -38,6 +42,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
+            self.IA.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -111,7 +116,7 @@ class Game:
         #the map display was moved inside the hud class
         self.map.draw(self.screen, self.camera)
         # drawing the hud, must be last but before fps and cursor
-        self.hud.draw(self.screen)
+        self.hud.draw(self.screen, self.map, self.camera)
         # MOUSE CURSOR - we disable the default one and create a new one at the current position of the mouse
         # MUST BE LAST TO SEE IT AND NOT BE HIDDEN BEHIND OTHER THINGS
         #pygame.mouse.set_visible(False)
