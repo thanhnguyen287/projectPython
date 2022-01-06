@@ -1,6 +1,7 @@
 from player import player_list
 from .utils import tile_founding
 from units import Villager
+from random import randint
 
 
 class IA:
@@ -14,7 +15,7 @@ class IA:
 
         # the range (in layers) that the AI will go to. It increase when the AI becomes stronger
         # or is lacking ressources
-        self.range = 1
+        self.range = 3
 
     def chose_behaviour(self):
         # welook at the enemy units within 10 tiles of our town center to know if we should go in defense mode
@@ -74,18 +75,23 @@ class IA:
         return False
 
     def run(self):
-        self.chose_behaviour()  # looking at state of the game to chose mode (we should look every 5 seconds or so)
+        """# looking at state of the game to chose mode (we should look every 5 seconds or so)
+        self.chose_behaviour()
+
         if self.behaviour == "neutral":
             self.neutral_routine()
         elif self.behaviour == "defense":
             self.defense_routine()
         elif self.behaviour == "attack":
-            self.attack_routine()
+            self.attack_routine()"""
+        self.building_routine()
+
+
 
     def neutral_routine(self):
         ressources = []
         for r in self.player.resources:
-            if r >= 1250:
+            if r >= 100:
                 ressources.append(True)
             else:
                 ressources.append(False)
@@ -120,17 +126,47 @@ class IA:
 
     def building_routine(self):
         # if we have more than 90% of our pop capacity occupied, we build a house
-        if self.player.current_population - self.player.max_population <= 0.1 * self.player.max_population:
+        if self.player.current_population >= 0.9 * self.player.max_population:
             for u in self.player.unit_list:
-                if isinstance(u, Villager) and u.target is None:
-                    tiles_to_build = tile_founding(1, 2, self.range, self.map, self.player, "")
-                    # u.build(tiles_to_build[0], "House")
+                if isinstance(u, Villager) and u.building_to_create is None:
+                    tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
+                    if tiles_to_build:
+                        r = randint(0, len(tiles_to_build) - 1)
+                        if len(tiles_to_build) >= 2:
+                            u.go_to_build(tiles_to_build[r], "House")
+                            u.target = tiles_to_build[r]
 
 
         # /!\ with the "elif" we can only build 1 building after 1 building
         # if we have more than 50% of our pop capacity occupied, we build a farm
         elif self.player.current_population >= 0.5 * self.player.max_population:
             for u in self.player.unit_list:
-                if isinstance(u, Villager) and u.target is None:
-                    tiles_to_build = tile_founding(1, 2, self.range, self.map, self.player, "")
-                    # u.build(tiles_to_build[0], "House")
+                if isinstance(u, Villager) and u.building_to_create is None:
+                    tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
+                    if tiles_to_build:
+                        r = randint(0, len(tiles_to_build) - 1)
+                        if len(tiles_to_build) >= 2:
+                            u.go_to_build(tiles_to_build[r], "Farm")
+                            u.target = tiles_to_build[r]
+
+        # THAT IS A TEST, DONT ACTIVATE IT BUT DONT DELETE IT
+        for u in self.player.unit_list:
+            if isinstance(u, Villager) and u.building_to_create is None:
+                tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
+                if tiles_to_build:
+                    r = randint(0, len(tiles_to_build)-1)
+                    if len(tiles_to_build) >= 2:
+                        u.go_to_build(tiles_to_build[r], "Farm")
+                        u.target = tiles_to_build[r]
+
+        #to make the villager able to build other buildings after he buildt a building
+        for u in self.player.unit_list:
+            if u.target is not None:
+                pos_x = u.target[0]
+                pos_y = u.target[1]
+
+                for b in u.owner.building_list:
+                    if b.pos[0] == pos_x and b.pos[1] == pos_y and not u.is_moving_to_build:
+                        if not b.is_being_built:
+                            u.building_to_create = None
+                            u.target = None
