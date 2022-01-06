@@ -83,8 +83,7 @@ class IA:
                     if u is not None and self.player.unit_occupied[j] == 0 and u.name == "Villager":
                         tile_to_gather = tile_founding(1, 1, 5, self.map, self.player, r)
                         if tile_to_gather:
-                            u.target = self.map[tile_to_gather[0][0]][tile_to_gather[0][1]]
-                            u.gathering = True
+                            u.go_to_ressource(tile_to_gather)
                             found = True
 
                     if found: break

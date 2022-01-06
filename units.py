@@ -376,7 +376,8 @@ class Unit:
 
     # returns True if entity is adjacent to unit/building calling it, else False
     def is_adjacent_to(self, entity):
-        if (abs(self.pos[0] - entity.pos[0]) == 1 and abs(self.pos[1] - entity.pos[1]) == 0 ) or (abs(self.pos[0] - entity.pos[0]) == 0 and abs(self.pos[1] - entity.pos[1]) == 1 ):
+        if (abs(self.pos[0] - entity.pos[0]) == 1 and abs(self.pos[1] - entity.pos[1]) == 0) or \
+                (abs(self.pos[0] - entity.pos[0]) == 0 and abs(self.pos[1] - entity.pos[1]) == 1):
             return True
         else:
             return False
@@ -493,6 +494,40 @@ class Villager(Unit):
         self.map.collision_matrix[self.building_to_create["pos"][1]][
             self.building_to_create["pos"][0]] = 0
         self.building_to_create = None
+
+
+    def go_to_ressource(self, pos):
+        # if the ressource is near us, we directly gather it
+        if (abs(pos[0] - self.pos[0]) <= 1 and abs(pos[1] - self.pos[1]) == 0) or \
+                (abs(pos[0] - self.pos[0]) == 0 and abs(pos[1] - self.pos[1]) <= 1):
+            self.target = self.map.map[pos[0]][pos[1]]
+            self.is_gathering = True
+
+        # else we go to an adjacent tile
+        else:
+            if self.map.map[pos[0] - 1][pos[1]]["tile"] == "":
+                self.move_to(self.map.map[pos[0] - 1][pos[1]])
+                self.target = self.map.map[pos[0]][pos[1]]
+                self.is_moving_to_gather = True
+
+            elif self.map.map[pos[0] + 1][pos[1]]["tile"] == "":
+                self.move_to(self.map.map[pos[0] + 1][pos[1]])
+                self.target = self.map.map[pos[0]][pos[1]]
+                self.is_moving_to_gather = True
+
+            elif self.map.map[pos[0]][pos[1] - 1]["tile"] == "":
+                self.move_to(self.map.map[pos[0]][pos[1] - 1])
+                self.target = self.map.map[pos[0]][pos[1]]
+                self.is_moving_to_gather = True
+
+            elif self.map.map[pos[0]][pos[1] + 1]["tile"] == "":
+                self.move_to(self.map.map[pos[0]][pos[1] + 1])
+                self.target = self.map.map[pos[0]][pos[1]]
+                self.is_moving_to_gather = True
+
+            else:
+                self.target = None
+
 
     def gather_ressources(self):
 

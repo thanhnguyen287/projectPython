@@ -197,46 +197,16 @@ class Map:
                         this_villager.is_moving_to_attack = True
 
                 # ONLY MOVEMENT
-                if not self.map[grid_pos[0]][grid_pos[1]][
-                    "collision"] and not this_villager.is_gathering and this_villager.target is None:
+                if not self.map[grid_pos[0]][grid_pos[1]]["collision"] and \
+                        not this_villager.is_gathering and this_villager.target is None:
                     this_villager.move_to(self.map[grid_pos[0]][grid_pos[1]])
 
                 # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving
                 # if the tile next to him is a ressource and we right click on it and he is not moving, he will gather it
                 if not this_villager.searching_for_path \
-                        and (self.map[pos_x][pos_y]["tile"] == "tree" or self.map[pos_x][pos_y]["tile"] == "rock" or self.map[pos_x][pos_y]["tile"] == "gold" or self.map[pos_x][pos_y]["tile"] == "berrybush"):
+                        and (self.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"]):
 
-                    if (abs(pos_x - villager_pos[0]) <= 1 and abs(
-                            pos_y - villager_pos[1]) == 0) \
-                            or (abs(pos_x - villager_pos[0]) == 0 and abs(pos_y - villager_pos[1]) <= 1):
-
-                        this_villager.target = self.map[pos_x][pos_y]
-                        this_villager.gathering = True
-
-                    # if the tile we right click on is a ressource, he will travel to it and then gather it
-                    else:
-                        if self.map[pos_x - 1][pos_y]["tile"] == "":
-                            this_villager.move_to(self.map[pos_x - 1][pos_y])
-                            this_villager.target = self.map[pos_x][pos_y]
-                            this_villager.is_moving_to_gather = True
-
-                        elif self.map[pos_x + 1][pos_y]["tile"] == "":
-                            this_villager.move_to(self.map[pos_x + 1][pos_y])
-                            this_villager.target = self.map[pos_x][pos_y]
-                            this_villager.is_moving_to_gather = True
-
-                        elif self.map[pos_x][pos_y - 1]["tile"] == "":
-                            this_villager.move_to(self.map[pos_x][pos_y - 1])
-                            this_villager.target = self.map[pos_x][pos_y]
-                            this_villager.is_moving_to_gather = True
-
-                        elif self.map[pos_x][pos_y + 1]["tile"] == "":
-                            this_villager.move_to(self.map[pos_x][pos_y + 1])
-                            this_villager.target = self.map[pos_x][pos_y]
-                            this_villager.is_moving_to_gather = True
-
-                        else:
-                            this_villager.target = None
+                    this_villager.go_to_ressource((pos_x, pos_y))
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
