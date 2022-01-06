@@ -500,29 +500,29 @@ class Villager(Unit):
         # if the ressource is near us, we directly gather it
         if (abs(pos[0] - self.pos[0]) <= 1 and abs(pos[1] - self.pos[1]) == 0) or \
                 (abs(pos[0] - self.pos[0]) == 0 and abs(pos[1] - self.pos[1]) <= 1):
-            self.target = self.map.map[pos[0]][pos[1]]
+            self.target = (pos[0], pos[1])
             self.is_gathering = True
 
         # else we go to an adjacent tile
         else:
-            if self.map.map[pos[0] - 1][pos[1]]["tile"] == "":
+            if 0 <= pos[0] - 1 <= self.map.grid_length_x and self.map.map[pos[0] - 1][pos[1]]["tile"] == "":
                 self.move_to(self.map.map[pos[0] - 1][pos[1]])
-                self.target = self.map.map[pos[0]][pos[1]]
+                self.target = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
-            elif self.map.map[pos[0] + 1][pos[1]]["tile"] == "":
+            elif 0 <= pos[0] + 1 <= self.map.grid_length_x and self.map.map[pos[0] + 1][pos[1]]["tile"] == "":
                 self.move_to(self.map.map[pos[0] + 1][pos[1]])
-                self.target = self.map.map[pos[0]][pos[1]]
+                self.target = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
-            elif self.map.map[pos[0]][pos[1] - 1]["tile"] == "":
+            elif 0 <= pos[1] - 1 <= self.map.grid_length_y and self.map.map[pos[0]][pos[1] - 1]["tile"] == "":
                 self.move_to(self.map.map[pos[0]][pos[1] - 1])
-                self.target = self.map.map[pos[0]][pos[1]]
+                self.target = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
-            elif self.map.map[pos[0]][pos[1] + 1]["tile"] == "":
+            elif 0 <= pos[0] + 1 <= self.map.grid_length_y and self.map.map[pos[0]][pos[1] + 1]["tile"] == "":
                 self.move_to(self.map.map[pos[0]][pos[1] + 1])
-                self.target = self.map.map[pos[0]][pos[1]]
+                self.target = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
             else:
@@ -530,27 +530,27 @@ class Villager(Unit):
 
 
     def gather_ressources(self):
-
+        this_target = self.map.map[self.target[0]][self.target[1]]
         if self.is_gathering and (self.now - self.attack_cooldown > self.attack_speed):
 
-            if self.target["health"] > self.attack_dmg:
-                self.target["health"] -= self.attack_dmg
+            if this_target["health"] > self.attack_dmg:
+                this_target["health"] -= self.attack_dmg
                 self.attack_cooldown = self.now
                 self.gathered_resources_stack += 1
             # no resource is remaining, we destroy it and give resource to the player:
             else:
-                if self.target["tile"] == "tree":
+                if this_target["tile"] == "tree":
                     self.owner.update_resource("WOOD", 10)
-                elif self.target["tile"] == "rock":
+                elif this_target["tile"] == "rock":
                     self.owner.update_resource("STONE", 10)
-                elif self.target["tile"] == "gold":
+                elif this_target["tile"] == "gold":
                     self.owner.update_resource("GOLD", 10)
-                elif self.target["tile"] == "berrybush":
+                elif this_target["tile"] == "berrybush":
                     self.owner.update_resource("FOOD", 10)
 
-                self.target["tile"] = ""
-                self.target["collision"] = False
-                self.map.collision_matrix[self.target["grid"][1]][self.target["grid"][0]] = 1
+                this_target["tile"] = ""
+                this_target["collision"] = False
+                self.map.collision_matrix[this_target["grid"][1]][this_target["grid"][0]] = 1
                 self.target = None
                 self.is_gathering = False
 

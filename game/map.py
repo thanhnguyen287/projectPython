@@ -207,6 +207,7 @@ class Map:
                         and (self.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"]):
 
                     this_villager.go_to_ressource((pos_x, pos_y))
+                    print("go to")
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -239,7 +240,7 @@ class Map:
                         self.hud.display_life_bar(screen, self.map[x][y], self, camera=camera, for_hud=False, for_resource=True)
 
                 # HERE WE DRAW THE UNITS ON THE MAP
-                # we extract from the units list the building we want to display
+                # we extract from the units list the unit we want to display
                 unit = self.units[x][y]
                 if unit is not None and unit.current_health <= 0:
                     self.remove_entity(unit)
@@ -249,11 +250,13 @@ class Map:
                         if (x == self.examined_tile[0]) and (y == self.examined_tile[1]):
                             self.highlight_tile(self.examined_tile[0], self.examined_tile[1], screen, "WHITE",
                                                 camera.scroll)
+                    if unit.target is not None:
+                        target = unit.map.map[unit.target[0]][unit.target[1]]
                     if unit.is_fighting or unit.is_moving_to_fight:
                         # target highlighted in dark red
-                        self.highlight_tile(unit.target.pos[0], unit.target.pos[1], screen, "DARK_RED", camera.scroll)
+                        self.highlight_tile(target.pos[0], target.pos[1], screen, "DARK_RED", camera.scroll)
                     elif unit.is_gathering or unit.is_moving_to_gather:
-                        self.highlight_tile(unit.target["grid"][0], unit.target["grid"][1], screen, "GREEN", camera.scroll)
+                        self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
 
                     if type(unit) == Villager:
                         # draw future buildings
