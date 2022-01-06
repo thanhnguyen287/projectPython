@@ -1,3 +1,4 @@
+import copy
 import random
 import noise
 import pygame.mouse
@@ -356,6 +357,7 @@ class Map:
         ]
         # polygon
         iso_poly = [decarte_to_iso(x, y) for x, y in rect]
+        iso_poly_minimap = copy.deepcopy(iso_poly)
         minx = min([x for x, y in iso_poly])
         miny = min([y for x, y in iso_poly])
         r = random.randint(1, 100)
@@ -392,7 +394,8 @@ class Map:
             "collision": False if tile == "" else True,
             "max_health": 10,
             "health": 10,
-            "variation": variation if tile != "" else 0
+            "variation": variation if tile != "" else 0,
+            "iso_poly_minimap": iso_poly_minimap
         }
         return out
 
@@ -649,11 +652,11 @@ class Map:
         self.collision_matrix[grid_y][grid_x] = 1
 
     # returns true if there is collision, else False
-    def is_there_collision(self, grid_pos: tuple[int, int]):
+    def is_there_collision(self, grid_pos: [int, int]):
         return True if self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 else False
 
     # return a list of empty tiles around origin
-    def get_empty_adjacent_tiles(self, origin_pos: tuple[int, int], origin_size=1):
+    def get_empty_adjacent_tiles(self, origin_pos: [int, int], origin_size=1):
         empty_adj_tiles = []
         checked_tile = ()
         if origin_size == 1:
@@ -703,3 +706,30 @@ class Map:
                 # Rendering what's on the map, if it is not a tree or rock then render nothing as we already had block with green grass
 
                 self.highlight_tile(x, y, screen, "BLACK", scroll)
+
+    def draw_minimap(self, screen, camera):
+        '''Draw a minimap so you dont get lost. Moving it to HUD or
+        Camera is highly recommended, draw the polygon once so increase
+        FPS. '''
+        minimap_scaling = 16
+        for x in range(self.grid_length_x):
+            for y in range(self.grid_length_y):
+                # Draw polygon
+                mini = self.map[x][y]["iso_poly_minimap"]
+                mini = [((x + self.width / 2) / minimap_scaling + 1640,
+                         (y + self.height / 4) / minimap_scaling + 820) for x, y in mini]  # position x + ...., y  + ...
+                pygame.draw.polygon(screen, "WHITE", mini, 1)
+
+                # Draw small dot representing entities
+                render_pos = self.map[x][y]["render_pos"]
+                tile = self.map[x][y]["tile"]
+
+                if tile == "tree":
+                    # pygame.draw.circle(screen, "GREEN", (render_pos[0]/minimap_scaling + 1640, render_pos[1]/minimap_scaling+820), 1)
+                    pygame.draw.circle(screen, "GREEN", (mini[1][0], mini[1][1]), 1)
+                elif tile == "rock":
+                    pygame.draw.circle(screen, "BlACK", (mini[1][0], mini[1][1]), 1)
+                elif tile == "gold":
+                    pygame.draw.circle(screen, "YELLOW", (mini[1][0], mini[1][1]), 1)
+
+

@@ -125,6 +125,8 @@ class Game:
         #Boom animation
         moving_sprites.draw(self.screen)
         moving_sprites.update(0.25)
+        #Draw minimap
+        self.map.draw_minimap(self.screen, self.camera)
         #Draw FPS, must be the last to shown -> put it right on top of the display.flip
         draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())),20,(255,0,0),(5,40))
         pygame.display.flip()
