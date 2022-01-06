@@ -599,6 +599,7 @@ class Map:
             new_building.current_health = new_building.max_health
 
             self.entities.append(new_building)
+            player.building_list.append(new_building)
             self.buildings[new_building.pos[0]][new_building.pos[1]] = new_building
             townhall_placed = True
             player.towncenter_pos = new_building.pos
