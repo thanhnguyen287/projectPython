@@ -33,7 +33,7 @@ class Game:
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
 
         # IA
-        #self.IA = IA(playerOne, self.map.map)
+        self.IA = IA(playerOne, self.map.map)
 
     def run(self):
         self.playing = True
@@ -42,7 +42,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            #self.IA.run()
+            self.IA.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]

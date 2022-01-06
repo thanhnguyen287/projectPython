@@ -11,6 +11,7 @@ class IA:
 
         self.tc_pos = self.player.towncenter_pos
 
+
     def chose_behaviour(self):
         for p in player_list:
             if p != self.player:
@@ -75,19 +76,16 @@ class IA:
 
     def gathering_routine(self):
         i = 0
-        found = False
-        for r in ["wood", "food", "gold", "stone"]:
-            if self.player.resources[i] < 9999:
-                for j in range(len(self.player.unit_list)):
-                    u = self.player.unit_list[j]
-                    if u is not None and self.player.unit_occupied[j] == 0 and u.name == "Villager":
-                        tile_to_gather = tile_founding(1, 1, 5, self.map, self.player, r)
-                        if tile_to_gather:
-                            u.go_to_ressource(tile_to_gather)
-                            found = True
+        for u in self.player.unit_list:
+            if u.name == "Villager" and u.target is None:
+                for indice in range(len(["wood", "food", "gold", "stone"])):
+                    r = ["wood", "food", "gold", "stone"][indice]
+                    if self.player.resources[indice] < 9999:
+                        tiles_to_gather = tile_founding(1, 1, 5, self.map, self.player, r)
+                        if tiles_to_gather:
+                            u.go_to_ressource(tiles_to_gather[0])
+                    
 
-                    if found: break
-                    # we go out of the for because we found a villager that will gather
 
     def building_routine(self):
         # if we have more than 90% of our pop capacity that is occupied, we build a house
