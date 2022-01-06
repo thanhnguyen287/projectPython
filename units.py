@@ -13,6 +13,7 @@ class Building:
 
     def __init__(self, pos, map, player_owner_of_unit, ):
         self.owner = player_owner_of_unit
+        self.owner.building_list.append(self)
         self.rect = self.sprite.get_rect(topleft=pos)
         # pos is the tile position, for ex : (4,4)
         self.pos = pos
@@ -28,7 +29,6 @@ class Building:
         self.selected = False
 
         self.resource_manager_cooldown = pygame.time.get_ticks()
-        #self.owner.pay_entity_cost(self)
         self.now = 0
 
     def update(self):

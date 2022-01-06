@@ -91,7 +91,7 @@ class Hud:
             if image_name == "Farm":
                 image_scale = farm_icon_hd
 
-            elif image_name == "Town center":
+            elif image_name == "TownCenter":
                 image_scale = town_center_icon
 
             elif image_name == "House":
@@ -138,11 +138,11 @@ class Hud:
                         button["affordable"] = False
                 else:
                     #if town center is not working, we have to remove the cancel button as there is nothing to cancel
-                    if self.examined_tile is not None and self.examined_tile.name == "Town center" and not self.examined_tile.is_working:
+                    if self.examined_tile is not None and self.examined_tile.name == "TownCenter" and not self.examined_tile.is_working:
                         self.bottom_left_menu.pop()
                         self.is_cancel_button_present = False
 
-            if self.examined_tile is not None and self.examined_tile.name == "Town center":
+            if self.examined_tile is not None and self.examined_tile.name == "TownCenter":
                 if self.examined_tile.is_working and not self.is_cancel_button_present:
                     stop_icon_pos = [0 + 52 * 4, self.height * 0.8 + 52 * 2]
                     icon = stop_icon
@@ -200,7 +200,7 @@ class Hud:
         villager = pygame.image.load("resources/assets/Villager.bmp").convert_alpha()
 
         images = {
-            "Town center": town_center,
+            "TownCenter": town_center,
             "House": house,
             "Farm": farm,
             "Villager": villager
@@ -486,7 +486,7 @@ class Hud:
             entity = Farm
         elif entity == "House":
             entity = House
-        elif entity == "Town center":
+        elif entity == "TownCenter":
             entity = TownCenter
         else:
             display_tooltip_for_entity = False
@@ -549,70 +549,87 @@ class Hud:
         pygame.draw.rect(screen, (0, 255, 0), (x, y, health * 10, 10))
         pygame.draw.rect(screen, (25, 25, 25), (x, y, max_health * 10, 10), 4)
 
-    def display_building(self, screen, building, scroll, render_pos):
+    def display_building(self, screen, building, scroll, render_pos, is_hypothetical_building=False):
         # we either display the building fully constructed or being built ( 4 possible states )
-        if not building.is_being_built:
-            if building.owner.age == 1:
-                sprite_to_display = self.first_age_building_sprites[building.__class__.__name__]
-            elif building.owner.age == 2:
-                sprite_to_display = self.second_age_building_sprites[building.__class__.__name__]
-            elif building.owner.age == 3:
-                sprite_to_display = self.third_age_building_sprites[building.__class__.__name__]
-            elif building.owner.age == 4:
-                sprite_to_display = self.fourth_age_building_sprites[building.__class__.__name__]
+        if not is_hypothetical_building:
+            if not building.is_being_built:
+                if building.owner.age == 1:
+                    sprite_to_display = self.first_age_building_sprites[building.__class__.__name__]
+                elif building.owner.age == 2:
+                    sprite_to_display = self.second_age_building_sprites[building.__class__.__name__]
+                elif building.owner.age == 3:
+                    sprite_to_display = self.third_age_building_sprites[building.__class__.__name__]
+                elif building.owner.age == 4:
+                    sprite_to_display = self.fourth_age_building_sprites[building.__class__.__name__]
 
-            screen.blit(sprite_to_display, (
-                render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
-                        )
-
-        else:
-            if building.construction_progress == 0:
-                if type(building) == TownCenter:
-                    screen.blit(building_construction_1_2x2, (
-                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
-                                )
-                else:
-                    screen.blit(building_construction_1, (
-                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
-                                )
-
-            elif building.construction_progress == 25:
-                if type(building) == TownCenter:
-                    screen.blit(building_construction_2_2x2, (
-                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
-                                )
-                else:
-                    screen.blit(building_construction_2, (
-                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
-                                )
-            elif building.construction_progress == 50:
-                if type(building) == TownCenter:
-                    screen.blit(building_construction_3_2x2, (
-                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
-                                )
-                else:
-                    screen.blit(building_construction_3, (
-                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
-                                )
-            elif building.construction_progress == 75:
-                if type(building) == TownCenter:
-                    screen.blit(building_construction_4_2x2, (
-                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
-                                )
-                else:
-                    screen.blit(building_construction_4, (
-                        render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                        render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                screen.blit(sprite_to_display, (
+                    render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                    render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
                             )
 
+            else:
+                if building.construction_progress == 0:
+                    if type(building) == TownCenter:
+                        screen.blit(building_construction_1_2x2, (
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                            render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                    )
+                    else:
+                        screen.blit(building_construction_1, (
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                            render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                    )
+
+                elif building.construction_progress == 25:
+                    if type(building) == TownCenter:
+                        screen.blit(building_construction_2_2x2, (
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                            render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                    )
+                    else:
+                        screen.blit(building_construction_2, (
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                            render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                    )
+                elif building.construction_progress == 50:
+                    if type(building) == TownCenter:
+                        screen.blit(building_construction_3_2x2, (
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                            render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                    )
+                    else:
+                        screen.blit(building_construction_3, (
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                            render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                    )
+                elif building.construction_progress == 75:
+                    if type(building) == TownCenter:
+                        screen.blit(building_construction_4_2x2, (
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                            render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                    )
+                    else:
+                        screen.blit(building_construction_4, (
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
+                            render_pos[1] - (building.sprite.get_height() - TILE_SIZE) + scroll.y)
+                                )
+
+        #we have to display hypothetical building sprite to show the villager wants to build there
+        else:
+            if playerOne.age == 1:
+                sprite_to_display = self.first_age_building_sprites[building["name"]]
+            elif playerOne.age == 2:
+                sprite_to_display = self.second_age_building_sprites[building["name"]]
+            elif playerOne.age == 3:
+                sprite_to_display = self.third_age_building_sprites[building["name"]]
+            else:
+                sprite_to_display = self.fourth_age_building_sprites[building["name"]]
+            screen.blit(sprite_to_display,
+                        (  # we obviously have to reapply the offset + camera scroll
+                            render_pos[0] + 6400 / 2 + scroll.x,
+                            render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y
+                        )
+                        )
 
     def load_first_age_building_images(self):
         town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()

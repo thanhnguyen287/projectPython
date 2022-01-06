@@ -16,7 +16,10 @@ class Player:
         self.max_population = 5
 
         self.unit_list = []
+
         self.unit_occupied = []
+
+        self.building_list = []
 
         self.towncenter_pos = None
 
@@ -25,7 +28,7 @@ class Player:
         self.entity_costs = {
             "Farm": {"wood": 100, "stone": 0, "food": 0, "gold": 0},
             "House": {"wood": 600, "stone": 0, "food": 0, "gold": 0},
-            "Town center": {"wood": 1000, "stone": 0, "food": 0, "gold": 0},
+            "TownCenter": {"wood": 1000, "stone": 0, "food": 0, "gold": 0},
 
             "Villager": {"wood": 0, "stone": 0, "food": 10, "gold": 25}
 
@@ -34,7 +37,7 @@ class Player:
         self.entity_population_cost = {
             "Farm": 0,
             "House": 0,
-            "Town center": 0,
+            "TownCenter": 0,
 
             "Villager": 1
 

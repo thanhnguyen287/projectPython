@@ -85,7 +85,7 @@ def get_color_code(color: str):
 
 
 def str_to_entity_class(name: str):
-    if name == "Town center":
+    if name == "TownCenter":
         return TownCenter
     elif name == "House":
         return House
