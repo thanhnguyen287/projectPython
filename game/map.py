@@ -50,7 +50,6 @@ class Map:
         self.collision_matrix[start_unit.pos[1]][start_unit.pos[0]] = 0
         self.map[start_unit.pos[0]][start_unit.pos[1]]["collision"] = True
 
-
     def create_map(self):
         map = []
         for grid_x in range(self.grid_length_x):

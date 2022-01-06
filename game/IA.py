@@ -1,12 +1,13 @@
 from player import player_list
-
+from .utils import tile_founding
 
 class IA:
 
-    def __init__(self, player):
+    def __init__(self, player, map):
         self.player = player
         self.behaviour = "neutral"
         self.mode = "neutral"
+        self.map = map
 
         self.tc_pos = self.player.towncenter_pos
 
@@ -38,13 +39,14 @@ class IA:
                     return False
 
     def run(self):
-        self.chose_behaviour()  # looking at state of the game to chose mode (we should look every 5 seconds or so)
+        """self.chose_behaviour()  # looking at state of the game to chose mode (we should look every 5 seconds or so)
         if self.mode == "neutral":
             self.neutral_routine()
         elif self.mode == "defense":
             self.defense_routine()
         elif self.mode == "attack":
-            self.attack_routine()
+            self.attack_routine()"""
+        self.gathering_routine()
 
     def neutral_routine(self):
         ressources = []
@@ -75,13 +77,15 @@ class IA:
         i = 0
         found = False
         for r in ["wood", "food", "gold", "stone"]:
-            if self.player.resources[i] < 1250:
+            if self.player.resources[i] < 9999:
                 for j in range(len(self.player.unit_list)):
                     u = self.player.unit_list[j]
                     if u is not None and self.player.unit_occupied[j] == 0 and u.name == "Villager":
-                        pass
-                        # the unit needs to gather the nearest ressource of the type r
-                        found = True
+                        tile_to_gather = tile_founding(1, 1, 5, self.map, self.player, r)
+                        if tile_to_gather:
+                            u.target = self.map[tile_to_gather[0][0]][tile_to_gather[0][1]]
+                            u.gathering = True
+                            found = True
 
                     if found: break
                     # we go out of the for because we found a villager that will gather

@@ -2,7 +2,8 @@ from .camera import Camera
 from .map import *
 from .utils import draw_text
 from .hud import Hud
-from.animation import *
+from .animation import *
+from .IA import IA
 
 
 class Game:
@@ -31,6 +32,9 @@ class Game:
         cam_y = (iso_to_decarte(th_x*64, th_y*32)[1]) - 1200
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
 
+        # IA
+        #self.IA = IA(playerOne, self.map.map)
+
     def run(self):
         self.playing = True
         while self.playing:
@@ -38,6 +42,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
+            #self.IA.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -93,7 +98,6 @@ class Game:
                 elif event.button == 3:  # RIGHT CLICK
                     #if testUnit1.is_alive:
                         #testUnit2.attack(testUnit1)
-                    print(self.map.mouse_to_grid(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], self.camera.scroll))
                     player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
                     player.play()
 

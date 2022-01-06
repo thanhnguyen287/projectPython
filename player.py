@@ -105,7 +105,7 @@ class Player:
 
 
 playerOne = Player("Tristan", True, [5000, 5000, 250, 1000], "GREEK")
-playerOne.age = 4
+playerOne.age = 3
 players = [playerOne]
 player_list = [playerOne]
 #  INIT FOR RESSOURCES DISPLAY
