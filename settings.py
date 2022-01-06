@@ -4,6 +4,7 @@ import pygame
 TILE_SIZE = 64
 #WIDTH = 1920
 #HEIGHT = 1080
+SHOW_GRID_SETTING = False
 
 
 ENABLE_HEALTH_BARS = False

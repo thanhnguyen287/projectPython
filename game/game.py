@@ -4,6 +4,7 @@ from .utils import draw_text
 from .hud import Hud
 from .animation import *
 from .IA import IA
+from settings import SHOW_GRID_SETTING
 
 
 class Game:
@@ -96,8 +97,6 @@ class Game:
                                         self.hud.selected_tile = button
                 #BOOM WHEN RIGHT CLICKING
                 elif event.button == 3:  # RIGHT CLICK
-                    #if testUnit1.is_alive:
-                        #testUnit2.attack(testUnit1)
                     player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
                     player.play()
 
