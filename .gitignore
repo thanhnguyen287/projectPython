@@ -1,6 +1,5 @@
 
 .idea/Projet AOE.iml
 .idea/misc.xml
-*.pyc
-*.pyc
+game/__pycache__/map.cpython-37.pyc
 *.pyc

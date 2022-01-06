@@ -2,6 +2,8 @@ import copy
 import random
 import noise
 import pygame.mouse
+
+#from .game import show_grid_setting
 from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
@@ -12,6 +14,8 @@ from units import Villager, Unit, Farm, TownCenter, House, Building
 class Map:
     def __init__(self, hud, entities, grid_length_x, grid_length_y, width, height):
         self.hud = hud
+        # 4 booleans for corners. each corner becomes true when a player occupies at the beginning of the game
+        self.corners = {"TOP_LEFT": False, "TOP_RIGHT": False, "BOTTOM_LEFT": False, "BOTTOM_RIGHT": False}
         self.entities = entities
         self.grid_length_x = grid_length_x
         self.grid_length_y = grid_length_y
@@ -31,25 +35,14 @@ class Map:
         self.place_x = 0
         self.place_y = 0
         # here we place the townhall randomly on the map
-        self.place_townhall()
+        #self.place_townhall()
         self.collision_matrix = self.create_collision_matrix()
-        # new_villager = Villager((0, 0), playerOne, self.map)
-        # self.units[0][0] = new_villager
         # used when selecting a tile to build
         self.temp_tile = None
         # used when examining elements of the map
         self.examined_tile = None
-        # starting unit
-        start_unit = Villager(self.map[5][5]["grid"], playerOne, self)
 
-        # we add the unit we created to the list of units of the player
-        playerOne.unit_list.append(start_unit)
-        playerOne.unit_occupied.append(0)
-
-        self.units[5][5] = start_unit
-        playerOne.pay_entity_cost_bis(Villager)
-        self.collision_matrix[start_unit.pos[1]][start_unit.pos[0]] = 0
-        self.map[start_unit.pos[0]][start_unit.pos[1]]["collision"] = True
+        self.place_starting_units(playerOne)
 
     def create_map(self):
         map = []
@@ -141,7 +134,10 @@ class Map:
                         self.examined_tile = grid_pos
                         if building is not None:
                             self.hud.examined_tile = building
+                            print("afficher town center menu")
+
                             if type(building) == TownCenter:
+                                print("afficher town center menu")
                                 self.hud.bottom_left_menu = self.hud.town_hall_menu
                             else:
                                 self.hud.bottom_left_menu = None
@@ -207,7 +203,6 @@ class Map:
                         and (self.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"]):
 
                     this_villager.go_to_ressource((pos_x, pos_y))
-                    print("go to")
 
     def draw(self, screen, camera):
         # Rendering "block", as Surface grass_tiles is in the same dimension of screen so just add (0,0)
@@ -216,7 +211,6 @@ class Map:
         #self.show_grid(camera.scroll, screen)
         # FOR THE MAP
 
-
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
                 render_pos = self.map[x][y]["render_pos"]
@@ -224,7 +218,6 @@ class Map:
                 # HERE WE DRAW THE MAP TILES
                 # Rendering what's on the map, if it is not a tree or rock then render nothing as we already had block with green grass
                 tile = self.map[x][y]["tile"]
-
 
 
                 # if the tile isnt empty and inst destroyed, we display it. All resources have slightly different models to add variety
@@ -266,15 +259,6 @@ class Map:
                                                                                 future_building["pos"][1])
                             self.hud.display_building(screen, future_building, camera.scroll, future_building_render_pos,
                                                       is_hypothetical_building=True, is_build_possibility_display=True)
-                            #future_building_sprite = self.hud.display_building(screen, future_building, camera.scroll, render_pos, is_hypothetical_building=True, is_build_possibility_display=True)
-
-                            #future_building_sprite.set_alpha(100)
-                           # screen.blit(future_building_sprite, (
-                            #    future_building_render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                            #    future_building_render_pos[1] - (
-                            #            future_building_sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                             #           )
-
                     screen.blit(unit.sprite, (
                         render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                         render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
@@ -551,6 +535,96 @@ class Map:
             self.map[place_x + 1][place_y - 1]["tile"] = "building"
             self.map[place_x + 1][place_y - 1]["collision"] = True
 
+
+    # here is the fonction that randomly places a player's starting units 4 tiles from the corner
+    def place_starting_units(self, player):
+        townhall_placed = False
+        while not townhall_placed:
+            # (x : 0 if left, 1 if right ; y : 1 if bottom, 0 if top)
+            place_x = random.randint(0, 1)
+            place_y = random.randint(0, 1)
+
+            #top_left
+            if (place_x, place_y) == (0, 0):
+                #we remove stuff from the chosen corner
+                for x in range(2, 8):
+                    for y in range(2, 8):
+                        self.clear_tile(x, y)
+                # we place towncenter
+                new_building = TownCenter((4, 5), self, playerOne)
+                # starting unit
+                start_unit = Villager(self.map[4][6]["grid"], player, self)
+                self.units[4][6] = start_unit
+
+            # top_right
+            elif (place_x, place_y) == (1, 0):
+                # we remove stuff from the chosen corner
+                for x in range(self.grid_length_x - 8, self.grid_length_x - 2):
+                    for y in range(2, 8):
+                        self.clear_tile(x, y)
+                # we place towncenter
+                new_building = TownCenter((self.grid_length_x - 6, 5), self, playerOne)
+                # starting unit
+                start_unit = Villager(self.map[self.grid_length_x - 6][6]["grid"], player, self)
+
+                self.units[self.grid_length_x - 6][6] = start_unit
+
+            # bot_left
+            elif (place_x, place_y) == (0, 1):
+                # we remove stuff from the chosen corner
+                for x in range(2, 8):
+                    for y in range(self.grid_length_y - 8, self.grid_length_y - 2):
+                        self.clear_tile(x, y)
+                # we place towncenter
+                new_building = TownCenter((4, self.grid_length_y - 5), self, playerOne)
+                # starting unit
+                start_unit = Villager(self.map[4][self.grid_length_y - 4]["grid"], player, self)
+
+                self.units[4][self.grid_length_y - 4] = start_unit
+
+            # bot_right
+            elif (place_x, place_y) == (1, 1):
+                # we remove stuff from the chosen corner
+                for x in range(self.grid_length_x - 8, self.grid_length_x - 2):
+                    for y in range(self.grid_length_y - 8, self.grid_length_y - 2):
+                        self.clear_tile(x, y)
+                # we place towncenter
+                new_building = TownCenter((self.grid_length_x - 6, self.grid_length_y - 5), self, playerOne)
+                # starting unit
+                start_unit = Villager(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"], player, self)
+
+                self.units[self.grid_length_x - 6][self.grid_length_y - 4] = start_unit
+
+
+            #for towncenter
+            new_building.is_being_built = False
+            new_building.construction_progress = 100
+            new_building.current_health = new_building.max_health
+
+            self.entities.append(new_building)
+            player.building_list.append(new_building)
+            self.buildings[new_building.pos[0]][new_building.pos[1]] = new_building
+            townhall_placed = True
+            player.towncenter_pos = new_building.pos
+            #collision
+            self.map[new_building.pos[0]][new_building.pos[1]]["tile"] = "building"
+            self.map[new_building.pos[0]][new_building.pos[1]]["collision"] = True
+            self.map[new_building.pos[0] + 1][new_building.pos[1]]["tile"] = "building"
+            self.map[new_building.pos[0] + 1][new_building.pos[1]]["collision"] = True
+            self.map[new_building.pos[0]][new_building.pos[1] - 1]["tile"] = "building"
+            self.map[new_building.pos[0]][new_building.pos[1] - 1]["collision"] = True
+            self.map[new_building.pos[0] + 1][new_building.pos[1] - 1]["tile"] = "building"
+            self.map[new_building.pos[0] + 1][new_building.pos[1] - 1]["collision"] = True
+
+            #for starting villagers
+            player.pay_entity_cost_bis(Villager)
+            self.collision_matrix[start_unit.pos[1]][start_unit.pos[0]] = 0
+            self.map[start_unit.pos[0]][start_unit.pos[1]]["collision"] = True
+
+            # we add the unit we created to the list of units of the player
+            player.unit_list.append(start_unit)
+            player.unit_occupied.append(0)
+
     def remove_entity(self, entity):
         if issubclass(type(entity), Building):
             if type(entity) != TownCenter:
@@ -570,6 +644,12 @@ class Map:
             self.collision_matrix[entity.pos[1]][entity.pos[0]] = 1
         self.examined_tile = None
         self.hud.examined_tile = None
+
+    #remove resources from tile to get an empty tile
+    def clear_tile(self, grid_x, grid_y):
+        self.map[grid_x][grid_y]["tile"] = ""
+        self.map[grid_x][grid_y]["variation"] = 0
+        self.collision_matrix[grid_y][grid_x] = 1
 
     # returns true if there is collision, else False
     def is_there_collision(self, grid_pos: [int, int]):
@@ -651,8 +731,5 @@ class Map:
                     pygame.draw.circle(screen, "BlACK", (mini[1][0], mini[1][1]), 1)
                 elif tile == "gold":
                     pygame.draw.circle(screen, "YELLOW", (mini[1][0], mini[1][1]), 1)
-                elif tile == "berrybush":
-                    pygame.draw.circle(screen, "RED", (mini[1][0], mini[1][1]), 1)
-
 
 
