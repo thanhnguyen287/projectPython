@@ -146,6 +146,7 @@ class Game:
 
         # MOUSE CURSOR - we disable the default one and create a new one at the current position of the mouse
         # MUST BE LAST TO SEE IT AND NOT BE HIDDEN BEHIND OTHER THINGS
+<<<<<<< Updated upstream
         pygame.mouse.set_visible(False)
         standard_cursor_rect = standard_cursor.get_rect()
         standard_cursor_rect.center = pygame.mouse.get_pos()  # update position
@@ -160,5 +161,17 @@ class Game:
             (10,10)
         )
 
+=======
+        #pygame.mouse.set_visible(False)
+        #standard_cursor_rect = standard_cursor.get_rect()
+        #standard_cursor_rect.center = pygame.mouse.get_pos()  # update position
+        #self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
+        #Boom animation
+        moving_sprites.draw(self.screen)
+        moving_sprites.update(0.25)
+        self.map.draw_minimap(self.screen, self.camera)
+        #Draw FPS, must be the last to shown -> put it right on top of the display.flip
+        draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())),20,(255,0,0),(5,40))
+>>>>>>> Stashed changes
         pygame.display.flip()
 
