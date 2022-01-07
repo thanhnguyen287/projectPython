@@ -19,7 +19,6 @@ common_path = os.path.join(resource_path, 'common')
 assets_path = os.path.join(resource_path, 'assets')
 
 top_menu_hd = pygame.image.load("resources/assets/NewUI_blank_resized.png")
-bot_menu_building_hd = pygame.image.load("resources/assets/buildingmenuDE.png")
 bot_complet_menu_building_hd = pygame.image.load("resources/assets/botuiDE.png")
 action_menu = pygame.image.load("resources/assets/action_menu.png")
 selection_panel = pygame.image.load("resources/assets/selection_panel.png")
