@@ -134,10 +134,8 @@ class Map:
                         self.examined_tile = grid_pos
                         if building is not None:
                             self.hud.examined_tile = building
-                            print("afficher town center menu")
 
                             if type(building) == TownCenter:
-                                print("afficher town center menu")
                                 self.hud.bottom_left_menu = self.hud.town_hall_menu
                             else:
                                 self.hud.bottom_left_menu = None
@@ -322,7 +320,6 @@ class Map:
         tree = pygame.image.load("Resources/assets/Models/Map/Trees/1.png").convert_alpha()
         rock = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/7.png")).convert_alpha()
         grass_tile = scale_image(pygame.image.load("Resources/assets/Models/Map/grass_01.png").convert_alpha(), w=132)
-        grass_hd = pygame.image.load(os.path.join(assets_path, "12.png")).convert_alpha()
         gold = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/4.png")).convert_alpha()
         berrybush = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/1.png")).convert_alpha()
 
@@ -339,7 +336,6 @@ class Map:
             "rock": rock,
             "block": block,
             "grass": grass_tile,
-            "grass_hd": grass_hd,
             "gold": gold,
             "berrybush": berrybush,
             "Villager": villager
@@ -716,8 +712,10 @@ class Map:
             for y in range(self.grid_length_y):
                 # Draw polygon
                 mini = self.map[x][y]["iso_poly_minimap"]
-                mini = [((x + self.width / 2) / minimap_scaling + 1640,
-                         (y + self.height / 4) / minimap_scaling + 820) for x, y in mini]  # position x + ...., y  + ...
+               # mini = [((x + self.width / 2) / minimap_scaling + 1640,
+                 #        (y + self.height / 4) / minimap_scaling + 820) for x, y in mini]  # position x + ...., y  + ...
+                mini = [((x + self.width / 2) / minimap_scaling + 1277,
+                                 (y + self.height / 4) / minimap_scaling + 655) for x, y in mini]  # position x + ...., y  + ...
                 pygame.draw.polygon(screen, "WHITE", mini, 1)
 
                 # Draw small dot representing entities

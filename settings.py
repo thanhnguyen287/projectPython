@@ -18,10 +18,30 @@ resource_path = os.path.join(current_path, 'resources')
 common_path = os.path.join(resource_path, 'common')
 assets_path = os.path.join(resource_path, 'assets')
 
-top_menu = pygame.image.load("resources/assets/ressource_bar_ui.png")
 top_menu_hd = pygame.image.load("resources/assets/NewUI_blank_resized.png")
 bot_menu_building_hd = pygame.image.load("resources/assets/buildingmenuDE.png")
 bot_complet_menu_building_hd = pygame.image.load("resources/assets/botuiDE.png")
+action_menu = pygame.image.load("resources/assets/action_menu.png")
+selection_panel = pygame.image.load("resources/assets/selection_panel.png")
+minimap_panel = pygame.image.load("resources/assets/minimap_panel.png")
+age_panel = pygame.image.load("resources/assets/age_panel.png")
+resource_panel = pygame.image.load("resources/assets/resources_panel.png")
+
+#resources icons
+wood_icon = pygame.image.load("resources/assets/wood_icon.png")
+food_icon = pygame.image.load("resources/assets/food_icon.png")
+gold_icon = pygame.image.load("resources/assets/gold.png")
+stone_icon = pygame.image.load("resources/assets/stone_icon.png")
+pop_icon = pygame.image.load("resources/assets/pop_icon.png")
+
+#ages icons
+age_1 = pygame.image.load("resources/assets/age_1.png")
+age_2 = pygame.image.load("resources/assets/age_2.png")
+age_3 = pygame.image.load("resources/assets/age_3.png")
+age_4 = pygame.image.load("resources/assets/age_4.png")
+
+
+
 
 
 farm_icon = pygame.image.load("resources/assets/icons./farm_icon.png")

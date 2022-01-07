@@ -1,6 +1,6 @@
 from settings import *
 from units import House
-from game.utils import str_to_entity_class
+from game.utils import str_to_entity_class, draw_text
 
 
 class Player:
@@ -90,30 +90,49 @@ class Player:
             self.resources[resource_type] += entity_class.construction_cost[resource_type]
         self.current_population -= entity_class.population_produced
 
-    def update_resources_bar(self, screen):
-        # resources display
-        screen.blit(top_menu, (0, 0))
-        resource_text_pos = 35
-        for resource_type in range(4):
-            screen.blit(myfont.render(str(playerOne.resources[resource_type]), True, (255, 255, 255)), (resource_text_pos, 2))
-            resource_text_pos += 65
-
     def update_resources_bar_hd(self, screen):
         # resources display
-        screen.blit(top_menu_hd, (0, 0))
-        resource_text_pos = 34
+        #screen.blit(top_menu_hd, (0, 0))
+        screen.blit(resource_panel, (0, 0))
+        screen.blit(wood_icon, (35, 11))
+        screen.blit(food_icon, (35+82, 11))
+        screen.blit(gold_icon, (35+162, 11))
+        screen.blit(stone_icon, (35+242, 11))
+        screen.blit(pop_icon, (35+330, 11))
+
+        resource_text_pos = 70
         for resource_type in range(4):
             screen.blit(myfont.render(str(playerOne.resources[resource_type]), True, (255, 255, 255)),
-                        (resource_text_pos, 11))
-            resource_text_pos += 68
+                        (resource_text_pos, 17))
+            resource_text_pos += 83
 
         #population
         population_text = str(playerOne.current_population) + "/" + str(playerOne.max_population)
 
-        screen.blit(myfont.render(population_text, True, (255, 255, 255)), (resource_text_pos, 11))
+        screen.blit(myfont.render(population_text, True, (255, 255, 255)), (resource_text_pos, 17))
+        # age
+        screen.blit(age_panel, (screen.get_size()[0]-age_panel.get_width(), 0))
+        screen.blit(age_1, (screen.get_size()[0] - age_panel.get_width() + 12, 9))
+        population_text = str(playerOne.current_population) + "/" + str(playerOne.max_population)
+        if self.age == 1:
+            screen.blit(age_1, (screen.get_size()[0] - age_panel.get_width() + 12, 9))
+            age_text = "Dark Age"
 
+        elif self.age == 2:
+            screen.blit(age_2, (screen.get_size()[0] - age_panel.get_width() + 12, 9))
+            age_text = "Feudal Age"
 
-playerOne = Player("Tristan", True, [0, 5000, 250, 1000], "GREEK")
+        elif self.age == 3:
+            screen.blit(age_3, (screen.get_size()[0] - age_panel.get_width() + 12, 9))
+            age_text = "Castle Age"
+
+        else:
+            screen.blit(age_4, (screen.get_size()[0] - age_panel.get_width() + 12, 9))
+            age_text = "Imperial Age"
+
+        draw_text(screen, age_text, 18, "WHITE", (screen.get_size()[0] - age_panel.get_width() + 90, 17))
+
+playerOne = Player("Tristan", True, [1000, 5000, 250, 1000], "GREEK")
 playerOne.age = 3
 players = [playerOne]
 player_list = [playerOne]
