@@ -99,13 +99,11 @@ class Map:
                 # if we left_click to build : the villager goes to an adjacent tile and the building is created
                 if mouse_action[0] and not collision:
                     working_villager = self.hud.examined_tile
-                    if self.get_empty_adjacent_tiles(grid_pos):
-                        villager_dest = self.get_empty_adjacent_tiles(grid_pos)[0]
-                        working_villager.move_to(self.map[villager_dest[0]][villager_dest[1]])
-                        working_villager.is_moving_to_build = True
+
                     # we store the future building information inside building_to_create
-                    if self.hud.selected_tile["name"] == "Farm" or self.hud.selected_tile["name"] == "House" or self.hud.selected_tile["name"] == "TownCenter":
-                        working_villager.building_to_create = {"name": self.hud.selected_tile["name"], "pos": grid_pos}
+                    if self.hud.selected_tile["name"] == "Farm" or self.hud.selected_tile["name"] == "House" or \
+                            self.hud.selected_tile["name"] == "TownCenter":
+                        working_villager.go_to_build(grid_pos, self.hud.selected_tile["name"])
                     self.hud.selected_tile = None
 
         # the player hasn't selected something to build, he will interact with what's on the map
@@ -134,8 +132,10 @@ class Map:
                         self.examined_tile = grid_pos
                         if building is not None:
                             self.hud.examined_tile = building
+                            print("afficher town center menu")
 
                             if type(building) == TownCenter:
+                                print("afficher town center menu")
                                 self.hud.bottom_left_menu = self.hud.town_hall_menu
                             else:
                                 self.hud.bottom_left_menu = None
@@ -320,6 +320,7 @@ class Map:
         tree = pygame.image.load("Resources/assets/Models/Map/Trees/1.png").convert_alpha()
         rock = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/7.png")).convert_alpha()
         grass_tile = scale_image(pygame.image.load("Resources/assets/Models/Map/grass_01.png").convert_alpha(), w=132)
+        grass_hd = pygame.image.load(os.path.join(assets_path, "12.png")).convert_alpha()
         gold = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/4.png")).convert_alpha()
         berrybush = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/1.png")).convert_alpha()
 
@@ -336,6 +337,7 @@ class Map:
             "rock": rock,
             "block": block,
             "grass": grass_tile,
+            "grass_hd": grass_hd,
             "gold": gold,
             "berrybush": berrybush,
             "Villager": villager

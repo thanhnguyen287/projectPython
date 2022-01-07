@@ -1,6 +1,7 @@
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from pathfinding.finder.a_star import DiagonalMovement
+from time import sleep
 
 #from player import *
 import os
@@ -468,6 +469,14 @@ class Villager(Unit):
                 self.target = None
                 self.is_fighting = False
 
+    def go_to_build(self, pos, name):
+        if self.map.get_empty_adjacent_tiles(pos):
+            villager_dest = self.map.get_empty_adjacent_tiles(pos)[0]
+            self.move_to(self.map.map[villager_dest[0]][villager_dest[1]])
+            self.is_moving_to_build = True
+
+            self.building_to_create = {"name": name, "pos": pos}
+
     def build(self):
         self.is_moving_to_build = False
         new_building = None
@@ -496,7 +505,12 @@ class Villager(Unit):
         # we actualize collision
         self.map.collision_matrix[self.building_to_create["pos"][1]][
             self.building_to_create["pos"][0]] = 0
-        self.building_to_create = None
+
+        pos_x = self.building_to_create["pos"][0]
+        pos_y = self.building_to_create["pos"][1]
+        self.map.map[pos_x][pos_y]["tile"] = "building"
+
+
 
 
     def go_to_ressource(self, pos):
@@ -557,7 +571,6 @@ class Villager(Unit):
                 self.target = None
                 self.is_gathering = False
 
-        #if (tar["tile"] == "tree" or tar["tile"] == "rock" or tar["tile"] == "gold" or tar["tile"] == "berrybush") and tar["health"] > 0:
 
     def update(self):
         self.now = pygame.time.get_ticks()
@@ -573,6 +586,7 @@ class Villager(Unit):
                     self.searching_for_path = False
                     if self.is_moving_to_build:
                         self.build()
+                        self.is_moving_to_build = False
                     elif self.is_moving_to_fight:
                         self.is_fighting = True
                         self.is_moving_to_fight = False
