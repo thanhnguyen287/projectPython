@@ -17,7 +17,7 @@ class Building:
     def __init__(self, pos, map, player_owner_of_unit, ):
         self.owner = player_owner_of_unit
         self.owner.building_list.append(self)
-        self.rect = self.sprite.get_rect(topleft=pos)
+        #self.rect = self.sprite.get_rect(topleft=pos)
         # pos is the tile position, for ex : (4,4)
         self.pos = pos
         self.map = map
@@ -33,6 +33,7 @@ class Building:
 
         self.resource_manager_cooldown = pygame.time.get_ticks()
         self.now = 0
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] = "building"
 
     def update(self):
         pass
@@ -44,8 +45,7 @@ class Farm(Building):
     construction_cost = [100, 0, 0, 0]
     construction_time = 4
     armor = 0
-
-    sprite = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png")
+    armor_age_bonus = 0
 
     def __init__(self, pos, map, player_owner_of_unit):
         self.name = " Farm"
@@ -86,8 +86,7 @@ class TownCenter(Building):
     construction_cost = [1000, 0, 0, 100]
     construction_time = 8
     armor = 3
-    sprite = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png")
-
+    armor_age_bonus = 1
 
     def __init__(self, pos, map, player_owner_of_unit):
 
@@ -316,7 +315,7 @@ class House(Building):
     construction_cost = [600, 0, 0, 0]
     construction_time = 4
     armor = -2
-    sprite = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png")
+    armor_age_bonus = 2
 
     def __init__(self, pos, map, player_owner_of_unit):
         self.name = "House"
