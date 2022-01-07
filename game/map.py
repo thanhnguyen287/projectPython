@@ -649,7 +649,7 @@ class Map:
 
     # returns true if there is collision, else False
     def is_there_collision(self, grid_pos: [int, int]):
-        return True if self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 else False
+        return True if (self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 or self.map[grid_pos[0]][grid_pos[1]]["collision"] == True) else False
 
     # return a list of empty tiles around origin
     def get_empty_adjacent_tiles(self, origin_pos: [int, int], origin_size=1):

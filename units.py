@@ -372,7 +372,7 @@ class Unit:
             self.grid = Grid(matrix=self.map.collision_matrix)
             self.start = self.grid.node(self.pos[0], self.pos[1])
             self.end = self.grid.node(new_tile["grid"][0], new_tile["grid"][1])
-            finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
+            finder = AStarFinder(diagonal_movement=DiagonalMovement.never)
             # how far along the path are we
             self.path_index = 0
             self.path, runs = finder.find_path(self.start, self.end, self.grid)
