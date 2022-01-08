@@ -92,7 +92,8 @@ class Game:
                                         #pay training cost
                                         unit_type_trained = self.hud.examined_tile.unit_type_currently_trained
                                         self.hud.examined_tile.owner.pay_entity_cost_bis(unit_type_trained)
-
+                                    elif button["name"] == "Advance to Feudal Age" or button["name"] == "Advance to Castle Age" or button["name"] == "Advance to Imperial Age":
+                                        self.hud.examined_tile.research_tech(button["name"])
                                     else:
                                         self.hud.selected_tile = button
                 #BOOM WHEN RIGHT CLICKING

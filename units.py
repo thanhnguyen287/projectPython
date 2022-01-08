@@ -2,7 +2,7 @@ from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from pathfinding.finder.a_star import DiagonalMovement
 from time import sleep
-
+from tech import Age_II, Age_III, Age_IV
 #from player import *
 import os
 import pygame
@@ -85,7 +85,7 @@ class TownCenter(Building):
     construction_tooltip = " Build a Town Center"
     construction_cost = [1000, 0, 0, 100]
     construction_time = 8
-    armor = 3
+    armor = 2
     armor_age_bonus = 1
 
     def __init__(self, pos, map, player_owner_of_unit):
@@ -102,6 +102,7 @@ class TownCenter(Building):
         player_owner_of_unit.max_population += 5
         #used when you order the creation of multiples units
         self.queue = 0
+        armor = 3
         self.resource_manager_cooldown = 0
 
         super().__init__(pos, map, player_owner_of_unit)
@@ -308,11 +309,25 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 2] = 0
 
+    def research_tech(self, tech):
+        if tech == "Advance to Feudal Age":
+            tech = Age_II
+            self.owner.age = 2
+        elif tech == "Advance to Castle Age":
+            tech = Age_III
+            self.owner.age = 3
+        elif tech == "Advance to Imperial Age":
+            tech = Age_IV
+            self.owner.age = 4
+
+        for resource_type in range(0, 3):
+            self.owner.resources[resource_type] -= tech.construction_costs[resource_type]
+
 
 class House(Building):
     description = " Each House increases the maximum population by 5."
     construction_tooltip = " Build a House"
-    construction_cost = [600, 0, 0, 0]
+    construction_cost = [300, 0, 0, 50]
     construction_time = 4
     armor = -2
     armor_age_bonus = 2
@@ -508,7 +523,7 @@ class Villager(Unit):
         pos_x = self.building_to_create["pos"][0]
         pos_y = self.building_to_create["pos"][1]
         self.map.map[pos_x][pos_y]["tile"] = "building"
-
+        #self.building_to_create = None
 
 
 

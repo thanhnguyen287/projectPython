@@ -133,10 +133,8 @@ class Map:
                         self.examined_tile = grid_pos
                         if building is not None:
                             self.hud.examined_tile = building
-                            print("afficher town center menu")
 
                             if type(building) == TownCenter:
-                                print("afficher town center menu")
                                 self.hud.bottom_left_menu = self.hud.town_hall_menu
                             else:
                                 self.hud.bottom_left_menu = None
@@ -227,9 +225,9 @@ class Map:
                                 self.highlight_tile(building.pos[0], building.pos[1] - 1, screen, "WHITE",
                                                     camera.scroll,
                                                     multiple_tiles_tiles_flag=True)
-                        # if not full life, we display its health bar above
-                        if building.current_health != building.max_health:
-                            self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
+                    # if not full life, we display its health bar above
+                    if building.current_health != building.max_health:
+                        self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
                 self.display_building(screen, building, camera.scroll,
                                       self.grid_to_renderpos(building.pos[0], building.pos[1]))
 
@@ -746,7 +744,7 @@ class Map:
                 self.highlight_tile(grid[0], grid[1], screen, "GREEN", camera.scroll)
 
         # display the buildable building on the tile
-        self.hud.display_building(screen, self.temp_tile, camera.scroll, render_pos, is_hypothetical_building=True)
+        self.display_building(screen, self.temp_tile, camera.scroll, render_pos, is_hypothetical_building=True)
 
     def display_building(self, screen, building, scroll, render_pos, is_hypothetical_building=False,
                          is_build_possibility_display=False):

@@ -28,11 +28,14 @@ class Player:
         self.civilization = civilization
 
         self.entity_costs = {
-            "Farm": {"wood": 100, "stone": 0, "food": 0, "gold": 0},
-            "House": {"wood": 600, "stone": 0, "food": 0, "gold": 0},
-            "TownCenter": {"wood": 1000, "stone": 0, "food": 0, "gold": 0},
+            "Farm": {"wood": 100, "food": 0, "gold": 0, "stone": 0},
+            "House": {"wood": 300, "food": 0, "gold": 0, "stone": 50},
+            "TownCenter": {"wood": 1000, "food": 0, "gold": 0, "stone": 100},
 
-            "Villager": {"wood": 0, "stone": 0, "food": 10, "gold": 25}
+            "Villager": {"wood": 0, "food": 10, "gold": 25, "stone": 0},
+            "Advance to Feudal Age": {"wood": 0, "food": 500, "gold": 0, "stone": 0},
+            "Advance to Castle Age": {"wood": 0, "food": 800, "gold": 200, "stone": 0},
+            "Advance to Imperial Age": {"wood": 0, "food": 1000, "gold": 800, "stone": 0}
 
         }
 
@@ -68,7 +71,7 @@ class Player:
                 affordable = False
             i += 1
 
-        if self.current_population + self.entity_population_cost[entity] > self.max_population:
+        if entity != "Advance to Feudal Age" and entity != "Advance to Castle Age" and entity != "Advance to Imperial Age" and self.current_population + self.entity_population_cost[entity] > self.max_population:
             affordable = False
         return affordable
 
@@ -77,9 +80,7 @@ class Player:
             self.resources[resource_type] -= entity.construction_cost[resource_type]
 
     def pay_entity_cost_bis(self, entity_class):
-        if entity_class == "House":
-            entity_class = House
-        elif type(entity_class) == str:
+        if type(entity_class) == str:
             entity_class = str_to_entity_class(entity_class)
         for resource_type in range(4):
             self.resources[resource_type] -= entity_class.construction_cost[resource_type]
@@ -90,9 +91,8 @@ class Player:
             self.resources[resource_type] += entity_class.construction_cost[resource_type]
         self.current_population -= entity_class.population_produced
 
-    def update_resources_bar_hd(self, screen):
+    def update_resources_bar(self, screen):
         # resources display
-        #screen.blit(top_menu_hd, (0, 0))
         screen.blit(resource_panel, (0, 0))
         screen.blit(wood_icon, (35, 11))
         screen.blit(food_icon, (35+82, 11))
@@ -132,8 +132,8 @@ class Player:
 
         draw_text(screen, age_text, 18, "WHITE", (screen.get_size()[0] - age_panel.get_width() + 90, 17))
 
-playerOne = Player("Tristan", True, [1000, 5000, 250, 1000], "GREEK")
-playerOne.age = 3
+playerOne = Player("Tristan", True, [10000, 10000, 1200, 500], "GREEK")
+playerOne.age = 1
 players = [playerOne]
 player_list = [playerOne]
 #  INIT FOR RESSOURCES DISPLAY

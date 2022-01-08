@@ -6,6 +6,7 @@ from player import playerOne
 from units import Villager, TownCenter, House, Farm, Building
 # from buildings import TownCenter, House, Farm, Building
 from .ActionMenu import *
+from tech import Age_II, Age_III, Age_IV
 
 
 class Hud:
@@ -55,7 +56,7 @@ class Hud:
         self.resources_sprites = self.load_resources_images()
 
     def create_train_menu_town_hall(self):
-        render_pos = [15, self.height - action_menu.get_height() + 40]
+        render_pos = [25, self.height - action_menu.get_height() + 40]
         object_width = 50
 
         tiles = []
@@ -79,11 +80,22 @@ class Hud:
                 "affordable": True
             }
         )
+        #advancing age
+        render_pos = [25, self.height - action_menu.get_height() + 125]
+        tiles.append(
+            {
+                "name": "Advance to Feudal Age",
+                "icon": advance_to_second_age_icon,
+                "image": None,
+                "rect": advance_to_second_age_icon.get_rect(topleft=render_pos),
+                "affordable": True
+            }
+        )
         return tiles
 
     def create_build_hud(self):
 
-        render_pos = [0 + 15, self.height * 0.8 + 10]
+        render_pos = [0 + 25, self.height * 0.8 + 10]
 
         tiles = []
         for image_name, image in self.images.items():
@@ -129,7 +141,7 @@ class Hud:
         if mouse_action[2]:
             self.selected_tile = None
 
-        # building selection inside the build menu
+        # building action_menu
         if self.bottom_left_menu is not None:
             for button in self.bottom_left_menu:
                 if button["name"] != "STOP":
@@ -137,13 +149,43 @@ class Hud:
                         button["affordable"] = True
                     else:
                         button["affordable"] = False
-                else:
-                    #if town center is not working, we have to remove the cancel button as there is nothing to cancel
-                    if self.examined_tile is not None and self.examined_tile.name == "TownCenter" and not self.examined_tile.is_working:
-                        self.bottom_left_menu.pop()
-                        self.is_cancel_button_present = False
+                #we remove the advance to x age tech if it has been researched, and add the next one
+                if self.examined_tile is not None and isinstance(self.examined_tile, TownCenter):
+                    if button["name"] == "Advance to Feudal Age" and self.examined_tile.owner.age == 2:
+                        self.bottom_left_menu.remove(button)
+                        # adding next advancing age
+                        self.bottom_left_menu.append(
+                            {
+                                "name": "Advance to Castle Age",
+                                "icon": advance_to_third_age_icon,
+                                "image": None,
+                                "rect": advance_to_third_age_icon.get_rect(topleft=[25, self.height - action_menu.get_height() + 125]),
+                                "affordable": True
+                            })
+                    elif button["name"] == "Advance to Castle Age" and self.examined_tile.owner.age == 3:
+                        self.bottom_left_menu.remove(button)
+                        # adding next advancing age
+                        self.bottom_left_menu.append(
+                            {
+                                "name": "Advance to Imperial Age",
+                                "icon": advance_to_fourth_age_icon,
+                                "image": None,
+                                "rect": advance_to_fourth_age_icon.get_rect(
+                                    topleft=[25, self.height - action_menu.get_height() + 125]),
+                                "affordable": True
+                            })
+                    elif button["name"] == "Advance to Imperial Age" and self.examined_tile.owner.age == 4:
+                        self.bottom_left_menu.remove(button)
+                    #if button is STOP
+                    else:
+                        #if town center is not working, we have to remove the cancel button as there is nothing to cancel
+                        if self.is_cancel_button_present:
+                            if not self.examined_tile.is_working:
+                                self.bottom_left_menu.pop()
+                                self.is_cancel_button_present = False
 
             if self.examined_tile is not None and isinstance(self.examined_tile, TownCenter):
+
                 if self.examined_tile.is_working and not self.is_cancel_button_present:
                     stop_icon_pos = [action_menu.get_width() - 90, self.height * 0.8 + 52 * 2]
                     icon = stop_icon
@@ -165,7 +207,7 @@ class Hud:
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
 
         # resources bar
-        playerOne.update_resources_bar_hd(screen)
+        playerOne.update_resources_bar(screen)
         # bottom menu
 
         if self.examined_tile is not None:
@@ -197,7 +239,7 @@ class Hud:
                         screen.blit(icon, tile["rect"].topleft)
                         if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP":
                             self.display_construction_tooltip(screen, tile["name"])
-                        if tile["rect"].collidepoint(mouse_pos) and tile["name"] == "STOP":
+                        if tile["rect"].collidepoint(mouse_pos) and (tile["name"] == "STOP" and tile["name"] !="Advance to Feudal Age"and tile["name"] !="Advance to Castle Age"and tile["name"] !="Advance to Imperial Age"):
                             self.display_construction_tooltip(screen, tile)
 
     def load_images(self):
@@ -495,6 +537,7 @@ class Hud:
     # display what entity, its costs, and a brief description
     def display_construction_tooltip(self, screen, entity):
         display_tooltip_for_entity = True
+        display_tooltip_for_tech = False
         if entity == "Villager":
             entity = Villager
         elif entity == "Farm":
@@ -506,6 +549,19 @@ class Hud:
         else:
             display_tooltip_for_entity = False
 
+        if entity == "Advance to Feudal Age":
+            display_tooltip_for_tech = True
+            entity = Age_II
+
+        elif entity == "Advance to Castle Age":
+            display_tooltip_for_tech = True
+            entity = Age_III
+
+        elif entity == "Advance to Imperial Age":
+            display_tooltip_for_tech = True
+            entity = Age_IV
+
+
         # display grey rectangle
         screen.blit(self.tooltip_surface, (0, self.height-action_menu.get_height()-self.tooltip_rect.height))
         pygame.draw.rect(self.tooltip_surface, (255, 201, 14),
@@ -513,11 +569,11 @@ class Hud:
 
         if display_tooltip_for_entity:
             # construction/training resources costs icons
-            screen.blit(wood_cost, (5, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
-            screen.blit(food_cost, (0 + 55, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
-            screen.blit(gold_cost, (0 + 110, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
-            screen.blit(stone_cost, (0 + 165, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
-            screen.blit(population_cost, (0 + 220, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
+            screen.blit(wood_cost, (8, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
+            screen.blit(food_cost, (0 + 60, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
+            screen.blit(gold_cost, (0 + 115, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
+            screen.blit(stone_cost, (0 + 170, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
+            screen.blit(population_cost, (0 + 225, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
 
             # order text such as "train a villager" or "build xxx"
             tooltip_text = entity.construction_tooltip + " (" + str(entity.construction_time) + "s)"
@@ -526,15 +582,15 @@ class Hud:
 
             # cost values. Displayed in red if not enough resources, else in gold
             display_color = "WHITE"
-            temp_pos = (29, self.height-action_menu.get_height()-self.tooltip_rect.height + 35)
+            temp_pos = (30, self.height-action_menu.get_height()-self.tooltip_rect.height + 35)
             #resources
             for resource_type in range(0, 4):
                 if entity.construction_cost[resource_type] > playerOne.resources[resource_type]:
                     display_color = "RED"
                 else:
                     display_color = "GOLD"
-                draw_text(screen, str(entity.construction_cost[0]), 12, display_color, temp_pos)
-                temp_pos = temp_pos[0] +55, temp_pos[1]
+                draw_text(screen, str(entity.construction_cost[resource_type]), 12, display_color, temp_pos)
+                temp_pos = temp_pos[0] + 55, temp_pos[1]
             #pop cost
             if playerOne.current_population + entity.population_produced > playerOne.max_population:
                 display_color = "RED"
@@ -548,6 +604,42 @@ class Hud:
 
             # grey line
             temp_pos = (7, self.height-action_menu.get_height()-self.tooltip_rect.height + 60)
+            pygame.draw.line(screen, (192, 192, 192), temp_pos,
+                             (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))
+
+        elif display_tooltip_for_tech:
+            # construction/training resources costs icons
+            screen.blit(wood_cost, (8, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
+            screen.blit(food_cost, (0 + 60, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
+            screen.blit(gold_cost,
+                        (0 + 115, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
+            screen.blit(stone_cost,
+                        (0 + 170, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
+
+            # order text such as "train a villager" or "build xxx"
+            tooltip_text = entity.name + " (" + str(entity.research_time) + "s )"
+            draw_text(screen, tooltip_text, 14, (255, 255, 255),
+                      (self.tooltip_rect.topleft[0] + 5,
+                       self.height - action_menu.get_height() - self.tooltip_rect.height + 5))
+
+            # cost values. Displayed in red if not enough resources, else in gold
+            display_color = "WHITE"
+            temp_pos = (30, self.height - action_menu.get_height() - self.tooltip_rect.height + 35)
+            # resources
+            for resource_type in range(0, 4):
+                if entity.construction_costs[resource_type] > playerOne.resources[resource_type]:
+                    display_color = "RED"
+                else:
+                    display_color = "GOLD"
+                draw_text(screen, str(entity.construction_costs[resource_type]), 12, display_color, temp_pos)
+                temp_pos = temp_pos[0] + 55, temp_pos[1]
+
+            # description
+            draw_text(screen, entity.description, 14, (255, 255, 255),
+                      (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
+
+            # grey line
+            temp_pos = (7, self.height - action_menu.get_height() - self.tooltip_rect.height + 60)
             pygame.draw.line(screen, (192, 192, 192), temp_pos,
                              (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))
 
@@ -570,8 +662,6 @@ class Hud:
     def display_resources_health(self, screen, x, y, health, max_health):
         pygame.draw.rect(screen, (0, 255, 0), (x, y, health * 10, 10))
         pygame.draw.rect(screen, (25, 25, 25), (x, y, max_health * 10, 10), 4)
-
-
 
     def load_first_age_building_images(self):
         town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
