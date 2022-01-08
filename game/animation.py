@@ -15,7 +15,6 @@ class Animation(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, sprites=[]):
         super().__init__()
 
-        self.attack_animation = False
         self.sprites = sprites
         self.index = 0
         self.current_frame = 0
@@ -48,13 +47,13 @@ class Animation(pygame.sprite.Sprite):
     #pos : render_pos_x, render_pos_y
     def play(self, pos=(0,0)):
         self.rect.topleft = [ pos[0], pos[1]]
-        self.attack_animation = True
+        self.to_be_played = True
 
     def update(self):
-        if self.attack_animation:
+        if self.to_be_played:
             self.current_sprite += self.animation_speed
         if floor(self.current_sprite) >= len(self.sprites):
-            self.attack_animation = False
+            self.to_be_played = False
             self.current_sprite = 0
         self.image = self.sprites[int(self.current_sprite)]
 

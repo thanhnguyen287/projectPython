@@ -530,7 +530,6 @@ class Map:
             new_building.current_health = new_building.max_health
 
             self.entities.append(new_building)
-            player.building_list.append(new_building)
             self.buildings[new_building.pos[0]][new_building.pos[1]] = new_building
             townhall_placed = True
             player.towncenter_pos = new_building.pos
@@ -554,11 +553,15 @@ class Map:
             player.unit_occupied.append(0)
 
     def remove_entity(self, entity, scroll):
-        entity.current_health = -1
         if issubclass(type(entity), Building):
+            death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
+            death_pos = (
+                death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
+                death_pos[1] - (self.hud.first_age_building_sprites[
+                                    entity.__class__.__name__].get_height() - TILE_SIZE) + scroll.y)
+            print(entity.owner.building_list)
             entity.owner.building_list.remove(entity)
             if type(entity) == TownCenter:
-                entity.owner.max_population -= 10
                 self.buildings[entity.pos[0]][entity.pos[1]] = None
                 self.buildings[entity.pos[0] + 1][entity.pos[1]] = None
                 self.buildings[entity.pos[0]][entity.pos[1] - 1] = None
@@ -583,16 +586,11 @@ class Map:
         self.map[entity.pos[0]][entity.pos[1]]["tile"] = ""
         #calculating where to display death animation
 
-        death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
-        death_pos = (
-            death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
-            death_pos[1] - (self.hud.first_age_building_sprites[entity.__class__.__name__].get_height() - TILE_SIZE) + scroll.y)
-
         if type(entity) == House:
             entity.owner.max_population -= 5
-
             self.hud.death_animations[entity.__class__.__name__]["animation"].play(death_pos)
         elif type(entity) == TownCenter:
+            entity.owner.max_population -= 10
             self.hud.death_animations["Town Center 1"]["animation"].play(death_pos)
 
 

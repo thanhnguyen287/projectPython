@@ -215,8 +215,7 @@ class Hud:
     def draw(self, screen, map, camera):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         for entity in self.death_animations:
-            if self.death_animations[entity]["animation"].attack_animation:
-                # if self.house_death_animation is not None and self.house_death_animation_group is not None and self.house_death_animation.attack_animation:
+            if self.death_animations[entity]["animation"].to_be_played:
                 self.death_animations[entity]["group"].draw(screen)
                 self.death_animations[entity]["animation"].update()
         # resources bar
@@ -417,7 +416,6 @@ class Hud:
     def display_entity_description(self, screen, map):
         # selection (bottom middle menu)
         w, h = self.bottom_hud_rect.width, self.bottom_hud_rect.height
-        # screen.blit(self.bottom_hud_surface, (0, self.height * 0.79))
         img = None
         # as we are scaling it, we make a copy
         if isinstance(self.examined_tile, Building):
