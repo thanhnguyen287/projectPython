@@ -7,15 +7,17 @@ from units import Villager, TownCenter, House, Farm, Building
 # from buildings import TownCenter, House, Farm, Building
 from .ActionMenu import *
 from tech import Age_II, Age_III, Age_IV
+from .animation import load_images_better, Animation, moving_sprites
 
 
 class Hud:
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, screen):
 
         self.width = width
         self.height = height
         self.hud_color = (198, 155, 93, 175)
+        self.screen = screen
 
         # bottom hud
         self.bottom_hud_surface = pygame.Surface((887, 182), pygame.SRCALPHA)
@@ -54,6 +56,12 @@ class Hud:
 
         # resources sprites
         self.resources_sprites = self.load_resources_images()
+        self.house_death_animation = None
+        self.house_death_animation_group = None
+        self.temp_bool = True
+
+        # animations. contains stuff like : self.death_animations["house"]["animation"]
+        self.death_animations = self.create_all_death_animations()
 
     def create_train_menu_town_hall(self):
         render_pos = [25, self.height - action_menu.get_height() + 40]
@@ -80,7 +88,7 @@ class Hud:
                 "affordable": True
             }
         )
-        #advancing age
+        # advancing age
         render_pos = [25, self.height - action_menu.get_height() + 125]
         tiles.append(
             {
@@ -149,7 +157,7 @@ class Hud:
                         button["affordable"] = True
                     else:
                         button["affordable"] = False
-                #we remove the advance to x age tech if it has been researched, and add the next one
+                # we remove the advance to x age tech if it has been researched, and add the next one
                 if self.examined_tile is not None and isinstance(self.examined_tile, TownCenter):
                     if button["name"] == "Advance to Feudal Age" and self.examined_tile.owner.age == 2:
                         self.bottom_left_menu.remove(button)
@@ -159,7 +167,8 @@ class Hud:
                                 "name": "Advance to Castle Age",
                                 "icon": advance_to_third_age_icon,
                                 "image": None,
-                                "rect": advance_to_third_age_icon.get_rect(topleft=[25, self.height - action_menu.get_height() + 125]),
+                                "rect": advance_to_third_age_icon.get_rect(
+                                    topleft=[25, self.height - action_menu.get_height() + 125]),
                                 "affordable": True
                             })
                     elif button["name"] == "Advance to Castle Age" and self.examined_tile.owner.age == 3:
@@ -176,9 +185,9 @@ class Hud:
                             })
                     elif button["name"] == "Advance to Imperial Age" and self.examined_tile.owner.age == 4:
                         self.bottom_left_menu.remove(button)
-                    #if button is STOP
+                    # if button is STOP
                     else:
-                        #if town center is not working, we have to remove the cancel button as there is nothing to cancel
+                        # if town center is not working, we have to remove the cancel button as there is nothing to cancel
                         if self.is_cancel_button_present:
                             if not self.examined_tile.is_working:
                                 self.bottom_left_menu.pop()
@@ -205,7 +214,11 @@ class Hud:
 
     def draw(self, screen, map, camera):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
-
+        for entity in self.death_animations:
+            if self.death_animations[entity]["animation"].attack_animation:
+                # if self.house_death_animation is not None and self.house_death_animation_group is not None and self.house_death_animation.attack_animation:
+                self.death_animations[entity]["group"].draw(screen)
+                self.death_animations[entity]["animation"].update()
         # resources bar
         playerOne.update_resources_bar(screen)
         # bottom menu
@@ -214,36 +227,39 @@ class Hud:
             # Draw minimap
             screen.blit(minimap_panel,
                         (self.width - minimap_panel.get_width(), self.height - selection_panel.get_height()))
-            map.draw_minimap(screen, camera)
+            # map.draw_minimap(screen, camera)
             screen.blit(action_menu, (0, self.height - action_menu.get_height()))
             screen.blit(selection_panel, (action_menu.get_width(), self.height - selection_panel.get_height()))
 
             self.display_entity_description(screen, map)
 
-            #if the town center is creating villager, we display the corresponding progression bar
+            # if the town center is creating villager, we display the corresponding progression bar
             if type(self.examined_tile) == TownCenter and self.examined_tile.is_working:
                 self.display_progress_bar(screen, Villager, self.examined_tile)
-            #we display progression bar if a building is currently being built
+            # we display progression bar if a building is currently being built
             elif issubclass(type(self.examined_tile), Building) and self.examined_tile.is_being_built:
                 self.display_progress_bar(screen, "Non_meaningful arg 1", "Non_meaningful arg 2", self.examined_tile)
 
             # building selection inside the build menu
             if self.bottom_left_menu is not None:
-                #if it is not a building in construction
+                # if it is not a building in construction
                 if not issubclass(type(self.examined_tile), Building) or not self.examined_tile.is_being_built:
                     for tile in self.bottom_left_menu:
                         icon = tile["icon"].copy()
-                        #if player cant affort to build/train entity, we make the icon transparent
+                        # if player cant affort to build/train entity, we make the icon transparent
                         if tile["name"] != "STOP" and not playerOne.can_afford(tile["name"]):
                             icon.set_alpha(100)
                         screen.blit(icon, tile["rect"].topleft)
                         if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP":
                             self.display_construction_tooltip(screen, tile["name"])
-                        if tile["rect"].collidepoint(mouse_pos) and (tile["name"] == "STOP" and tile["name"] !="Advance to Feudal Age"and tile["name"] !="Advance to Castle Age"and tile["name"] !="Advance to Imperial Age"):
+                        if tile["rect"].collidepoint(mouse_pos) and (
+                                tile["name"] == "STOP" and tile["name"] != "Advance to Feudal Age" and tile[
+                            "name"] != "Advance to Castle Age" and tile["name"] != "Advance to Imperial Age"):
                             self.display_construction_tooltip(screen, tile)
 
     def load_images(self):
-        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
+        town_center = pygame.image.load(
+            "Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
         house = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
 
@@ -257,15 +273,15 @@ class Hud:
         }
         return images
 
-    #display life of entity inside mid bottom menu (when examining smth)
-     #if below 25 pourcent, life bar in red, 25-40 : orange , 40-60 : yellow, 60-100 : light or dark green
+    # display life of entity inside mid bottom menu (when examining smth)
+    # if below 25 pourcent, life bar in red, 25-40 : orange , 40-60 : yellow, 60-100 : light or dark green
     def display_life_bar(self, screen, entity, map, for_hud=True, camera=None, for_resource=False):
         if for_hud:
             # health bar
             # to get the same health bar size and not have huge ones, we use a ratio
             health_bar_length = 100
             hp_displayed = (entity.current_health / entity.max_health * health_bar_length)
-            #from 1 to 100% of max health, used to know which color we use for the health bar
+            # from 1 to 100% of max health, used to know which color we use for the health bar
             unit_pourcentage_of_max_hp = (entity.current_health / entity.max_health) * 100
             bar_info = (action_menu.get_width() + 30, self.height * 0.9 + 43, hp_displayed, 6)
 
@@ -328,7 +344,7 @@ class Hud:
                 # outer rectangle for the shape of life bar, never changes
                 pygame.draw.rect(screen, get_color_code("BLACK"),
                                  (display_pos_x, display_pos_y, health_bar_length, 6), 2)  # change this too
-            #for 1x1 entities
+            # for 1x1 entities
             else:
                 health_bar_length = 90
                 # bar_display_pos
@@ -561,29 +577,30 @@ class Hud:
             display_tooltip_for_tech = True
             entity = Age_IV
 
-
         # display grey rectangle
-        screen.blit(self.tooltip_surface, (0, self.height-action_menu.get_height()-self.tooltip_rect.height))
+        screen.blit(self.tooltip_surface, (0, self.height - action_menu.get_height() - self.tooltip_rect.height))
         pygame.draw.rect(self.tooltip_surface, (255, 201, 14),
                          pygame.Rect(0, 0, self.tooltip_rect.width, self.tooltip_rect.height), 2)
 
         if display_tooltip_for_entity:
             # construction/training resources costs icons
-            screen.blit(wood_cost, (8, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
-            screen.blit(food_cost, (0 + 60, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
-            screen.blit(gold_cost, (0 + 115, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
-            screen.blit(stone_cost, (0 + 170, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
-            screen.blit(population_cost, (0 + 225, self.height-action_menu.get_height()-self.tooltip_rect.height + 30))
+            screen.blit(wood_cost, (8, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
+            screen.blit(food_cost, (0 + 60, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
+            screen.blit(gold_cost, (0 + 115, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
+            screen.blit(stone_cost, (0 + 170, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
+            screen.blit(population_cost,
+                        (0 + 225, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
 
             # order text such as "train a villager" or "build xxx"
             tooltip_text = entity.construction_tooltip + " (" + str(entity.construction_time) + "s)"
             draw_text(screen, tooltip_text, 14, (255, 255, 255),
-                      (self.tooltip_rect.topleft[0], self.height-action_menu.get_height()-self.tooltip_rect.height + 5))
+                      (self.tooltip_rect.topleft[0],
+                       self.height - action_menu.get_height() - self.tooltip_rect.height + 5))
 
             # cost values. Displayed in red if not enough resources, else in gold
             display_color = "WHITE"
-            temp_pos = (30, self.height-action_menu.get_height()-self.tooltip_rect.height + 35)
-            #resources
+            temp_pos = (30, self.height - action_menu.get_height() - self.tooltip_rect.height + 35)
+            # resources
             for resource_type in range(0, 4):
                 if entity.construction_cost[resource_type] > playerOne.resources[resource_type]:
                     display_color = "RED"
@@ -591,7 +608,7 @@ class Hud:
                     display_color = "GOLD"
                 draw_text(screen, str(entity.construction_cost[resource_type]), 12, display_color, temp_pos)
                 temp_pos = temp_pos[0] + 55, temp_pos[1]
-            #pop cost
+            # pop cost
             if playerOne.current_population + entity.population_produced > playerOne.max_population:
                 display_color = "RED"
             else:
@@ -603,7 +620,7 @@ class Hud:
                       (self.tooltip_rect.topleft[0], temp_pos[1] + 30))
 
             # grey line
-            temp_pos = (7, self.height-action_menu.get_height()-self.tooltip_rect.height + 60)
+            temp_pos = (7, self.height - action_menu.get_height() - self.tooltip_rect.height + 60)
             pygame.draw.line(screen, (192, 192, 192), temp_pos,
                              (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))
 
@@ -648,9 +665,10 @@ class Hud:
             # text
             tooltip_text = entity["tooltip"]
             draw_text(screen, tooltip_text, 14, (255, 0, 0),
-                      (self.tooltip_rect.topleft[0], self.height-action_menu.get_height()-self.tooltip_rect.height + 5))
+                      (self.tooltip_rect.topleft[0],
+                       self.height - action_menu.get_height() - self.tooltip_rect.height + 5))
             # grey line
-            temp_pos = (7, self.height-action_menu.get_height()-self.tooltip_rect.height + 60)
+            temp_pos = (7, self.height - action_menu.get_height() - self.tooltip_rect.height + 60)
             pygame.draw.line(screen, (192, 192, 192), temp_pos,
                              (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))
             # description
@@ -664,7 +682,8 @@ class Hud:
         pygame.draw.rect(screen, (25, 25, 25), (x, y, max_health * 10, 10), 4)
 
     def load_first_age_building_images(self):
-        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
+        town_center = pygame.image.load(
+            "Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
         house = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
 
@@ -676,7 +695,8 @@ class Hud:
         return images
 
     def load_second_age_building_images(self):
-        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x2.png").convert_alpha()
+        town_center = pygame.image.load(
+            "Resources/assets/Models/Buildings/Town_Center/town_center_x2.png").convert_alpha()
         house = pygame.image.load("Resources/assets/Models/Buildings/House/house_2.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
 
@@ -688,7 +708,8 @@ class Hud:
         return images
 
     def load_third_age_building_images(self):
-        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x3.png").convert_alpha()
+        town_center = pygame.image.load(
+            "Resources/assets/Models/Buildings/Town_Center/town_center_x3.png").convert_alpha()
         house = pygame.image.load("Resources/assets/Models/Buildings/House/house_3.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
 
@@ -700,7 +721,8 @@ class Hud:
         return images
 
     def load_fourth_age_building_images(self):
-        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x4.png").convert_alpha()
+        town_center = pygame.image.load(
+            "Resources/assets/Models/Buildings/Town_Center/town_center_x4.png").convert_alpha()
         house = pygame.image.load("Resources/assets/Models/Buildings/House/house_4.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
 
@@ -750,3 +772,24 @@ class Hud:
                              "tree": tree_sprites}
 
         return resources_sprites
+
+    def create_all_death_animations(self):
+        house_death_animation = Animation(300, 300, sprites=load_images_better(
+            "resources/assets/Models/Buildings/House/House_death_animation"))
+        house_death_animation_group = pygame.sprite.Group()
+        house_death_animation_group.add(house_death_animation)
+        house = {"animation": house_death_animation,
+                 "group": house_death_animation_group
+                 }
+
+        town_center_1_death_animation = Animation(300, 300, sprites=load_images_better(
+            "resources/assets/Models/Buildings/Town_Center/town_center_1_death_animation"))
+        town_center_1_death_animation_group = pygame.sprite.Group()
+        town_center_1_death_animation_group.add(town_center_1_death_animation)
+
+        town_center_1 = {"animation": town_center_1_death_animation,
+                         "group": town_center_1_death_animation_group
+                         }
+        dic = {"House": house,
+               "Town Center 1": town_center_1}
+        return dic

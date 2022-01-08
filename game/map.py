@@ -61,8 +61,11 @@ class Map:
         return map
 
     def update(self, camera, screen):
+
         mouse_pos = pygame.mouse.get_pos()
         mouse_action = pygame.mouse.get_pressed()
+        if mouse_action[1] and self.hud.examined_tile is not None:
+            self.remove_entity(self.hud.examined_tile, camera.scroll)
         self.temp_tile = None
 
         # the player selects a building in the hud
@@ -213,9 +216,9 @@ class Map:
         for player in player_list:
             for building in player.building_list:
                 if building.current_health <= 0:
-                    self.remove_entity(building)
+                    self.remove_entity(building, camera.scroll)
                 # if building is selected, we highlight its tile
-                if self.examined_tile is not None:
+                elif self.examined_tile is not None:
                     if not building.is_being_built:
                         if (building.pos[0] == self.examined_tile[0]) and (building.pos[1] == self.examined_tile[1]):
                             if type(building) != TownCenter:
@@ -550,9 +553,12 @@ class Map:
             player.unit_list.append(start_unit)
             player.unit_occupied.append(0)
 
-    def remove_entity(self, entity):
+    def remove_entity(self, entity, scroll):
+        entity.current_health = -1
         if issubclass(type(entity), Building):
-            if type(entity) != TownCenter:
+            entity.owner.building_list.remove(entity)
+            if type(entity) == TownCenter:
+                entity.owner.max_population -= 10
                 self.buildings[entity.pos[0]][entity.pos[1]] = None
                 self.buildings[entity.pos[0] + 1][entity.pos[1]] = None
                 self.buildings[entity.pos[0]][entity.pos[1] - 1] = None
@@ -561,20 +567,41 @@ class Map:
                 self.collision_matrix[entity.pos[1]][entity.pos[0] + 1] = 1
                 self.collision_matrix[entity.pos[1] - 1][entity.pos[0] + 1] = 1
                 self.collision_matrix[entity.pos[1] - 1][entity.pos[0]] = 1
+                self.map[entity.pos[0] + 1][entity.pos[1]]["tile"] = ""
+                self.map[entity.pos[0]][entity.pos[1] - 1]["tile"] = ""
+                self.map[entity.pos[0] + 1][entity.pos[1] - 1]["tile"] = ""
             else:
                 self.buildings[entity.pos[0]][entity.pos[1]] = None
                 self.collision_matrix[entity.pos[1]][entity.pos[0]] = 1
+
         elif issubclass(type(entity), Unit):
             self.units[entity.pos[0]][entity.pos[1]] = None
             self.collision_matrix[entity.pos[1]][entity.pos[0]] = 1
+
         self.examined_tile = None
         self.hud.examined_tile = None
+        self.map[entity.pos[0]][entity.pos[1]]["tile"] = ""
+        #calculating where to display death animation
+
+        death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
+        death_pos = (
+            death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
+            death_pos[1] - (self.hud.first_age_building_sprites[entity.__class__.__name__].get_height() - TILE_SIZE) + scroll.y)
+
+        if type(entity) == House:
+            entity.owner.max_population -= 5
+
+            self.hud.death_animations[entity.__class__.__name__]["animation"].play(death_pos)
+        elif type(entity) == TownCenter:
+            self.hud.death_animations["Town Center 1"]["animation"].play(death_pos)
+
 
     # remove resources from tile to get an empty tile
     def clear_tile(self, grid_x, grid_y):
         self.map[grid_x][grid_y]["tile"] = ""
         self.map[grid_x][grid_y]["variation"] = 0
         self.collision_matrix[grid_y][grid_x] = 1
+        self.map[grid_x][grid_y]["collision"] = False
 
     # returns true if there is collision, else False
     def is_there_collision(self, grid_pos: [int, int]):
@@ -683,8 +710,8 @@ class Map:
         # HERE WE DRAW THE UNITS ON THE MAP
         # we extract from the units list the unit we want to display
         if unit is not None and unit.current_health <= 0:
-            self.remove_entity(unit)
-        if unit is not None:
+            self.remove_entity(unit, camera.scroll)
+        elif unit is not None:
             # have we selected this unit ? if yes we will highlight its tile
             if self.examined_tile is not None:
                 if (unit.pos[0] == self.examined_tile[0]) and (unit.pos[1] == self.examined_tile[1]):

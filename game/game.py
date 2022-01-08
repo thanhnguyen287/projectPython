@@ -14,7 +14,7 @@ class Game:
         self.width, self.height = self.screen.get_size()
 
         # hud
-        self.hud = Hud(self.width, self.height)
+        self.hud = Hud(self.width, self.height, self.screen)
 
         # entities list (units, buildings, etc...)
         self.entities = []
@@ -101,6 +101,7 @@ class Game:
                     player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
                     player.play()
 
+
     def update(self):
         self.camera.update()
         self.hud.update(self.screen)
@@ -125,7 +126,7 @@ class Game:
         #self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
         #Boom animation
         moving_sprites.draw(self.screen)
-        moving_sprites.update(0.25)
+        moving_sprites.update()
         #Draw FPS, must be the last to shown -> put it right on top of the display.flip
         draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())),20,(255,0,0),(5,55))
         pygame.display.flip()
