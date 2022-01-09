@@ -1,5 +1,5 @@
 from player import player_list
-from .utils import tile_founding
+from .utils import tile_founding, look_around, RESSOURCE_LIST
 from units import Villager
 from random import randint
 
@@ -16,6 +16,22 @@ class IA:
         # the range (in layers) that the AI will go to. It increase when the AI becomes stronger
         # or is lacking ressources
         self.range = 3
+
+        # this will be used to know if the AI needs to gather or not, and to expand or not
+        self.needed_ressource = []
+
+        # a list of tiles to manage the gathering of ressources with the multiple units
+        self.targeted_tiles = []
+
+        # a list of the tiles where buildings are being built, to not build more on it
+        self.in_building_tiles = []
+
+        #number of each ressource needed for every villager
+        self.limit = 150
+
+# ======================================================================================================================
+# ------------------------------------------CONTROL AND RUNNING FUNCTIONS-----------------------------------------------
+# ======================================================================================================================
 
     def chose_behaviour(self):
         # welook at the enemy units within 10 tiles of our town center to know if we should go in defense mode
@@ -47,35 +63,23 @@ class IA:
         if self.is_stronger():
             self.range += 1
 
-
+        # WARNING i will modify this so the AI expand only if a ressource she needs is lacking
         # or if she is neutral but lacking ressources to gather
         elif self.behaviour == "neutral":
-            ressources = ["wood", "food", "gold", "stone"]
             ressources_available = []
-            for r in ressources:
+            for r in self.needed_ressource:
                 tiles_to_gather = tile_founding(1, 1, self.range, self.map, self.player, r)
                 if tiles_to_gather:
                     ressources_available.append(True)
                 else:
                     ressources_available.append(False)
 
-            if False in ressources_available:
+            if True not in ressources_available:
                 self.range += 1
 
-        print(self.range)
-
-    def is_stronger(self):
-        for p in player_list:
-            if p != self.player:
-                # we have at least 25% more units, only works without fog of war because we are looking at all enemy units
-                if len(self.player.unit_list) >= 1.25 * len(p.unit_list):
-                    return True
-                else:
-                    return False
-        return False
 
     def run(self):
-        """# looking at state of the game to chose mode (we should look every 5 seconds or so)
+        # looking at state of the game to chose mode (we should look every 5 seconds or so)
         self.chose_behaviour()
 
         if self.behaviour == "neutral":
@@ -83,25 +87,41 @@ class IA:
         elif self.behaviour == "defense":
             self.defense_routine()
         elif self.behaviour == "attack":
-            self.attack_routine()"""
-        self.building_routine()
+            self.attack_routine()
 
+# ======================================================================================================================
+# --------------------------------------------------MAIN ROUTINES-------------------------------------------------------
+# ======================================================================================================================
 
-
+    #gather, build, spawn villagers
     def neutral_routine(self):
-        ressources = []
-        for r in self.player.resources:
-            if r >= 100:
-                ressources.append(True)
-            else:
-                ressources.append(False)
+        self.planning_gathering()
 
-        if False in ressources:
-            self.gathering_routine()
+        #if we dont need ressources, we are not training units, we have free pop space and we have at least as many
+        #buildings as units, then we can train a new unit
+        if not self.needed_ressource and self.player.towncenter.queue == 0 and \
+                self.player.current_population < self.player.max_population and \
+                len(self.player.building_list) - 1 + len(self.in_building_tiles) >= len(self.player.unit_list):
 
-        self.building_routine()
+            self.population_developpement_routine()
 
-    # TODO
+        #if we dont train unit, we will try to gather or to build
+        else:
+            for u in self.player.unit_list:
+
+                #if we need ressources and the unit is a villager and he is free, he will go gather
+                if self.needed_ressource and isinstance(u, Villager) and u.building_to_create is None:
+                    self.gathering_routine(u)
+                    #print("gather")
+
+                #if we dont need ressources or when the villager is building, we are using the building routine
+                elif isinstance(u,Villager) and\
+                        (len(self.player.building_list) - 1 + len(self.in_building_tiles) < len(self.player.unit_list)
+                         or u.target is not None):
+                    self.building_routine(u)
+                    #print("build")
+
+        self.free_tiles()
 
     def defense_routine(self):
         pass
@@ -113,60 +133,110 @@ class IA:
 
     # TODO
 
-    def gathering_routine(self):
-        i = 0
-        for u in self.player.unit_list:
-            if isinstance(u, Villager) and u.target is None:
-                for indice in range(len(["wood", "food", "gold", "stone"])):
-                    r = ["wood", "food", "gold", "stone"][indice]
-                    if self.player.resources[indice] < 150:
-                        tiles_to_gather = tile_founding(1, 1, self.range, self.map, self.player, r)
-                        if tiles_to_gather:
-                            u.go_to_ressource(tiles_to_gather[0])
 
-    def building_routine(self):
+# ======================================================================================================================
+# ---------------------------------------------------SUB ROUTINES-------------------------------------------------------
+# ======================================================================================================================
+
+    def gathering_routine(self, unit):
+        i = 0
+        for r in self.needed_ressource:
+            if unit.target is None:
+                tiles_to_gather = tile_founding(10, 1, self.range, self.map, self.player, r)
+                found = False
+                for i in range(len(tiles_to_gather)):
+                    if tiles_to_gather:
+                        pos_x = tiles_to_gather[i][0]
+                        pos_y = tiles_to_gather[i][1]
+                        if look_around((pos_x, pos_y), self.map) and not found and \
+                                (pos_x, pos_y) not in self.targeted_tiles:
+                            unit.go_to_ressource(tiles_to_gather[i])
+                            self.targeted_tiles.append((pos_x, pos_y))
+                            found = True
+
+
+    def building_routine(self, unit):
         # if we have more than 90% of our pop capacity occupied, we build a house
         if self.player.current_population >= 0.9 * self.player.max_population:
-            for u in self.player.unit_list:
-                if isinstance(u, Villager) and u.building_to_create is None:
-                    tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
+            if unit.building_to_create is None:
+                tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
+                for i in range(len(tiles_to_build)):
                     if tiles_to_build:
-                        r = randint(0, len(tiles_to_build) - 1)
-                        if len(tiles_to_build) >= 2:
-                            u.go_to_build(tiles_to_build[r], "House")
-                            u.target = tiles_to_build[r]
+                        random_number = randint(0, len(tiles_to_build) - 1)
+                        if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles:
+                            unit.go_to_build(tiles_to_build[random_number], "House")
+                            unit.target = tiles_to_build[random_number]
+                            self.in_building_tiles.append(tiles_to_build[random_number])
 
 
         # /!\ with the "elif" we can only build 1 building after 1 building
         # if we have more than 50% of our pop capacity occupied, we build a farm
         elif self.player.current_population >= 0.5 * self.player.max_population:
-            for u in self.player.unit_list:
-                if isinstance(u, Villager) and u.building_to_create is None:
-                    tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
+            if unit.building_to_create is None:
+                tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
+                for i in range(len(tiles_to_build)):
                     if tiles_to_build:
-                        r = randint(0, len(tiles_to_build) - 1)
-                        if len(tiles_to_build) >= 2:
-                            u.go_to_build(tiles_to_build[r], "Farm")
-                            u.target = tiles_to_build[r]
+                        random_number = randint(0, len(tiles_to_build) - 1)
+                        if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles:
+                            unit.go_to_build(tiles_to_build[random_number], "Farm")
+                            unit.target = tiles_to_build[random_number]
+                            self.in_building_tiles.append(tiles_to_build[random_number])
 
         # THAT IS A TEST, DONT ACTIVATE IT BUT DONT DELETE IT
-        for u in self.player.unit_list:
-            if isinstance(u, Villager) and u.building_to_create is None:
-                tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
+        if unit.building_to_create is None:
+            tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
+            for i in range(len(tiles_to_build)):
                 if tiles_to_build:
-                    r = randint(0, len(tiles_to_build)-1)
-                    if len(tiles_to_build) >= 2:
-                        u.go_to_build(tiles_to_build[r], "Farm")
-                        u.target = tiles_to_build[r]
+                    random_number = randint(0, len(tiles_to_build)-1)
+                    if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles:
+                        unit.go_to_build(tiles_to_build[random_number], "Farm")
+                        unit.target = tiles_to_build[random_number]
+                        self.in_building_tiles.append(tiles_to_build[random_number])
 
         #to make the villager able to build other buildings after he buildt a building
-        for u in self.player.unit_list:
-            if u.target is not None:
-                pos_x = u.target[0]
-                pos_y = u.target[1]
+        if unit.target is not None:
+            pos_x = unit.target[0]
+            pos_y = unit.target[1]
 
-                for b in u.owner.building_list:
-                    if b.pos[0] == pos_x and b.pos[1] == pos_y and not u.is_moving_to_build:
-                        if not b.is_being_built:
-                            u.building_to_create = None
-                            u.target = None
+            for b in unit.owner.building_list:
+                if b.pos[0] == pos_x and b.pos[1] == pos_y and not unit.is_moving_to_build:
+                    if not b.is_being_built:
+                        unit.building_to_create = None
+                        unit.target = None
+
+
+    def population_developpement_routine(self):
+        self.player.towncenter.check_collision_and_spawn_villager_where_possible()
+        self.player.current_population += 1
+
+# ======================================================================================================================
+# -----------------------------------------------USEFUL FUNCTIONS-------------------------------------------------------
+# ======================================================================================================================
+
+    def planning_gathering(self):
+        for i in range(4):
+            if self.player.resources[i] <= len(self.player.unit_list)*self.limit and \
+                    RESSOURCE_LIST[i] not in self.needed_ressource:
+                self.needed_ressource.append(RESSOURCE_LIST[i])
+            elif self.player.resources[i] > len(self.player.unit_list)*self.limit and \
+                    RESSOURCE_LIST[i] in self.needed_ressource:
+                self.needed_ressource.remove(RESSOURCE_LIST[i])
+
+    def is_stronger(self):
+        for p in player_list:
+            if p != self.player:
+                # we have at least 25% more units, only works without fog of war because we are looking at all enemy units
+                if len(self.player.unit_list) >= 1.25 * len(p.unit_list):
+                    return True
+                else:
+                    return False
+        return False
+
+    def free_tiles(self):
+        for tile in self.targeted_tiles:
+            if self.map[tile[0]][tile[1]]["tile"] == "":
+                self.targeted_tiles.remove(tile)
+
+        for tile in self.in_building_tiles:
+            if self.map[tile[0]][tile[1]]["tile"] != "":
+                self.in_building_tiles.remove(tile)

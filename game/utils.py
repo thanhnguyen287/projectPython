@@ -1,6 +1,8 @@
 import pygame
 #from units import *
+from settings import MAP_SIZE_X, MAP_SIZE_Y
 
+RESSOURCE_LIST = ["wood", "food", "gold", "stone"]
 
 def draw_text(screen, text, size, color, pos):
     # create a Font object from the system fonts
@@ -118,14 +120,14 @@ def tile_founding(x, first_layer, layer_max, map, player, tile_type):
             # if the tile is empty we add it to the list and we decrease the nb of tile left to found
             pos_x = tc_pos[0] - layer + j
             pos_y = tc_pos[1] - layer - 1
-            if 0 <= pos_x < 50 and 0 <= pos_y < 50 and map[pos_x][pos_y]["tile"] == tile_type and \
+            if 0 <= pos_x < MAP_SIZE_X and 0 <= pos_y < MAP_SIZE_Y and map[pos_x][pos_y]["tile"] == tile_type and \
                     nb_of_tile_left_to_found > 0:
                 list_of_tile.append((pos_x, pos_y))
                 nb_of_tile_left_to_found -= 1
 
             pos_x = tc_pos[0] - layer + j
             pos_y = tc_pos[1] + layer
-            if 0 <= pos_x < 50 and 0 <= pos_y < 50 and map[pos_x][pos_y]["tile"] == tile_type and \
+            if 0 <= pos_x < MAP_SIZE_X and 0 <= pos_y < MAP_SIZE_Y and map[pos_x][pos_y]["tile"] == tile_type and \
                     nb_of_tile_left_to_found > 0:
                 list_of_tile.append((pos_x, pos_y))
                 nb_of_tile_left_to_found -= 1
@@ -133,17 +135,42 @@ def tile_founding(x, first_layer, layer_max, map, player, tile_type):
         for k in range(1, layer * 2 + 1):
             pos_x = tc_pos[0] - layer
             pos_y = tc_pos[1] - layer - 1 + k
-            if 0 <= pos_x < 50 and 0 <= pos_y < 50 and map[pos_x][pos_y]["tile"] == tile_type and \
+            if 0 <= pos_x < MAP_SIZE_X and 0 <= pos_y < MAP_SIZE_Y and map[pos_x][pos_y]["tile"] == tile_type and \
                     nb_of_tile_left_to_found > 0:
                 list_of_tile.append((pos_x, pos_y))
                 nb_of_tile_left_to_found -= 1
 
             pos_x = tc_pos[0] + layer + 1
             pos_y = tc_pos[1] - layer - 1 + k
-            if 0 <= pos_x < 50 and 0 <= pos_y < 50 and map[pos_x][pos_y]["tile"] == tile_type and \
+            if 0 <= pos_x < MAP_SIZE_X and 0 <= pos_y < MAP_SIZE_Y and map[pos_x][pos_y]["tile"] == tile_type and \
                     nb_of_tile_left_to_found > 0:
                 list_of_tile.append((pos_x, pos_y))
                 nb_of_tile_left_to_found -= 1
 
         layer += 1
     return list_of_tile
+
+
+def look_around(pos, map):
+    list = []
+    if 0 <= pos[0]+1 < MAP_SIZE_X and map[pos[0]+1][pos[1]]["tile"] == "":
+        list.append(True)
+    else:
+        list.append(False)
+
+    if 0 <= pos[0]-1 < MAP_SIZE_X and map[pos[0]-1][pos[1]]["tile"] == "":
+        list.append(True)
+    else:
+        list.append(False)
+
+    if 0 <= pos[1]+1 < MAP_SIZE_Y and map[pos[0]][pos[1] + 1]["tile"] == "":
+        list.append(True)
+    else:
+        list.append(False)
+
+    if 0 <= pos[1]-1 < MAP_SIZE_Y and map[pos[0]][pos[1]-1]["tile"] == "":
+        list.append(True)
+    else:
+        list.append(False)
+
+    return True if any(list) else False

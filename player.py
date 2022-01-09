@@ -24,6 +24,7 @@ class Player:
         self.building_list = []
 
         self.towncenter_pos = None
+        self.towncenter = None
 
         self.entity_costs = {
             "Farm": {"wood": 100, "food": 0, "gold": 0, "stone": 0},

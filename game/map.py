@@ -443,6 +443,7 @@ class Map:
             self.townhall_placed = True
 
             playerOne.towncenter_pos = (place_x, place_y)
+            playerOne.towncenter = new_building
 
             self.map[place_x][place_y]["tile"] = "building"
             self.map[place_x][place_y]["collision"] = True
@@ -522,6 +523,7 @@ class Map:
 
             townhall_placed = True
             player.towncenter_pos = new_building.pos
+            player.towncenter = new_building
 
 
             # for starting villagers
