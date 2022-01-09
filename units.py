@@ -448,8 +448,8 @@ class Unit:
     def change_tile(self, new_tile):
         # remove the unit from its current position on the map
         if self.pos != new_tile:
-            self.angle = self.map.get_angle_between(self.pos, new_tile) if self.map.get_angle_between(self.pos,
-                                                                                                     new_tile) != -1 else ...
+            self.angle = self.map.get_angle_between(self.pos, new_tile, self) if self.map.get_angle_between(self.pos,
+                                                                                                     new_tile, self) != -1 else ...
         self.map.units[self.pos[0]][self.pos[1]] = None
         #remove collision from old position
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 1
@@ -527,8 +527,8 @@ class Villager(Unit):
     def attack(self):
         #target has enough health to survive
         if self.is_fighting and (self.now - self.attack_cooldown > self.attack_speed):
-            self.angle = self.map.get_angle_between(self.pos, new_tile) if self.map.get_angle_between(self.pos,
-                                                                                                      new_tile) != -1 else ...
+            self.angle = self.map.get_angle_between(self.pos, new_tile, self) if self.map.get_angle_between(self.pos,
+                                                                                                      new_tile, self) != -1 else ...
 
             if self.target.current_health > self.attack_dmg:
                 self.target.current_health -= self.attack_dmg
@@ -551,7 +551,7 @@ class Villager(Unit):
     def build(self):
         self.is_moving_to_build = False
         if self.building_to_create is not None:
-            self.angle = self.map.get_angle_between(self.pos, self.building_to_create["pos"]) if self.map.get_angle_between(self.pos, self.building_to_create["pos"]) != -1 else ...
+            self.angle = self.map.get_angle_between(self.pos, self.building_to_create["pos"], self) if self.map.get_angle_between(self.pos, self.building_to_create["pos"], self) != -1 else ...
 
         new_building = None
         if self.building_to_create["name"] == "Farm":
@@ -620,8 +620,8 @@ class Villager(Unit):
 
     def gather_ressources(self):
         this_target = self.map.map[self.target[0]][self.target[1]]
-        self.angle = self.map.get_angle_between(self.pos, self.target) if self.map.get_angle_between(self.pos,
-                                                                                             self.target) != -1 else ...
+        self.angle = self.map.get_angle_between(self.pos, self.target, self) if self.map.get_angle_between(self.pos,
+                                                                                             self.target, self) != -1 else ...
 
         if self.is_gathering and (self.now - self.attack_cooldown > self.attack_speed):
 
@@ -656,7 +656,7 @@ class Villager(Unit):
                 # for debug, because the first tile of our path is the pos of unit, not the first tile where we must go
                 if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
-                    print("debug path index, path)", self.path_index, len(self.path))
+                print("debug path index, path)", self.path_index, len(self.path))
                 new_pos = self.path[self.path_index]
 
                 #update position in the world

@@ -719,7 +719,7 @@ class Map:
             if unit.searching_for_path and not unit.is_moving_to_gather and not unit.is_moving_to_build and not unit.is_moving_to_gather:
                 screen.blit(scale_image(move_icon, w=40), (
                     render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
-                    render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y - 80)
+                    render_pos[1] - (self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 80)
                  )
             elif unit.is_fighting or unit.is_gathering or unit.is_moving_to_gather:
                 screen.blit(scale_image(attack_icon, w=40), (
@@ -915,7 +915,7 @@ class Map:
            #     animation_pos[1] - (self.hud.villager_sprites[0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
            # self.hud.villager_idle_animations[str(unit.angle)]["animation"].play(animation_pos)
     #returns the angle between the origin tile and the destination tile. Angle goes from 0 to 360, 0 top, 90 right, etc...
-    def get_angle_between(self, origin_tile_pos: [int, int], end_tile_pos: [int, int]):
+    def get_angle_between(self, origin_tile_pos: [int, int], end_tile_pos: [int, int], unit):
         # first we calculate angle between grid, then we will apply some maths to get the "real" isometric angle
         #if origin == destination, no calcul
         if origin_tile_pos == end_tile_pos:
@@ -925,46 +925,46 @@ class Map:
         elif end_tile_pos[1] == origin_tile_pos[1]:
             # from left to right
             if end_tile_pos[0] > origin_tile_pos[0]:
-                angle = 90
+                self.angle = 90
             #else from right to left
             else:
-                angle = 270
+                self.angle = 270
 
         # linear movement : top bottom ; x the same, y varies
         elif end_tile_pos[0] == origin_tile_pos[0]:
             # from top to bottom
             if end_tile_pos[1] > origin_tile_pos[1]:
-                angle = 180
+                self.angle = 180
 
             # else from bottom to top
             else:
-                angle = 0
+                self.angle = 0
 
 
         #diagonal movement : top left bottom right ; dx = dy
         elif end_tile_pos[0] - origin_tile_pos[0] == end_tile_pos[1] - origin_tile_pos[1]:
             # if going down
             if end_tile_pos[0] - origin_tile_pos[0] > 0:
-                angle = 135
+                self.angle = 135
 
             # else he is going up
             else:
-                angle = 315
+                self.angle = 315
 
         # diagonal movement : top right bottom left ; dx = - dy
         elif end_tile_pos[0] - origin_tile_pos[0] == - (end_tile_pos[1] - origin_tile_pos[1]):
             # if going towards top right
             if end_tile_pos[0] - origin_tile_pos[0] > 0:
-                angle = 45
+                self.angle = 45
 
             # else he is going bottom left
             else:
-                angle = 225
+                self.angle = 225
 
         #transformation to get isometric
-        angle = angle + 45
+        self.angle = self.angle + 45
 
-        return angle
+        return self.angle
 
     def load_anchor_points(self, path):
         anchor_dic = {}

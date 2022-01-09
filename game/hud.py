@@ -791,7 +791,7 @@ class Hud:
 
     def create_all_attack_animations(self):
 
-        anim_speed = 0.65
+        anim_speed = 0.50
         villager_attack_animation_0 = Animation(300, 300, sprites=load_images_better(
             "Resources/assets/Models/Units/Villager/attack/0"), animation_speed=anim_speed)
         villager_attack_animation_1 = Animation(300, 300, sprites=load_images_better(
