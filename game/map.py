@@ -918,11 +918,10 @@ class Map:
     def get_angle_between(self, origin_tile_pos: [int, int], end_tile_pos: [int, int], unit):
         # first we calculate angle between grid, then we will apply some maths to get the "real" isometric angle
         #if origin == destination, no calcul
-        if origin_tile_pos == end_tile_pos:
-            angle = -1
+        self.angle = 0
 
         #linear movement : left right ; y the same, x varies
-        elif end_tile_pos[1] == origin_tile_pos[1]:
+        if end_tile_pos[1] == origin_tile_pos[1]:
             # from left to right
             if end_tile_pos[0] > origin_tile_pos[0]:
                 self.angle = 90
