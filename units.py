@@ -451,6 +451,7 @@ class Unit:
             self.angle = self.map.get_angle_between(self.pos, new_tile, self) if self.map.get_angle_between(self.pos,
                                                                                                      new_tile, self) != -1 else ...
         self.map.units[self.pos[0]][self.pos[1]] = None
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] == ""
         #remove collision from old position
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 1
         # update the map
@@ -458,6 +459,7 @@ class Unit:
         self.pos = tuple(self.map.map[new_tile[0]][new_tile[1]]["grid"])
         #update collision for new tile
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] == "unit"
 
     def update(self):
         self.now = pygame.time.get_ticks()
@@ -657,7 +659,7 @@ class Villager(Unit):
                 if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
                 print("debug path index, path)", self.path_index, len(self.path))
-                new_pos = self.path[self.path_index] if len(self.path) !=0 else ...
+                new_pos = self.path[self.path_index] if len(self.path) != self.path_index else ...
 
                 #update position in the world
                 self.change_tile(new_pos)
