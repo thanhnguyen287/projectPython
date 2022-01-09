@@ -331,7 +331,7 @@ class TownCenter(Building):
         print(available_tile_for_spawn[0][0])
         self.map.units[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]] = Villager((available_tile_for_spawn[0][0], available_tile_for_spawn[0][1]), self.owner,
                                                                     self.map)
-        self.map.map[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]]["tile"] = ""
+        self.map.map[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]]["tile"] = "unit"
         self.map.map[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]]["collision"] = True
         #we add the unit we created to the list of units of the player
         self.owner.unit_list.append(self.map.units[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]])
