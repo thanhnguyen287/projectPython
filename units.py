@@ -657,7 +657,7 @@ class Villager(Unit):
                 if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
                 print("debug path index, path)", self.path_index, len(self.path))
-                new_pos = self.path[self.path_index]
+                new_pos = self.path[self.path_index] if len(self.path) !=0 else ...
 
                 #update position in the world
                 self.change_tile(new_pos)
