@@ -43,7 +43,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            self.IA.run()
+            #self.IA.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -98,9 +98,45 @@ class Game:
                                         self.hud.selected_tile = button
                 #BOOM WHEN RIGHT CLICKING
                 elif event.button == 3:  # RIGHT CLICK
-                    player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
-                    player.play()
+                    #player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
+                    #player.play()
+                    # right click, gathering and moving units (fighting in future)
+                    grid_pos = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
+                    if 0 <= grid_pos[0] <= self.map.grid_length_x and 0 <= grid_pos[
+                        1] <= self.map.grid_length_y:
 
+                        # There is a bug with collecting ressources on the side of the map !!!
+
+                        if self.map.hud.examined_tile is not None and self.map.hud.examined_tile.name == "Villager":
+                            villager_pos = self.map.hud.examined_tile.pos
+                            this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
+                            pos_mouse = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
+                            pos_x = pos_mouse[0]
+                            pos_y = pos_mouse[1]
+                            # ATTACK
+                            if self.map.units[pos_x][pos_y] is not None or self.map.buildings[pos_x][pos_y] is not None:
+                                # si les deux unites sont adjacentes:
+                                target_to_attack = self.map.units[pos_x][pos_y] if self.map.units[pos_x][pos_y] is not None else \
+                                    self.map.buildings[pos_x][pos_y]
+                                this_villager.target = target_to_attack
+
+                                if this_villager.is_adjacent_to(target_to_attack):
+                                    this_villager.is_fighting = True
+                                else:
+                                    this_villager_dest = self.map.get_empty_adjacent_tiles((pos_x, pos_y))[0]
+                                    this_villager.move_to(self.map.map[this_villager_dest[0]][this_villager_dest[1]])
+                                    this_villager.is_moving_to_attack = True
+
+                            # ONLY MOVEMENT
+                            if not self.map.map[grid_pos[0]][grid_pos[1]]["collision"] and \
+                                    not this_villager.is_gathering and this_villager.target is None:
+                                this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
+
+                            # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving
+                            # if the tile next to him is a ressource and we right click on it and he is not moving, he will gather it
+                            if not this_villager.searching_for_path \
+                                    and (self.map.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"]):
+                                this_villager.go_to_ressource((pos_x, pos_y))
 
     def update(self):
         self.camera.update()

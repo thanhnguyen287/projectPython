@@ -362,10 +362,11 @@ class House(Building):
             elif progress_time_pourcent > 25:
                 self.construction_progress = 25
 
+
 class Unit:
     armor = 0
 
-    def __init__(self, pos, player_owner_of_unit, map):
+    def __init__(self, pos, player_owner_of_unit, map, angle=225):
         self.owner = player_owner_of_unit
         self.map = map
         self.map.entities.append(self)
@@ -373,6 +374,7 @@ class Unit:
         self.pos = pos
         self.current_health = self.max_health
         self.is_alive = True
+        self.angle = angle
         #pathfinding
         self.move_timer = pygame.time.get_ticks()
         self.searching_for_path = False
@@ -386,7 +388,9 @@ class Unit:
             self.grid = Grid(matrix=self.map.collision_matrix)
             self.start = self.grid.node(self.pos[0], self.pos[1])
             self.end = self.grid.node(new_tile["grid"][0], new_tile["grid"][1])
-            finder = AStarFinder(diagonal_movement=DiagonalMovement.never)
+            #finder = AStarFinder(diagonal_movement=DiagonalMovement.never)
+            finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
+
             # how far along the path are we
             self.path_index = 0
             self.path, runs = finder.find_path(self.start, self.end, self.grid)
@@ -401,22 +405,25 @@ class Unit:
 
     def change_tile(self, new_tile):
         # remove the unit from its current position on the map
-
+        if self.pos != new_tile:
+            self.angle = self.map.get_angle_between(self.pos, new_tile) if self.map.get_angle_between(self.pos,
+                                                                                                     new_tile) != -1 else ...
         self.map.units[self.pos[0]][self.pos[1]] = None
         #remove collision from old position
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 1
         # update the map
         self.map.units[new_tile[0]][new_tile[1]] = self
-        self.pos = self.map.map[new_tile[0]][new_tile[1]]["grid"]
+        self.pos = tuple(self.map.map[new_tile[0]][new_tile[1]]["grid"])
         #update collision for new tile
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
 
     def update(self):
         self.now = pygame.time.get_ticks()
         if self.searching_for_path and self.now - self.move_timer > 1000:
+            while self.path[self.path_index] == self.pos:
+                self.path_index += 1
             new_pos = self.path[self.path_index]
             #update position in the world
-
             self.change_tile(new_pos)
             self.path_index += 1
             self.move_timer = self.now
@@ -430,27 +437,33 @@ class Villager(Unit):
     description = " Your best friend. Can work, fight and gather resources."
     construction_tooltip = " Train a Villager"
     name = "Villager"
+    attack_speed = 500
+
     construction_cost = [0, 10, 25, 0]
     construction_time = 5
     population_produced = 1
 
-    def __init__(self, pos, player_owner_of_unit, map):
+    def __init__(self, pos, player_owner_of_unit, map, angle=225):
 
         self.name = "Villager"
         # DISPLAY
-        self.sprite = pygame.image.load("resources/assets/Villager.bmp").convert_alpha()
+        self.sprite = pygame.image.load("resources/assets/Models/Units/Villager/Idle/fixed/villager_225.png").convert_alpha()
         # DATA
         self.max_health = 25
         self.attack_dmg = 3
         self.attack_speed = 1500
         self.movement_speed = 1.1
         # unit type : melee
+        self.is_on_tile = True
         self.range = 0
         # used to gather ressources
+        # between 0 and 360, 0 being top, 90 right, etc.... Only 0, 45, 90, 135, etc (up to 360 ofc) supported for now
         self.is_moving_to_build = False
         self.is_moving_to_fight = False
+        self.display_pos = pos
         self.building_to_create = None
         self.is_moving_to_gather = False
+        self.is_building = False
         self.target = None
         self.is_gathering = False
         self.is_fighting = False
@@ -461,7 +474,7 @@ class Villager(Unit):
         self.population_produced = 1
         self.now = 0
 
-        super().__init__(pos, player_owner_of_unit, map)
+        super().__init__(pos, player_owner_of_unit, map, angle)
 
     def repair(self, building):
         if building.current_health != building.max_health:
@@ -472,6 +485,8 @@ class Villager(Unit):
     def attack(self):
         #target has enough health to survive
         if self.is_fighting and (self.now - self.attack_cooldown > self.attack_speed):
+            self.angle = self.map.get_angle_between(self.pos, new_tile) if self.map.get_angle_between(self.pos,
+                                                                                                      new_tile) != -1 else ...
 
             if self.target.current_health > self.attack_dmg:
                 self.target.current_health -= self.attack_dmg
@@ -493,6 +508,9 @@ class Villager(Unit):
 
     def build(self):
         self.is_moving_to_build = False
+        if self.building_to_create is not None:
+            self.angle = self.map.get_angle_between(self.pos, self.building_to_create["pos"]) if self.map.get_angle_between(self.pos, self.building_to_create["pos"]) != -1 else ...
+
         new_building = None
         if self.building_to_create["name"] == "Farm":
             new_building = Farm((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
@@ -524,8 +542,7 @@ class Villager(Unit):
         pos_y = self.building_to_create["pos"][1]
         self.map.map[pos_x][pos_y]["tile"] = "building"
         #self.building_to_create = None
-
-
+        self.is_building = False
 
     def go_to_ressource(self, pos):
         # if the ressource is near us, we directly gather it
@@ -559,9 +576,11 @@ class Villager(Unit):
             else:
                 self.target = None
 
-
     def gather_ressources(self):
         this_target = self.map.map[self.target[0]][self.target[1]]
+        self.angle = self.map.get_angle_between(self.pos, self.target) if self.map.get_angle_between(self.pos,
+                                                                                             self.target) != -1 else ...
+
         if self.is_gathering and (self.now - self.attack_cooldown > self.attack_speed):
 
             if this_target["health"] > self.attack_dmg:
@@ -584,21 +603,29 @@ class Villager(Unit):
                 self.map.collision_matrix[this_target["grid"][1]][this_target["grid"][0]] = 1
                 self.target = None
                 self.is_gathering = False
-
+                self.map.hud.villager_attack_animations[str(self.angle)]["animation"].to_be_played = False
 
     def update(self):
         self.now = pygame.time.get_ticks()
 
-        if self.now - self.move_timer > 500:
-            # movement
+        if self.now - self.move_timer > 400:
             if self.searching_for_path:
+
+                # movement
+                # for debug, because the first tile of our path is the pos of unit, not the first tile where we must go
+                if self.path[self.path_index] == self.pos:
+                    self.path_index += 1
                 new_pos = self.path[self.path_index]
+
                 #update position in the world
                 self.change_tile(new_pos)
+
                 self.path_index += 1
                 if self.path_index == len(self.path):
                     self.searching_for_path = False
+                    self.is_on_tile = True
                     if self.is_moving_to_build:
+                        self.is_building = True
                         self.build()
                         self.is_moving_to_build = False
                     elif self.is_moving_to_fight:
@@ -607,12 +634,17 @@ class Villager(Unit):
                     elif self.is_moving_to_gather:
                         self.is_gathering = True
                         self.is_moving_to_gather = False
+            else:
+                ...
+
+
 
             #always at the end to reset the timer
             self.move_timer = self.now
 
         if self.is_gathering:
             self.gather_ressources()
+
 
             # fighting
         if self.is_fighting:

@@ -1,4 +1,5 @@
 import copy
+import csv
 import random
 import noise
 import pygame.mouse
@@ -43,6 +44,7 @@ class Map:
         self.examined_tile = None
 
         self.place_starting_units(playerOne)
+        self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
 
     def create_map(self):
         map = []
@@ -169,9 +171,9 @@ class Map:
 
                 else:
                     pass
-
+        print("""
         # right click, gathering and moving units (fighting in future)
-        if mouse_action[2] and 0 <= grid_pos[0] <= 50 and 0 <= grid_pos[1] <= 50:
+        if mouse_action[2] and 0 <= grid_pos[0] <= self.grid_length_x and 0 <= grid_pos[1] <= self.grid_length_y:
 
             # There is a bug with collecting ressources on the side of the map !!!
 
@@ -205,7 +207,7 @@ class Map:
                 if not this_villager.searching_for_path \
                         and (self.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"]):
                     this_villager.go_to_ressource((pos_x, pos_y))
-
+""") if False else ...
     def draw(self, screen, camera):
         # displaying grass tiles
         screen.blit(self.grass_tiles, (camera.scroll.x, camera.scroll.y))
@@ -217,6 +219,8 @@ class Map:
             for building in player.building_list:
                 if building.current_health <= 0:
                     self.remove_entity(building, camera.scroll)
+                elif building.current_health < building.max_health:
+                    self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
                 # if building is selected, we highlight its tile
                 elif self.examined_tile is not None:
                     if not building.is_being_built:
@@ -228,11 +232,11 @@ class Map:
                                 self.highlight_tile(building.pos[0], building.pos[1] - 1, screen, "WHITE",
                                                     camera.scroll,
                                                     multiple_tiles_tiles_flag=True)
-                    # if not full life, we display its health bar above
-                    if building.current_health != building.max_health:
-                        self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
                 self.display_building(screen, building, camera.scroll,
                                       self.grid_to_renderpos(building.pos[0], building.pos[1]))
+                if self.examined_tile is not None:
+                    if (building.pos[0] == self.examined_tile[0]) and (building.pos[1] == self.examined_tile[1]):
+                        self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
 
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
@@ -262,7 +266,8 @@ class Map:
             "Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
         house = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
-        villager = pygame.image.load("resources/assets/Villager.bmp").convert_alpha()
+        #villager = pygame.image.load("resources/assets/villager.png").convert_alpha()
+        villager = None
 
         images = {
             "TownCenter": town_center,
@@ -468,6 +473,7 @@ class Map:
     # here is the fonction that randomly places a player's starting units 4 tiles from the corner
     def place_starting_units(self, player):
         townhall_placed = False
+
         while not townhall_placed:
             # (x : 0 if left, 1 if right ; y : 1 if bottom, 0 if top)
             place_x = random.randint(0, 1)
@@ -483,7 +489,8 @@ class Map:
                 new_building = TownCenter((4, 5), self, playerOne)
                 # starting unit
                 start_unit = Villager(self.map[4][6]["grid"], player, self)
-                self.units[4][6] = start_unit
+                # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
+                vill_pos = tuple(self.map[4][6]["grid"])
 
             # top_right
             elif (place_x, place_y) == (1, 0):
@@ -495,8 +502,8 @@ class Map:
                 new_building = TownCenter((self.grid_length_x - 6, 5), self, playerOne)
                 # starting unit
                 start_unit = Villager(self.map[self.grid_length_x - 6][6]["grid"], player, self)
-
-                self.units[self.grid_length_x - 6][6] = start_unit
+                # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
+                vill_pos = tuple(self.map[self.grid_length_x - 6][6]["grid"])
 
             # bot_left
             elif (place_x, place_y) == (0, 1):
@@ -508,8 +515,8 @@ class Map:
                 new_building = TownCenter((4, self.grid_length_y - 5), self, playerOne)
                 # starting unit
                 start_unit = Villager(self.map[4][self.grid_length_y - 4]["grid"], player, self)
-
-                self.units[4][self.grid_length_y - 4] = start_unit
+                # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
+                vill_pos = tuple(self.map[4][self.grid_length_y - 4]["grid"])
 
             # bot_right
             elif (place_x, place_y) == (1, 1):
@@ -519,10 +526,12 @@ class Map:
                         self.clear_tile(x, y)
                 # we place towncenter
                 new_building = TownCenter((self.grid_length_x - 6, self.grid_length_y - 5), self, playerOne)
-                # starting unit
-                start_unit = Villager(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"], player, self)
+                # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
+                vill_pos = tuple(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"])
 
-                self.units[self.grid_length_x - 6][self.grid_length_y - 4] = start_unit
+            #villager creation
+            start_unit = Villager(vill_pos, player, self)
+            self.units[vill_pos[0]][vill_pos[1]] = start_unit
 
             # for towncenter
             new_building.is_being_built = False
@@ -559,7 +568,6 @@ class Map:
                 death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
                 death_pos[1] - (self.hud.first_age_building_sprites[
                                     entity.__class__.__name__].get_height() - TILE_SIZE) + scroll.y)
-            print(entity.owner.building_list)
             entity.owner.building_list.remove(entity)
             if type(entity) == TownCenter:
                 self.buildings[entity.pos[0]][entity.pos[1]] = None
@@ -715,13 +723,34 @@ class Map:
                 if (unit.pos[0] == self.examined_tile[0]) and (unit.pos[1] == self.examined_tile[1]):
                     self.highlight_tile(self.examined_tile[0], self.examined_tile[1], screen, "WHITE",
                                         camera.scroll)
+                    self.hud.display_life_bar(screen, unit, self, for_hud=False, camera=camera, for_resource=False)
             if unit.target is not None:
                 target = unit.map.map[unit.target[0]][unit.target[1]]
+
             if unit.is_fighting or unit.is_moving_to_fight:
                 # target highlighted in dark red
                 self.highlight_tile(target.pos[0], target.pos[1], screen, "DARK_RED", camera.scroll)
+
             elif unit.is_gathering or unit.is_moving_to_gather:
-                self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
+                ...
+                #self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
+
+            if unit.searching_for_path and not unit.is_moving_to_gather and not unit.is_moving_to_build and not unit.is_moving_to_gather:
+                screen.blit(scale_image(move_icon, w=40), (
+                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
+                    render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y - 80)
+                 )
+            elif unit.is_fighting or unit.is_gathering or unit.is_moving_to_gather:
+                screen.blit(scale_image(attack_icon, w=40), (
+                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
+                    render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y - 80)
+                            )
+
+            elif unit.is_building or unit.is_moving_to_build:
+                screen.blit(scale_image(build_icon, w=40), (
+                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
+                    render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y + -80)
+                 )
 
             if type(unit) == Villager:
                 # draw future buildings
@@ -731,10 +760,14 @@ class Map:
                                                                         future_building["pos"][1])
                     self.display_building(screen, future_building, camera.scroll, future_building_render_pos,
                                           is_hypothetical_building=True, is_build_possibility_display=True)
-            screen.blit(unit.sprite, (
-                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                        )
+            #display unit model
+            if type(unit) != Villager:
+                screen.blit(unit.sprite, (
+                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                    render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                            )
+            else:
+                self.display_villager(unit, screen, camera, render_pos)
             if unit.searching_for_path:
                 # creates a flag to display where the unit is going
                 screen.blit(destination_flag, (
@@ -860,3 +893,109 @@ class Map:
                             render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y
                         )
                         )
+
+    #first try with not 1 image but animation (not only 1 image)
+    #self.hud.villager_sprites[0] : corresponding to angle 135,+ 90 every time you add 1 to index
+    def display_villager(self, unit, screen, camera, render_pos):
+        """
+        We have to calculate the angle between the villager's target and him
+        """
+        if unit.angle == 45:
+            index = 6
+        elif unit.angle == 135:
+            index = 1
+        elif unit.angle == 225:
+            index = 3
+        elif unit.angle == 180:
+            index = 2
+        elif unit.angle == 90:
+            index = 7
+        elif unit.angle == 270:
+            index = 4
+        elif unit.angle == 0:
+            index = 0
+        elif unit.angle == 315:
+            index = 5
+
+        if unit.is_fighting or unit.is_gathering:
+            animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
+            animation_pos = (
+                animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
+                animation_pos[1] - (self.hud.villager_sprites[0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+            self.hud.villager_attack_animations[str(unit.angle)]["animation"].play((animation_pos), anchor_list = self.anchor_points)
+        else:
+            #fixed sprite
+             #+ 20 because of sprite offset
+            screen.blit(self.hud.villager_sprites[index], (
+                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 32,
+                render_pos[1] - (self.hud.villager_sprites[index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+                        )
+
+            #idle animation
+            #animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
+           # animation_pos = (
+            #    animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
+           #     animation_pos[1] - (self.hud.villager_sprites[0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+           # self.hud.villager_idle_animations[str(unit.angle)]["animation"].play(animation_pos)
+    #returns the angle between the origin tile and the destination tile. Angle goes from 0 to 360, 0 top, 90 right, etc...
+    def get_angle_between(self, origin_tile_pos: [int, int], end_tile_pos: [int, int]):
+        # first we calculate angle between grid, then we will apply some maths to get the "real" isometric angle
+        #if origin == destination, no calcul
+        if origin_tile_pos == end_tile_pos:
+            angle = -1
+
+        #linear movement : left right ; y the same, x varies
+        elif end_tile_pos[1] == origin_tile_pos[1]:
+            # from left to right
+            if end_tile_pos[0] > origin_tile_pos[0]:
+                angle = 90
+            #else from right to left
+            else:
+                angle = 270
+
+        # linear movement : top bottom ; x the same, y varies
+        elif end_tile_pos[0] == origin_tile_pos[0]:
+            # from top to bottom
+            if end_tile_pos[1] > origin_tile_pos[1]:
+                angle = 180
+
+            # else from bottom to top
+            else:
+                angle = 0
+
+
+        #diagonal movement : top left bottom right ; dx = dy
+        elif end_tile_pos[0] - origin_tile_pos[0] == end_tile_pos[1] - origin_tile_pos[1]:
+            # if going down
+            if end_tile_pos[0] - origin_tile_pos[0] > 0:
+                angle = 135
+
+            # else he is going up
+            else:
+                angle = 315
+
+        # diagonal movement : top right bottom left ; dx = - dy
+        elif end_tile_pos[0] - origin_tile_pos[0] == - (end_tile_pos[1] - origin_tile_pos[1]):
+            # if going towards top right
+            if end_tile_pos[0] - origin_tile_pos[0] > 0:
+                angle = 45
+
+            # else he is going bottom left
+            else:
+                angle = 225
+
+        #transformation to get isometric
+        angle = angle + 45
+
+        return angle
+
+    def load_anchor_points(self, path):
+        anchor_dic = {}
+        with open(path, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if 360 < reader.line_num <= 390:
+                    anchor_dic[reader.line_num] = (int(row[0]), int(row[1]))
+        return anchor_dic
+
+

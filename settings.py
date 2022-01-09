@@ -18,6 +18,7 @@ resource_path = os.path.join(current_path, 'resources')
 common_path = os.path.join(resource_path, 'common')
 assets_path = os.path.join(resource_path, 'assets')
 
+#UI
 top_menu_hd = pygame.image.load("resources/assets/NewUI_blank_resized.png")
 bot_complet_menu_building_hd = pygame.image.load("resources/assets/botuiDE.png")
 action_menu = pygame.image.load("resources/assets/action_menu.png")
@@ -44,16 +45,17 @@ advance_to_second_age_icon = pygame.image.load("resources/assets/advance_2_age.p
 advance_to_third_age_icon = pygame.image.load("resources/assets/advance_3_age.png")
 advance_to_fourth_age_icon = pygame.image.load("resources/assets/advance_4_age.png")
 
-
-
-
-
+#icons
 farm_icon = pygame.image.load("resources/assets/icons./farm_icon.png")
 farm_icon_hd = pygame.image.load("resources/assets/icons./FarmDE.png")
-
 town_center_icon = pygame.image.load("resources/assets/icons./town_center_icon_hd.png")
 house_icon = pygame.image.load("resources/assets/icons/houseDE.png")
 villager_icon = pygame.image.load("resources/assets/icons/villagerde.bmp")
+
+#action icons
+attack_icon = pygame.image.load("resources/assets/icons/attack_icon.png")
+move_icon = pygame.image.load("resources/assets/icons/move_icon.png")
+build_icon = pygame.image.load("resources/assets/icons/build_icon.png")
 
 #armor and attack classes icons
 armor_icon = pygame.image.load("resources/assets/icons/normal_armor.png")
@@ -86,3 +88,4 @@ building_construction_4_2x2 = pygame.image.load("resources/assets/Models/Buildin
 standard_cursor = pygame.image.load("resources/assets/standard_cursor.png")
 
 destination_flag = pygame.image.load("resources/assets/dflag.png")
+

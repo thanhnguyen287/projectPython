@@ -10,14 +10,15 @@ pygame.mixer.init()
 
 class Animation(pygame.sprite.Sprite):
     # change this to make the animation quicker or slower
-    animation_speed = 0.15
 
-    def __init__(self, pos_x, pos_y, sprites=[]):
+    def __init__(self, pos_x, pos_y, sprites=[], animation_speed=0.15):
         super().__init__()
 
         self.sprites = sprites
         self.index = 0
         self.current_frame = 0
+        self.animation_speed = animation_speed
+
         self.to_be_played = False
         if not sprites:
             self.sprites.append(pygame.image.load("resources/assets/Boom/496_0.png"))
@@ -43,9 +44,12 @@ class Animation(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos_x, pos_y]
+        self.anchor_list = None
 
     #pos : render_pos_x, render_pos_y
-    def play(self, pos=(0,0)):
+    def play(self, pos=(0,0), anchor_list=None):
+        if anchor_list is not None:
+            self.anchor_list = anchor_list
         self.rect.topleft = [ pos[0], pos[1]]
         self.to_be_played = True
 
