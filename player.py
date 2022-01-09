@@ -5,10 +5,10 @@ from game.utils import draw_text
 
 class Player:
 
-    def __init__(self, name, controller, starting_resources, civilization):
+    def __init__(self, name, controller, starting_resources,color="RED"):
 
         self.name = name
-
+        self.color = color
         # True = Human, False = AI
         self.is_human = controller
         #self.resources = {"wood": 0, "food": 0, "gold": 0, "stone": 0}
@@ -24,8 +24,6 @@ class Player:
         self.building_list = []
 
         self.towncenter_pos = None
-
-        self.civilization = civilization
 
         self.entity_costs = {
             "Farm": {"wood": 100, "food": 0, "gold": 0, "stone": 0},
@@ -132,7 +130,7 @@ class Player:
 
         draw_text(screen, age_text, 18, "WHITE", (screen.get_size()[0] - age_panel.get_width() + 90, 17))
 
-playerOne = Player("Tristan", True, [10000, 10000, 1200, 500], "GREEK")
+playerOne = Player("Tristan", True, [10000, 10000, 1200, 500], color="YELLOW")
 playerOne.age = 1
 players = [playerOne]
 player_list = [playerOne]

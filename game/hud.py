@@ -37,7 +37,7 @@ class Hud:
         self.trained_unit_icon_surface = pygame.Surface(self.icon_size, pygame.SRCALPHA)
         self.trained_unit_icon_rect = self.tooltip_surface.get_rect(topleft=self.trained_unit_icon_pos)
 
-        self.images = self.load_images()
+        self.images = self.load_buildings_icons()
         self.town_hall_menu = self.create_train_menu_town_hall()
         self.villager_menu = self.create_build_hud()
 
@@ -50,9 +50,6 @@ class Hud:
         # buildings sprites
 
         self.first_age_building_sprites = self.load_first_age_building_images()
-        self.second_age_building_sprites = self.load_second_age_building_images()
-        self.third_age_building_sprites = self.load_third_age_building_images()
-        self.fourth_age_building_sprites = self.load_fourth_age_building_images()
 
         # resources sprites
         self.resources_sprites = self.load_resources_images()
@@ -62,11 +59,11 @@ class Hud:
 
         # animations. contains stuff like : self.death_animations["house"]["animation"]
         self.death_animations = self.create_all_death_animations()
-        self.villager_sprites = load_images_better("Resources/assets/Models/Units/Villager/Idle/fixed")
+        self.villager_sprites = self.load_villager_idle_fixed_sprites()
         self.villager_attack_animations = self.create_all_attack_animations()
         self.villager_idle_animations = self.create_all_idle_animations()
-#        self.villager_walk_animations = self.create_all_walk_animations()
 
+    #        self.villager_walk_animations = self.create_all_walk_animations()
 
     def create_train_menu_town_hall(self):
         render_pos = [25, self.height - action_menu.get_height() + 40]
@@ -112,37 +109,21 @@ class Hud:
 
         tiles = []
         for image_name, image in self.images.items():
+            if image_name != "Villager":
+                pos = render_pos.copy()
+                rect = image.get_rect(topleft=pos)
 
-            pos = render_pos.copy()
-            if image_name == "Farm":
-                image_scale = farm_icon_hd
+                tiles.append(
+                    {
+                        "name": image_name,
+                        "icon": image,
+                        "image": self.images[image_name],
+                        "rect": rect,
+                        "affordable": True
+                    }
+                )
 
-            elif image_name == "TownCenter":
-                image_scale = town_center_icon
-
-            elif image_name == "House":
-                image_scale = house_icon
-
-            elif image_name == "Villager":
-                image_scale = villager_icon
-
-            else:
-                image_tmp = image.copy()
-                image_scale = scale_image(image_tmp, w=40)  # a modifier pour s'adapter a l'ecran
-            rect = image_scale.get_rect(topleft=pos)
-
-            tiles.append(
-                {
-                    "name": image_name,
-                    "icon": image_scale,
-                    "image": self.images[image_name],
-                    "rect": rect,
-                    "affordable": True
-                }
-            )
-
-            render_pos[0] += image_scale.get_width() + 5  # modifier le 20 pour que ça marche pour tout ecran
-        tiles.pop()
+                render_pos[0] += image.get_width() + 5  # modifier le 20 pour que ça marche pour tout ecran
 
         return tiles
 
@@ -219,14 +200,14 @@ class Hud:
 
     def draw(self, screen, map, camera):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
-        #entity is string corresponding to class unit/building name
+        # entity is string corresponding to class unit/building name
         for entity in self.death_animations:
             if entity == "Villager":
-                #8 possible angles for villager
-                for angle in range(0,8):
-                    if self.death_animations[entity]["animation"][str(int(45*angle))].to_be_played:
-                        self.death_animations[entity]["group"][str(int(45*angle))].draw(screen)
-                        self.death_animations[entity]["animation"][str(int(45*angle))].update()
+                # 8 possible angles for villager
+                for angle in range(0, 8):
+                    if self.death_animations[entity]["animation"][str(int(45 * angle))].to_be_played:
+                        self.death_animations[entity]["group"][str(int(45 * angle))].draw(screen)
+                        self.death_animations[entity]["animation"][str(int(45 * angle))].update()
             else:
                 if self.death_animations[entity]["animation"].to_be_played:
                     self.death_animations[entity]["group"].draw(screen)
@@ -240,7 +221,6 @@ class Hud:
                 self.villager_idle_animations[str(angle)]["group"].draw(screen)
                 self.villager_idle_animations[angle]["animation"].update()
 
-
         # resources bar
         playerOne.update_resources_bar(screen)
         # bottom menu
@@ -249,7 +229,7 @@ class Hud:
             # Draw minimap
             screen.blit(minimap_panel,
                         (self.width - minimap_panel.get_width(), self.height - selection_panel.get_height()))
-            #map.draw_minimap(screen, camera)
+            # map.draw_minimap(screen, camera)
             screen.blit(action_menu, (0, self.height - action_menu.get_height()))
             screen.blit(selection_panel, (action_menu.get_width(), self.height - selection_panel.get_height()))
 
@@ -279,13 +259,13 @@ class Hud:
                             "name"] != "Advance to Castle Age" and tile["name"] != "Advance to Imperial Age"):
                             self.display_construction_tooltip(screen, tile)
 
-    def load_images(self):
-        town_center = pygame.image.load(
-            "Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png").convert_alpha()
-        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
+    def load_buildings_icons(self):
 
-        # villager = pygame.image.load("resources/assets/villager.png").convert_alpha()
+        town_center = pygame.image.load("resources/assets/icons/town_center_icon_hd.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/icons/houseDE.png").convert_alpha()
+        farm = pygame.image.load("resources/assets/icons/farmDE.png").convert_alpha()
+        # villager = pygame.image.load("resources/assets/icons/villagerde.bmp").convert_alpha()
+
         villager = None
         images = {
             "TownCenter": town_center,
@@ -444,18 +424,15 @@ class Hud:
         img = None
         # as we are scaling it, we make a copy
         if isinstance(self.examined_tile, Building):
-            if self.examined_tile.owner.age == 1:
-                img = self.first_age_building_sprites[self.examined_tile.__class__.__name__].copy()
-            elif self.examined_tile.owner.age == 2:
-                img = self.second_age_building_sprites[self.examined_tile.__class__.__name__].copy()
-            elif self.examined_tile.owner.age == 3:
-                if isinstance(self.examined_tile, Building):
-                    img = self.third_age_building_sprites[self.examined_tile.__class__.__name__].copy()
-            elif self.examined_tile.owner.age == 4:
-                if isinstance(self.examined_tile, Building):
-                    img = self.fourth_age_building_sprites[self.examined_tile.__class__.__name__].copy()
+            if self.examined_tile.__class__.__name__ != "Farm":
+                img = self.first_age_building_sprites[self.examined_tile.__class__.__name__][self.examined_tile.owner.color][self.examined_tile.owner.age - 1].copy()
+            else:
+                img = self.first_age_building_sprites[self.examined_tile.__class__.__name__][
+                    self.examined_tile.owner.color].copy()
+        #if unit, display unit with 270 degree (index : 4)
         else:
-            img = self.examined_tile.sprite.copy()
+            img = self.villager_sprites[self.examined_tile.owner.color][4].copy()
+
 
         if type(self.examined_tile) == Farm:
             img_scaled = scale_image(img, h * 0.60)
@@ -470,7 +447,7 @@ class Hud:
             screen.blit(img_scaled, (action_menu.get_width() + 20, self.height - selection_panel.get_height() + 75))
         # villager
         else:
-            img_scaled = scale_image(img, h * 0.28)
+            img_scaled = scale_image(img, h * 0.20)
             screen.blit(img_scaled, (action_menu.get_width() + 50, self.height - selection_panel.get_height() + 70))
 
         # for now, we display the picture of the object and its name
@@ -704,56 +681,29 @@ class Hud:
         pygame.draw.rect(screen, (0, 255, 0), (x, y, health * 10, 10))
         pygame.draw.rect(screen, (25, 25, 25), (x, y, max_health * 10, 10), 4)
 
+    # returns dic containing images of First age Buildings; Need to specify the player's color. Uses like that : images["House"]["RED"]
     def load_first_age_building_images(self):
-        town_center = pygame.image.load(
-            "Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png").convert_alpha()
-        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
+        town_center = {"BLUE": load_images_better("Resources/assets/Models/Buildings/Town_Center/BLUE/"),
+                       "RED": load_images_better("Resources/assets/Models/Buildings/Town_Center/RED/"),
+                       "GREEN": load_images_better("Resources/assets/Models/Buildings/Town_Center/GREEN/"),
+                       "YELLOW": load_images_better("Resources/assets/Models/Buildings/Town_Center/YELLOW/")}
+
+        # pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
+        house = {"BLUE": load_images_better("Resources/assets/Models/Buildings/House/BLUE/"),
+                 "RED": load_images_better("Resources/assets/Models/Buildings/House/BLUE/"),
+                 "GREEN": load_images_better("Resources/assets/Models/Buildings/House/BLUE/"),
+                 "YELLOW": load_images_better("Resources/assets/Models/Buildings/House/BLUE/")}
+        farm = {"BLUE": pygame.image.load("Resources/assets/Models/Buildings/Farm/farmBLUE.png").convert_alpha(),
+                "RED": pygame.image.load("Resources/assets/Models/Buildings/Farm/farmRED.png").convert_alpha(),
+                "GREEN": pygame.image.load("Resources/assets/Models/Buildings/Farm/farmGREEN.png").convert_alpha(),
+                "YELLOW": pygame.image.load("Resources/assets/Models/Buildings/Farm/farmYELLOW.png").convert_alpha()}
 
         images = {
             "TownCenter": town_center,
             "House": house,
             "Farm": farm
         }
-        return images
 
-    def load_second_age_building_images(self):
-        town_center = pygame.image.load(
-            "Resources/assets/Models/Buildings/Town_Center/town_center_x2.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_2.png").convert_alpha()
-        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
-
-        images = {
-            "TownCenter": town_center,
-            "House": house,
-            "Farm": farm
-        }
-        return images
-
-    def load_third_age_building_images(self):
-        town_center = pygame.image.load(
-            "Resources/assets/Models/Buildings/Town_Center/town_center_x3.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_3.png").convert_alpha()
-        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
-
-        images = {
-            "TownCenter": town_center,
-            "House": house,
-            "Farm": farm
-        }
-        return images
-
-    def load_fourth_age_building_images(self):
-        town_center = pygame.image.load(
-            "Resources/assets/Models/Buildings/Town_Center/town_center_x4.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_4.png").convert_alpha()
-        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
-
-        images = {
-            "TownCenter": town_center,
-            "House": house,
-            "Farm": farm
-        }
         return images
 
     def load_resources_images(self):
@@ -797,7 +747,7 @@ class Hud:
         return resources_sprites
 
     def create_all_death_animations(self):
-        #HOUSE
+        # HOUSE
         house_death_animation = Animation(300, 300, sprites=load_images_better(
             "resources/assets/Models/Buildings/House/House_death_animation"))
         house_death_animation_group = pygame.sprite.Group()
@@ -805,7 +755,7 @@ class Hud:
         house = {"animation": house_death_animation,
                  "group": house_death_animation_group
                  }
-        #TOWN CENTER
+        # TOWN CENTER
         town_center_1_death_animation = Animation(300, 300, sprites=load_images_better(
             "resources/assets/Models/Buildings/Town_Center/town_center_1_death_animation"))
         town_center_1_death_animation_group = pygame.sprite.Group()
@@ -814,22 +764,24 @@ class Hud:
         town_center_1 = {"animation": town_center_1_death_animation,
                          "group": town_center_1_death_animation_group
                          }
-        #VILLAGER - 8 different deaths animation, varies with angle
+        # VILLAGER - 8 different deaths animation, varies with angle
         villager_death_sprites = {}
         villager_death_animation = {}
         villager_death_animation_group = {}
-        villager_death ={}
+        villager_death = {}
         villager_death["animation"] = {}
         villager_death["group"] = {}
 
         for folder in range(0, 8):
-            villager_death_sprites[str(folder*45)] = load_images_better("resources/assets/Models/Units/Villager/death/" + str(int(folder*45)))
-            villager_death_animation[str(folder*45)] = Animation(sprites=villager_death_sprites[str(str(folder*45))])
+            villager_death_sprites[str(folder * 45)] = load_images_better(
+                "resources/assets/Models/Units/Villager/death/" + str(int(folder * 45)))
+            villager_death_animation[str(folder * 45)] = Animation(
+                sprites=villager_death_sprites[str(str(folder * 45))])
 
-            villager_death_animation_group[str(int(folder*45))] = pygame.sprite.Group()
-            villager_death_animation_group[str(int(folder*45))].add(villager_death_animation[str(int(folder*45))])
+            villager_death_animation_group[str(int(folder * 45))] = pygame.sprite.Group()
+            villager_death_animation_group[str(int(folder * 45))].add(villager_death_animation[str(int(folder * 45))])
 
-            villager_death["animation"][str(int(folder*45))] = villager_death_animation[str(int(folder*45))]
+            villager_death["animation"][str(int(folder * 45))] = villager_death_animation[str(int(folder * 45))]
             villager_death["group"] = villager_death_animation_group
 
         dic = {"House": house,
@@ -840,20 +792,28 @@ class Hud:
     def create_all_attack_animations(self):
 
         anim_speed = 0.65
-        villager_attack_animation_0 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/0"), animation_speed=anim_speed)
-        villager_attack_animation_1 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/45"), animation_speed=anim_speed)
-        villager_attack_animation_2 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/90"), animation_speed=anim_speed)
-        villager_attack_animation_3 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/135"), animation_speed=anim_speed)
-        villager_attack_animation_4 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/180"), animation_speed=anim_speed)
-        villager_attack_animation_5 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/225"), animation_speed=anim_speed)
-        villager_attack_animation_6 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/270"), animation_speed=anim_speed)
-        villager_attack_animation_7 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/315"), animation_speed=anim_speed)
+        villager_attack_animation_0 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/attack/0"), animation_speed=anim_speed)
+        villager_attack_animation_1 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/attack/45"), animation_speed=anim_speed)
+        villager_attack_animation_2 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/attack/90"), animation_speed=anim_speed)
+        villager_attack_animation_3 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/attack/135"), animation_speed=anim_speed)
+        villager_attack_animation_4 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/attack/180"), animation_speed=anim_speed)
+        villager_attack_animation_5 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/attack/225"), animation_speed=anim_speed)
+        villager_attack_animation_6 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/attack/270"), animation_speed=anim_speed)
+        villager_attack_animation_7 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/attack/315"), animation_speed=anim_speed)
 
         villager_attack_animation_0_group = pygame.sprite.Group()
         villager_attack_animation_0_group.add(villager_attack_animation_0)
         attack_animation_0 = {"animation": villager_attack_animation_0,
-                 "group": villager_attack_animation_0_group
-                 }
+                              "group": villager_attack_animation_0_group
+                              }
         villager_attack_animation_1_group = pygame.sprite.Group()
         villager_attack_animation_1_group.add(villager_attack_animation_1)
         attack_animation_1 = {"animation": villager_attack_animation_1,
@@ -898,62 +858,70 @@ class Hud:
                "225": attack_animation_5,
                "270": attack_animation_6,
                "315": attack_animation_7,
-}
+               }
 
         return dic
 
     def create_all_idle_animations(self):
 
         anim_speed = 0.15
-        villager_idle_animation_0 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/Idle/0"), animation_speed=anim_speed)
-        villager_idle_animation_1 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/Idle/45"), animation_speed=anim_speed)
-        villager_idle_animation_2 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/Idle/90"), animation_speed=anim_speed)
-        villager_idle_animation_3 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/Idle/135"), animation_speed=anim_speed)
-        villager_idle_animation_4 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/Idle/180"), animation_speed=anim_speed)
-        villager_idle_animation_5 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/Idle/225"), animation_speed=anim_speed)
-        villager_idle_animation_6 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/Idle/270"), animation_speed=anim_speed)
-        villager_idle_animation_7 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/Idle/315"), animation_speed=anim_speed)
+        villager_idle_animation_0 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/Idle/0"), animation_speed=anim_speed)
+        villager_idle_animation_1 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/Idle/45"), animation_speed=anim_speed)
+        villager_idle_animation_2 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/Idle/90"), animation_speed=anim_speed)
+        villager_idle_animation_3 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/Idle/135"), animation_speed=anim_speed)
+        villager_idle_animation_4 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/Idle/180"), animation_speed=anim_speed)
+        villager_idle_animation_5 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/Idle/225"), animation_speed=anim_speed)
+        villager_idle_animation_6 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/Idle/270"), animation_speed=anim_speed)
+        villager_idle_animation_7 = Animation(300, 300, sprites=load_images_better(
+            "Resources/assets/Models/Units/Villager/Idle/315"), animation_speed=anim_speed)
 
         villager_idle_animation_0_group = pygame.sprite.Group()
         villager_idle_animation_0_group.add(villager_idle_animation_0)
         idle_animation_0 = {"animation": villager_idle_animation_0,
-                 "group": villager_idle_animation_0_group
-                 }
+                            "group": villager_idle_animation_0_group
+                            }
         villager_idle_animation_1_group = pygame.sprite.Group()
         villager_idle_animation_1_group.add(villager_idle_animation_1)
         idle_animation_1 = {"animation": villager_idle_animation_1,
-                              "group": villager_idle_animation_1_group
-                              }
+                            "group": villager_idle_animation_1_group
+                            }
         villager_idle_animation_2_group = pygame.sprite.Group()
         villager_idle_animation_2_group.add(villager_idle_animation_2)
         idle_animation_2 = {"animation": villager_idle_animation_2,
-                              "group": villager_idle_animation_2_group
-                              }
+                            "group": villager_idle_animation_2_group
+                            }
         villager_idle_animation_3_group = pygame.sprite.Group()
         villager_idle_animation_3_group.add(villager_idle_animation_3)
         idle_animation_3 = {"animation": villager_idle_animation_3,
-                              "group": villager_idle_animation_3_group
-                              }
+                            "group": villager_idle_animation_3_group
+                            }
         villager_idle_animation_4_group = pygame.sprite.Group()
         villager_idle_animation_4_group.add(villager_idle_animation_4)
         idle_animation_4 = {"animation": villager_idle_animation_4,
-                              "group": villager_idle_animation_4_group
-                              }
+                            "group": villager_idle_animation_4_group
+                            }
         villager_idle_animation_5_group = pygame.sprite.Group()
         villager_idle_animation_5_group.add(villager_idle_animation_5)
         idle_animation_5 = {"animation": villager_idle_animation_5,
-                              "group": villager_idle_animation_5_group
-                              }
+                            "group": villager_idle_animation_5_group
+                            }
         villager_idle_animation_6_group = pygame.sprite.Group()
         villager_idle_animation_6_group.add(villager_idle_animation_6)
         idle_animation_6 = {"animation": villager_idle_animation_6,
-                              "group": villager_idle_animation_6_group
-                              }
+                            "group": villager_idle_animation_6_group
+                            }
         villager_idle_animation_7_group = pygame.sprite.Group()
         villager_idle_animation_7_group.add(villager_idle_animation_7)
         idle_animation_7 = {"animation": villager_idle_animation_7,
-                              "group": villager_idle_animation_7_group
-                              }
+                            "group": villager_idle_animation_7_group
+                            }
 
         dic = {"0": idle_animation_0,
                "45": idle_animation_1,
@@ -963,13 +931,22 @@ class Hud:
                "225": idle_animation_5,
                "270": idle_animation_6,
                "315": idle_animation_7,
-}
+               }
 
         return dic
 
+    def load_villager_idle_fixed_sprites(self):
+        dic = {"BLUE": load_images_better("Resources/assets/Models/Units/Villager/Idle/fixed/BLUE"),
+               "RED": load_images_better("Resources/assets/Models/Units/Villager/Idle/fixed/RED"),
+               "GREEN": load_images_better("Resources/assets/Models/Units/Villager/Idle/fixed/GREEN"),
+               "YELLOW": load_images_better("Resources/assets/Models/Units/Villager/Idle/fixed/YELLOW")
+               }
+        return dic
+
+
 print(
-    #work in progress, not finished
-   """ def create_all_walking_animations(self):
+    # work in progress, not finished
+    """ def create_all_walking_animations(self):
         anim_speed = 0.15
         villager_walking_animation_1 = Animation(300, 300, sprites=load_images_better(
             "Resources/assets/Models/Units/Villager/Idle/45"), animation_speed=anim_speed)
@@ -1015,4 +992,4 @@ print(
                }
 
         return dic
-""") if False else...
+""") if False else ...

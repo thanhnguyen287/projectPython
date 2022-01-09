@@ -205,7 +205,7 @@ class Map:
                                 self.highlight_tile(building.pos[0], building.pos[1] - 1, screen, "WHITE",
                                                     camera.scroll,
                                                     multiple_tiles_tiles_flag=True)
-                self.display_building(screen, building, camera.scroll,
+                self.display_building(screen, building, building.owner.color, camera.scroll,
                                       self.grid_to_renderpos(building.pos[0], building.pos[1]))
                 if self.examined_tile is not None:
                     if (building.pos[0] == self.examined_tile[0]) and (building.pos[1] == self.examined_tile[1]):
@@ -246,9 +246,9 @@ class Map:
         berrybush = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/1.png")).convert_alpha()
 
         town_center = pygame.image.load(
-            "Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
-        house = pygame.image.load("Resources/assets/Models/Buildings/House/house_1.png").convert_alpha()
-        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farm.png").convert_alpha()
+            "Resources/assets/Models/Buildings/Town_Center/BLUE/town_center_x1.png").convert_alpha()
+        house = pygame.image.load("Resources/assets/Models/Buildings/House/BLUE/house_1BLUE.png").convert_alpha()
+        farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farmBLUE.png").convert_alpha()
         #villager = pygame.image.load("resources/assets/villager.png").convert_alpha()
         villager = None
 
@@ -534,7 +534,7 @@ class Map:
             death_pos = (
                 death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
                 death_pos[1] - (self.hud.first_age_building_sprites[
-                                    entity.__class__.__name__].get_height() - TILE_SIZE) + scroll.y)
+                                    entity.__class__.__name__]["RED"][entity.owner.age-1].get_height() - TILE_SIZE) + scroll.y)
             entity.owner.building_list.remove(entity)
             if type(entity) == TownCenter:
                 self.buildings[entity.pos[0]][entity.pos[1]] = None
@@ -559,7 +559,7 @@ class Map:
             death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
             death_pos = (
                 death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
-                death_pos[1] - (self.hud.villager_sprites[0].get_height() - TILE_SIZE) + scroll.y)
+                death_pos[1] - (self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + scroll.y)
             entity.owner.unit_list.remove(entity)
             if isinstance(entity, Villager):
                 entity.owner.unit_occupied.append(0)
@@ -728,7 +728,7 @@ class Map:
             elif unit.is_building or unit.is_moving_to_build:
                 screen.blit(scale_image(build_icon, w=40), (
                     render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
-                    render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y + -80)
+                    render_pos[1] - (self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y + -80)
                  )
 
             if type(unit) == Villager:
@@ -737,7 +737,7 @@ class Map:
                     future_building = unit.building_to_create
                     future_building_render_pos = self.grid_to_renderpos(future_building["pos"][0],
                                                                         future_building["pos"][1])
-                    self.display_building(screen, future_building, camera.scroll, future_building_render_pos,
+                    self.display_building(screen, future_building, unit.owner.color, camera.scroll, future_building_render_pos,
                                           is_hypothetical_building=True, is_build_possibility_display=True)
             #display unit model
             if type(unit) != Villager:
@@ -781,22 +781,20 @@ class Map:
                 self.highlight_tile(grid[0], grid[1], screen, "GREEN", camera.scroll)
 
         # display the buildable building on the tile
-        self.display_building(screen, self.temp_tile, camera.scroll, render_pos, is_hypothetical_building=True)
+        self.display_building(screen, self.temp_tile, playerOne.color, camera.scroll, render_pos, is_hypothetical_building=True)
 
-    def display_building(self, screen, building, scroll, render_pos, is_hypothetical_building=False,
+    def display_building(self, screen, building, color:str, scroll, render_pos, is_hypothetical_building=False,
                          is_build_possibility_display=False):
         # we either display the building fully constructed or being built ( 4 possible states )
         if not is_hypothetical_building:
             offset = (0, 0)
             if not building.is_being_built:
-                if building.owner.age == 1:
-                    sprite_to_display = self.hud.first_age_building_sprites[building.__class__.__name__]
-                elif building.owner.age == 2:
-                    sprite_to_display = self.hud.second_age_building_sprites[building.__class__.__name__]
-                elif building.owner.age == 3:
-                    sprite_to_display = self.hud.third_age_building_sprites[building.__class__.__name__]
-                elif building.owner.age == 4:
-                    sprite_to_display = self.hud.fourth_age_building_sprites[building.__class__.__name__]
+                if building.__class__.__name__ != "Farm":
+                    sprite_to_display = self.hud.first_age_building_sprites[building.__class__.__name__][building.owner.color][building.owner.age - 1]
+                # farm has the same model the 4 ages, hence we directly have the image and not a list of 4 images, 1 for every age
+                else:
+                    sprite_to_display = self.hud.first_age_building_sprites[building.__class__.__name__][building.owner.color]
+
                 if isinstance(building, TownCenter):
                     offset = (10, 13)
                 screen.blit(sprite_to_display, (
@@ -854,14 +852,11 @@ class Map:
 
         # we have to display hypothetical building sprite to show the villager wants to build there
         else:
-            if playerOne.age == 1:
-                sprite_to_display = self.hud.first_age_building_sprites[building["name"]]
-            elif playerOne.age == 2:
-                sprite_to_display = self.hud.second_age_building_sprites[building["name"]]
-            elif playerOne.age == 3:
-                sprite_to_display = self.hud.third_age_building_sprites[building["name"]]
+            if building["name"] != "Farm":
+                sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color][playerOne.age-1]
             else:
-                sprite_to_display = self.hud.fourth_age_building_sprites[building["name"]]
+                sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color]
+
 
             if is_build_possibility_display:
                 sprite_to_display = sprite_to_display.copy()
@@ -881,21 +876,21 @@ class Map:
         We have to calculate the angle between the villager's target and him
         """
         if unit.angle == 45:
-            unit.sprite_index = 6
-        elif unit.angle == 135:
             unit.sprite_index = 1
-        elif unit.angle == 225:
+        elif unit.angle == 135:
             unit.sprite_index = 3
+        elif unit.angle == 225:
+            unit.sprite_index = 5
         elif unit.angle == 180:
-            unit.sprite_index = 2
-        elif unit.angle == 90:
-            unit.sprite_index = 7
-        elif unit.angle == 270:
             unit.sprite_index = 4
+        elif unit.angle == 90:
+            unit.sprite_index = 2
+        elif unit.angle == 270:
+            unit.sprite_index = 6
         elif unit.angle == 0:
             unit.sprite_index = 0
         elif unit.angle == 315:
-            unit.sprite_index = 5
+            unit.sprite_index = 7
 
         if unit.is_fighting or unit.is_gathering:
             animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
@@ -906,9 +901,9 @@ class Map:
         else:
             #fixed sprite
              #+ 20 because of sprite offset
-            screen.blit(self.hud.villager_sprites[unit.sprite_index], (
+            screen.blit(self.hud.villager_sprites[unit.owner.color][unit.sprite_index], (
                 render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 32,
-                render_pos[1] - (self.hud.villager_sprites[unit.sprite_index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+                render_pos[1] - (self.hud.villager_sprites[unit.owner.color][unit.sprite_index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
                         )
 
             #idle animation

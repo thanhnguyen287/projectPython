@@ -489,7 +489,6 @@ class Villager(Unit):
 
         self.name = "Villager"
         # DISPLAY
-        self.sprite = pygame.image.load("resources/assets/Models/Units/Villager/Idle/fixed/villager_225.png").convert_alpha()
         # DATA
         self.max_health = 25
         self.attack_dmg = 3

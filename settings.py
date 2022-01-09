@@ -46,7 +46,6 @@ advance_to_third_age_icon = pygame.image.load("resources/assets/advance_3_age.pn
 advance_to_fourth_age_icon = pygame.image.load("resources/assets/advance_4_age.png")
 
 #icons
-farm_icon = pygame.image.load("resources/assets/icons./farm_icon.png")
 farm_icon_hd = pygame.image.load("resources/assets/icons./FarmDE.png")
 town_center_icon = pygame.image.load("resources/assets/icons./town_center_icon_hd.png")
 house_icon = pygame.image.load("resources/assets/icons/houseDE.png")
