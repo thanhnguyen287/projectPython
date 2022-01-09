@@ -515,9 +515,6 @@ class Map:
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"])
 
-            #villager creation
-            #start_unit = Villager(vill_pos, player, self)
-
             # for towncenter
             new_building.is_being_built = False
             new_building.construction_progress = 100

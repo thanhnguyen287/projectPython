@@ -328,7 +328,7 @@ class TownCenter(Building):
     def check_collision_and_spawn_villager_where_possible(self):
 
         available_tile_for_spawn = tile_founding(1, 1, 2, self.map.map, self.owner, "")
-        print(available_tile_for_spawn[0][0])
+        #print(available_tile_for_spawn[0][0])
         self.map.units[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]] = Villager((available_tile_for_spawn[0][0], available_tile_for_spawn[0][1]), self.owner,
                                                                     self.map)
         self.map.map[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]]["tile"] = "unit"

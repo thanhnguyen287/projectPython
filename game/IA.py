@@ -112,14 +112,12 @@ class IA:
                 #if we need ressources and the unit is a villager and he is free, he will go gather
                 if self.needed_ressource and isinstance(u, Villager) and u.building_to_create is None:
                     self.gathering_routine(u)
-                    #print("gather")
 
                 #if we dont need ressources or when the villager is building, we are using the building routine
                 elif isinstance(u,Villager) and\
                         (len(self.player.building_list) - 1 + len(self.in_building_tiles) < len(self.player.unit_list)
                          or u.target is not None):
                     self.building_routine(u)
-                    #print("build")
 
         self.free_tiles()
 
@@ -190,18 +188,17 @@ class IA:
                             unit.building_to_create is None:
                         unit.go_to_build(tiles_to_build[random_number], "Farm")
                         self.in_building_tiles.append(tiles_to_build[random_number])
-                        print("la tile selectionnée :", tiles_to_build[random_number])
 
         #to make the villager able to build other buildings after he buildt a building
         if unit.building_to_create is not None:
-            print(unit.building_to_create)
             pos_x = unit.building_to_create["pos"][0]
             pos_y = unit.building_to_create["pos"][1]
-            print(pos_x, pos_y)
 
             for b in unit.owner.building_list:
                 if b.pos[0] == pos_x and b.pos[1] == pos_y and not unit.is_moving_to_build:
                     if not b.is_being_built:
+                        print("in_building_tiles : ", self.in_building_tiles)
+                        print("building_to_create pos", unit.building_to_create["pos"])
                         self.in_building_tiles.remove(unit.building_to_create["pos"])
                         unit.building_to_create = None
 
@@ -237,7 +234,3 @@ class IA:
         for tile in self.targeted_tiles:
             if self.map[tile[0]][tile[1]]["tile"] == "":
                 self.targeted_tiles.remove(tile)
-
-        for tile in self.in_building_tiles:
-            if self.map[tile[0]][tile[1]]["tile"] != "":
-                self.in_building_tiles.remove(tile)
