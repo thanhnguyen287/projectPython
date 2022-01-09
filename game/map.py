@@ -510,6 +510,8 @@ class Map:
                         self.clear_tile(x, y)
                 # we place towncenter
                 new_building = TownCenter((self.grid_length_x - 6, self.grid_length_y - 5), self, playerOne)
+                # starting unit
+                start_unit = Villager(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"], player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"])
 
