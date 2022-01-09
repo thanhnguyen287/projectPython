@@ -532,11 +532,19 @@ class Map:
     def remove_entity(self, entity, scroll):
         self.entities.remove(entity)
         if issubclass(type(entity), Building):
-            death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
-            death_pos = (
-                death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
-                death_pos[1] - (self.hud.first_age_building_sprites[
-                                    entity.__class__.__name__]["RED"][entity.owner.age-1].get_height() - TILE_SIZE) + scroll.y)
+            if not issubclass(type(entity, Farm)):
+
+                death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
+                death_pos = (
+                    death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
+                    death_pos[1] - (self.hud.first_age_building_sprites[
+                                        entity.__class__.__name__]["RED"][entity.owner.age-1].get_height() - TILE_SIZE) + scroll.y)
+            else:
+                death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
+                death_pos = (
+                    death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
+                    death_pos[1] - (self.hud.first_age_building_sprites[
+                                        entity.__class__.__name__]["RED"].get_height() - TILE_SIZE) + scroll.y)
             entity.owner.building_list.remove(entity)
             if type(entity) == TownCenter:
                 self.buildings[entity.pos[0]][entity.pos[1]] = None
