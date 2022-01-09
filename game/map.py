@@ -122,7 +122,7 @@ class Map:
         # the player hasn't selected something to build, he will interact with what's on the map
         else:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
-            if grid_pos[0] < self.grid_length_x - 1 and grid_pos[1] < self.grid_length_y - 1:
+            if 0 < grid_pos[0] < self.grid_length_x - 1 and 0 < grid_pos[1] < self.grid_length_y - 1:
                 # we deselect the object examined when left-clicking if not on hud
                 town_center_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(
                     self.buildings[grid_pos[0]][grid_pos[1] + 1]) == TownCenter) \
@@ -514,7 +514,7 @@ class Map:
                 vill_pos = tuple(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"])
 
             #villager creation
-            start_unit = Villager(vill_pos, player, self)
+            #start_unit = Villager(vill_pos, player, self)
 
             # for towncenter
             new_building.is_being_built = False
@@ -713,7 +713,11 @@ class Map:
                     self.highlight_tile(self.examined_tile[0], self.examined_tile[1], screen, "WHITE",
                                         camera.scroll)
                     self.hud.display_life_bar(screen, unit, self, for_hud=False, camera=camera, for_resource=False)
-            if unit.target is not None:
+
+            if type(unit.target) == Villager and unit.target.pos == unit.pos:
+                unit.target = None
+
+            if unit.target is not None and type(unit.target) != Villager:
                 target = unit.map.map[unit.target[0]][unit.target[1]]
 
             if unit.is_fighting or unit.is_moving_to_fight:

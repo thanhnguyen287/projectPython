@@ -165,7 +165,6 @@ class IA:
                         random_number = randint(0, len(tiles_to_build) - 1)
                         if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles:
                             unit.go_to_build(tiles_to_build[random_number], "House")
-                            unit.target = tiles_to_build[random_number]
                             self.in_building_tiles.append(tiles_to_build[random_number])
 
 
@@ -179,7 +178,6 @@ class IA:
                         random_number = randint(0, len(tiles_to_build) - 1)
                         if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles:
                             unit.go_to_build(tiles_to_build[random_number], "Farm")
-                            unit.target = tiles_to_build[random_number]
                             self.in_building_tiles.append(tiles_to_build[random_number])
 
         # THAT IS A TEST, DONT ACTIVATE IT BUT DONT DELETE IT
@@ -188,21 +186,24 @@ class IA:
             for i in range(len(tiles_to_build)):
                 if tiles_to_build:
                     random_number = randint(0, len(tiles_to_build)-1)
-                    if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles:
+                    if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles and \
+                            unit.building_to_create is None:
                         unit.go_to_build(tiles_to_build[random_number], "Farm")
-                        unit.target = tiles_to_build[random_number]
                         self.in_building_tiles.append(tiles_to_build[random_number])
+                        print("la tile selectionnée :", tiles_to_build[random_number])
 
         #to make the villager able to build other buildings after he buildt a building
-        if unit.target is not None:
-            pos_x = unit.target[0]
-            pos_y = unit.target[1]
+        if unit.building_to_create is not None:
+            print(unit.building_to_create)
+            pos_x = unit.building_to_create["pos"][0]
+            pos_y = unit.building_to_create["pos"][1]
+            print(pos_x, pos_y)
 
             for b in unit.owner.building_list:
                 if b.pos[0] == pos_x and b.pos[1] == pos_y and not unit.is_moving_to_build:
                     if not b.is_being_built:
+                        self.in_building_tiles.remove(unit.building_to_create["pos"])
                         unit.building_to_create = None
-                        unit.target = None
 
 
     def population_developpement_routine(self):

@@ -451,7 +451,7 @@ class Unit:
             self.angle = self.map.get_angle_between(self.pos, new_tile, self) if self.map.get_angle_between(self.pos,
                                                                                                      new_tile, self) != -1 else ...
         self.map.units[self.pos[0]][self.pos[1]] = None
-        self.map.map[self.pos[0]][self.pos[1]]["tile"] == ""
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] = ""
         #remove collision from old position
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 1
         # update the map
@@ -459,7 +459,7 @@ class Unit:
         self.pos = tuple(self.map.map[new_tile[0]][new_tile[1]]["grid"])
         #update collision for new tile
         self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
-        self.map.map[self.pos[0]][self.pos[1]]["tile"] == "unit"
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] = "unit"
 
     def update(self):
         self.now = pygame.time.get_ticks()
@@ -621,33 +621,34 @@ class Villager(Unit):
                 self.target = None
 
     def gather_ressources(self):
-        this_target = self.map.map[self.target[0]][self.target[1]]
-        self.angle = self.map.get_angle_between(self.pos, self.target, self) if self.map.get_angle_between(self.pos,
-                                                                                             self.target, self) != -1 else ...
+        if self.target is not None:
+            this_target = self.map.map[self.target[0]][self.target[1]]
+            self.angle = self.map.get_angle_between(self.pos, self.target, self) if self.map.get_angle_between(self.pos,
+                                                                                                 self.target, self) != -1 else ...
 
-        if self.is_gathering and (self.now - self.attack_cooldown > self.attack_speed):
+            if self.is_gathering and (self.now - self.attack_cooldown > self.attack_speed):
 
-            if this_target["health"] > self.attack_dmg:
-                this_target["health"] -= self.attack_dmg
-                self.attack_cooldown = self.now
-                self.gathered_resources_stack += 1
-            # no resource is remaining, we destroy it and give resource to the player:
-            else:
-                if this_target["tile"] == "tree":
-                    self.owner.update_resource("WOOD", 10)
-                elif this_target["tile"] == "rock":
-                    self.owner.update_resource("STONE", 10)
-                elif this_target["tile"] == "gold":
-                    self.owner.update_resource("GOLD", 10)
-                elif this_target["tile"] == "berrybush":
-                    self.owner.update_resource("FOOD", 10)
+                if this_target["health"] > self.attack_dmg:
+                    this_target["health"] -= self.attack_dmg
+                    self.attack_cooldown = self.now
+                    self.gathered_resources_stack += 1
+                # no resource is remaining, we destroy it and give resource to the player:
+                else:
+                    if this_target["tile"] == "tree":
+                        self.owner.update_resource("WOOD", 10)
+                    elif this_target["tile"] == "rock":
+                        self.owner.update_resource("STONE", 10)
+                    elif this_target["tile"] == "gold":
+                        self.owner.update_resource("GOLD", 10)
+                    elif this_target["tile"] == "berrybush":
+                        self.owner.update_resource("FOOD", 10)
 
-                this_target["tile"] = ""
-                this_target["collision"] = False
-                self.map.collision_matrix[this_target["grid"][1]][this_target["grid"][0]] = 1
-                self.target = None
-                self.is_gathering = False
-                self.map.hud.villager_attack_animations[str(self.angle)]["animation"].to_be_played = False
+                    this_target["tile"] = ""
+                    this_target["collision"] = False
+                    self.map.collision_matrix[this_target["grid"][1]][this_target["grid"][0]] = 1
+                    self.target = None
+                    self.is_gathering = False
+                    self.map.hud.villager_attack_animations[str(self.angle)]["animation"].to_be_played = False
 
     def update(self):
         self.now = pygame.time.get_ticks()
@@ -658,7 +659,7 @@ class Villager(Unit):
                 # for debug, because the first tile of our path is the pos of unit, not the first tile where we must go
                 if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
-                print("debug path index, path)", self.path_index, len(self.path))
+                #print("debug path index, path)", self.path_index, len(self.path))
                 new_pos = self.path[self.path_index] if len(self.path) != self.path_index else ...
 
                 #update position in the world
