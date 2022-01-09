@@ -7,6 +7,7 @@ from tech import Age_II, Age_III, Age_IV
 import os
 import pygame
 from math import ceil
+from game.utils import tile_founding
 
 
 class Building:
@@ -17,10 +18,15 @@ class Building:
     def __init__(self, pos, map, player_owner_of_unit, ):
         self.owner = player_owner_of_unit
         self.owner.building_list.append(self)
-        #self.rect = self.sprite.get_rect(topleft=pos)
         # pos is the tile position, for ex : (4,4)
         self.pos = pos
         self.map = map
+        # updating map with the new unit, collision, etc...
+        self.map.buildings[self.pos[0]][self.pos[1]] = self
+        self.map.entities.append(self)
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] = "building"
+        # 0 means collision = True
+        self.map.collision_matrix[self.pos[0]][self.pos[1]] = 0
 
         # will be used in the timer to increase resources of the player
         self.resource_manager_cooldown = pygame.time.get_ticks()
@@ -33,7 +39,6 @@ class Building:
 
         self.resource_manager_cooldown = pygame.time.get_ticks()
         self.now = 0
-        self.map.map[self.pos[0]][self.pos[1]]["tile"] = "building"
 
     def update(self):
         pass
@@ -91,6 +96,16 @@ class TownCenter(Building):
     def __init__(self, pos, map, player_owner_of_unit):
 
         self.name = "Town center"
+        # additional collision bc 2x1 building
+
+        map.map[pos[0] + 1][pos[1]]["tile"] = "building"
+        map.collision_matrix[pos[1]][pos[0] + 1] = 0
+
+        map.map[pos[0]][pos[1] - 1]["tile"] = "building"
+        map.collision_matrix[pos[1] - 1][pos[0]] = 0
+
+        map.map[pos[0] + 1][pos[1] - 1]["tile"] = "building"
+        map.collision_matrix[pos[0] + 1][pos[1] - 1] = 0
 
         self.construction_cost = [0, 0, 0, 0]
 
@@ -148,7 +163,7 @@ class TownCenter(Building):
     # we determine the nearest free tile, collision matrix has a 1 if the tile is free
     # we try the 4 tiles under the town center, then the ones on the sides, then the ones above
     # we also check if we stay in the map boundaries
-    def check_collision_and_spawn_villager_where_possible(self):
+    def check_collision_and_spawn_villager_where_possible_old(self):
         # UNDER
         #check if the tile is in the map boundaries and if tile is empty
         if 0 <= self.pos[0] < self.map.grid_length_x and 0 < self.pos[1] + 1 < self.map.grid_length_y and self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] == 1:
@@ -309,6 +324,23 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 2] = 0
 
+    #trying to simplify that shit
+    def check_collision_and_spawn_villager_where_possible(self):
+
+        available_tile_for_spawn = tile_founding(1, 1, 2, self.map.map, self.owner, "")
+        print(available_tile_for_spawn[0][0])
+        self.map.units[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]] = Villager((available_tile_for_spawn[0][0], available_tile_for_spawn[0][1]), self.owner,
+                                                                    self.map)
+        self.map.map[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]]["tile"] = ""
+        self.map.map[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]]["collision"] = True
+        #we add the unit we created to the list of units of the player
+        self.owner.unit_list.append(self.map.units[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]])
+        self.owner.unit_occupied.append(0)
+
+        # update collision for new villager
+        self.map.collision_matrix[available_tile_for_spawn[0][1]][available_tile_for_spawn[0][0]] = 0
+
+
     def research_tech(self, tech):
         if tech == "Advance to Feudal Age":
             tech = Age_II
@@ -369,9 +401,18 @@ class Unit:
     def __init__(self, pos, player_owner_of_unit, map, angle=225):
         self.owner = player_owner_of_unit
         self.map = map
-        self.map.entities.append(self)
         # pos is the tile position, for ex : (4,4)
         self.pos = pos
+        #updating map with the new unit, collision, etc...
+        self.map.units[self.pos[0]][self.pos[1]] = self
+        self.map.entities.append(self)
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] = "unit"
+        # 0 means collision = True
+        self.map.collision_matrix[self.pos[0]][self.pos[1]] = 0
+
+        # we add the unit we created to the list of units of the player
+        self.owner.unit_list.append(self)
+
         self.current_health = self.max_health
         self.is_alive = True
         self.angle = angle
@@ -476,6 +517,7 @@ class Villager(Unit):
         self.now = 0
 
         super().__init__(pos, player_owner_of_unit, map, angle)
+        self.owner.unit_occupied.append(0)
 
     def repair(self, building):
         if building.current_health != building.max_health:
@@ -613,7 +655,7 @@ class Villager(Unit):
 
                 # movement
                 # for debug, because the first tile of our path is the pos of unit, not the first tile where we must go
-                if self.path[self.path_index] == self.pos:
+                if self.path[self.path_index] == self.pos and self.path_index < len(self.path):
                     self.path_index += 1
                 new_pos = self.path[self.path_index]
 

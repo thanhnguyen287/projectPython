@@ -43,7 +43,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            #self.IA.run()
+            self.IA.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]

@@ -1,6 +1,6 @@
 from settings import *
-from units import House
-from game.utils import str_to_entity_class, draw_text
+from units import House, TownCenter,Farm, Villager
+from game.utils import draw_text
 
 
 class Player:
@@ -137,3 +137,17 @@ playerOne.age = 1
 players = [playerOne]
 player_list = [playerOne]
 #  INIT FOR RESSOURCES DISPLAY
+
+def str_to_entity_class(name: str):
+    if name == "TownCenter":
+        return TownCenter
+    elif name == "House":
+        return House
+    elif name == "Farm":
+        return Farm
+    elif name == "Villager":
+        return Villager
+    elif name == "Clubman":
+        return Clubman
+    elif name == "Bowman":
+        return Bowman

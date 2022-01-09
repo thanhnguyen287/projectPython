@@ -30,6 +30,8 @@ class Map:
         # lists of lists
         self.buildings = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
         self.units = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
+        self.resources_list = []
+
         self.map = self.create_map()
         # used in the fonction that places the townhall randomly on the map
         self.townhall_placed = False
@@ -55,6 +57,9 @@ class Map:
             map.append([])
             for grid_y in range(self.grid_length_y):
                 map_tile = self.grid_to_map(grid_x, grid_y)
+                #if tile is resource, we add it to resources_list, is used for display
+                if map_tile["tile"] != "" and map_tile["tile"] != "building" and map_tile["tile"] != "unit":
+                    self.resources_list.append(map_tile)
                 map[grid_x].append(map_tile)
                 render_pos = map_tile["render_pos"]
                 # self.grass_tiles.getwidth()/2 : offset
@@ -181,8 +186,9 @@ class Map:
         # display grid
         # self.show_grid(camera.scroll, screen)
 
-        # building display. If building selected, we highlight the tile. If building not full health, we display its health bar
         for player in player_list:
+
+            # building display. If building selected, we highlight the tile. If building not full health, we display its health bar
             for building in player.building_list:
                 if building.current_health <= 0:
                     self.remove_entity(building, camera.scroll)
@@ -205,16 +211,25 @@ class Map:
                     if (building.pos[0] == self.examined_tile[0]) and (building.pos[1] == self.examined_tile[1]):
                         self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
 
-        for x in range(self.grid_length_x):
-            for y in range(self.grid_length_y):
-                render_pos = self.map[x][y]["render_pos"]
-                # displaying resources (tree, berrybush, rocks, etc....
-                # displaying units
-                if self.units[x][y] is not None:
-                    self.display_unit(self.units[x][y], screen, camera, render_pos)
+            # units display. If units selected, we highlight the tile. If units not full health, we display its health bar
+            for unit in player.unit_list:
+                if unit.current_health <= 0:
+                    self.remove_entity(unit, camera.scroll)
+                elif unit.current_health < unit.max_health:
+                    self.hud.display_life_bar(screen, unit, self, for_hud=False, camera=camera)
+                # if building is selected, we highlight its tile
+                elif self.examined_tile is not None:
+                    if (unit.pos[0] == self.examined_tile[0]) and (unit.pos[1] == self.examined_tile[1]):
+                        self.highlight_tile(unit.pos[0], unit.pos[1], screen, "WHITE", camera.scroll)
 
-                if self.map[x][y]["tile"] != "building" and self.map[x][y]["tile"] != "unit":
-                    self.display_resources_on_tile(self.map[x][y], screen, camera)
+                self.display_unit(unit, screen, camera, self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
+                if self.examined_tile is not None:
+                    if (unit.pos[0] == self.examined_tile[0]) and (
+                            unit.pos[1] == self.examined_tile[1]):
+                        self.hud.display_life_bar(screen, unit, self, for_hud=False, camera=camera)
+
+        for resource in self.resources_list:
+            self.display_resources_on_tile(resource, screen, camera)
 
         # temp tile is a dictionary containing name + image + render pos + iso_poly + collision
         # if player is looking for a tile to place a building, we highlight the tested tiles in RED or GREEN if the tile is free or not
@@ -499,37 +514,21 @@ class Map:
 
             #villager creation
             start_unit = Villager(vill_pos, player, self)
-            self.units[vill_pos[0]][vill_pos[1]] = start_unit
 
             # for towncenter
             new_building.is_being_built = False
             new_building.construction_progress = 100
             new_building.current_health = new_building.max_health
 
-            self.entities.append(new_building)
-            self.buildings[new_building.pos[0]][new_building.pos[1]] = new_building
             townhall_placed = True
             player.towncenter_pos = new_building.pos
-            # collision
-            self.map[new_building.pos[0]][new_building.pos[1]]["tile"] = "building"
-            self.map[new_building.pos[0]][new_building.pos[1]]["collision"] = True
-            self.map[new_building.pos[0] + 1][new_building.pos[1]]["tile"] = "building"
-            self.map[new_building.pos[0] + 1][new_building.pos[1]]["collision"] = True
-            self.map[new_building.pos[0]][new_building.pos[1] - 1]["tile"] = "building"
-            self.map[new_building.pos[0]][new_building.pos[1] - 1]["collision"] = True
-            self.map[new_building.pos[0] + 1][new_building.pos[1] - 1]["tile"] = "building"
-            self.map[new_building.pos[0] + 1][new_building.pos[1] - 1]["collision"] = True
+
 
             # for starting villagers
             player.pay_entity_cost_bis(Villager)
-            self.collision_matrix[start_unit.pos[1]][start_unit.pos[0]] = 0
-            self.map[start_unit.pos[0]][start_unit.pos[1]]["collision"] = True
-
-            # we add the unit we created to the list of units of the player
-            player.unit_list.append(start_unit)
-            player.unit_occupied.append(0)
 
     def remove_entity(self, entity, scroll):
+        self.entities.remove(entity)
         if issubclass(type(entity), Building):
             death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
             death_pos = (
@@ -556,10 +555,14 @@ class Map:
         elif issubclass(type(entity), Unit):
             self.units[entity.pos[0]][entity.pos[1]] = None
             self.collision_matrix[entity.pos[1]][entity.pos[0]] = 1
+
             death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
             death_pos = (
                 death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
                 death_pos[1] - (self.hud.villager_sprites[0].get_height() - TILE_SIZE) + scroll.y)
+            entity.owner.unit_list.remove(entity)
+            if isinstance(entity, Villager):
+                entity.owner.unit_occupied.append(0)
 
         self.examined_tile = None
         self.hud.examined_tile = None
@@ -575,8 +578,6 @@ class Map:
         elif type(entity) == Villager:
             entity.owner.current_population -= 1
             self.hud.death_animations["Villager"]["animation"][str(entity.angle)].play(death_pos)
-
-
 
     # remove resources from tile to get an empty tile
     def clear_tile(self, grid_x, grid_y):
@@ -677,7 +678,7 @@ class Map:
         render_pos = resource_tile["render_pos"]
 
         # if the tile isnt empty and inst destroyed, we display it. All resources have slightly different models to add variety
-        if tile_type != "" and tile_type != "building":
+        if tile_type != "" and tile_type != "building" and tile_type != "unit":
             screen.blit(self.hud.resources_sprites[tile_type][
                             str(self.map[resource_tile["grid"][0]][resource_tile["grid"][1]]["variation"])], (
                             render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
@@ -786,7 +787,7 @@ class Map:
                          is_build_possibility_display=False):
         # we either display the building fully constructed or being built ( 4 possible states )
         if not is_hypothetical_building:
-
+            offset = (0, 0)
             if not building.is_being_built:
                 if building.owner.age == 1:
                     sprite_to_display = self.hud.first_age_building_sprites[building.__class__.__name__]
@@ -796,10 +797,11 @@ class Map:
                     sprite_to_display = self.hud.third_age_building_sprites[building.__class__.__name__]
                 elif building.owner.age == 4:
                     sprite_to_display = self.hud.fourth_age_building_sprites[building.__class__.__name__]
-
+                if isinstance(building, TownCenter):
+                    offset = (10, 13)
                 screen.blit(sprite_to_display, (
-                    render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                    render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y)
+                    render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
+                    render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y + offset[1])
                             )
 
             else:

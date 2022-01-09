@@ -1,5 +1,5 @@
 import pygame
-from units import *
+#from units import *
 
 
 def draw_text(screen, text, size, color, pos):
@@ -84,20 +84,20 @@ def get_color_code(color: str):
         return 255, 201, 14
 
 
-def str_to_entity_class(name: str):
-    if name == "TownCenter":
-        return TownCenter
-    elif name == "House":
-        return House
-    elif name == "Farm":
-        return Farm
+#def str_to_entity_class(name: str):
+ #   if name == "TownCenter":
+  #      return TownCenter
+   # elif name == "House":
+    #    return House
+    #elif name == "Farm":
+     #   return Farm
 
-    elif name == "Villager":
-        return Villager
-    elif name == "Clubman":
-        return Clubman
-    elif name == "Bowman":
-        return Bowman
+    #elif name == "Villager":
+     #   return Villager
+    #elif name == "Clubman":
+     #   return Clubman
+    #elif name == "Bowman":
+     #   return Bowman
 
 # this methode return a list of the x nearest free tiles
 def tile_founding(x, first_layer, layer_max, map, player, tile_type):
