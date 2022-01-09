@@ -219,10 +219,18 @@ class Hud:
 
     def draw(self, screen, map, camera):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
+        #entity is string corresponding to class unit/building name
         for entity in self.death_animations:
-            if self.death_animations[entity]["animation"].to_be_played:
-                self.death_animations[entity]["group"].draw(screen)
-                self.death_animations[entity]["animation"].update()
+            if entity == "Villager":
+                #8 possible angles for villager
+                for angle in range(0,8):
+                    if self.death_animations[entity]["animation"][str(int(45*angle))].to_be_played:
+                        self.death_animations[entity]["group"][str(int(45*angle))].draw(screen)
+                        self.death_animations[entity]["animation"][str(int(45*angle))].update()
+            else:
+                if self.death_animations[entity]["animation"].to_be_played:
+                    self.death_animations[entity]["group"].draw(screen)
+                    self.death_animations[entity]["animation"].update()
         for angle in self.villager_attack_animations:
             if self.villager_attack_animations[angle]["animation"].to_be_played:
                 self.villager_attack_animations[str(angle)]["group"].draw(screen)
@@ -789,6 +797,7 @@ class Hud:
         return resources_sprites
 
     def create_all_death_animations(self):
+        #HOUSE
         house_death_animation = Animation(300, 300, sprites=load_images_better(
             "resources/assets/Models/Buildings/House/House_death_animation"))
         house_death_animation_group = pygame.sprite.Group()
@@ -796,7 +805,7 @@ class Hud:
         house = {"animation": house_death_animation,
                  "group": house_death_animation_group
                  }
-
+        #TOWN CENTER
         town_center_1_death_animation = Animation(300, 300, sprites=load_images_better(
             "resources/assets/Models/Buildings/Town_Center/town_center_1_death_animation"))
         town_center_1_death_animation_group = pygame.sprite.Group()
@@ -805,13 +814,32 @@ class Hud:
         town_center_1 = {"animation": town_center_1_death_animation,
                          "group": town_center_1_death_animation_group
                          }
+        #VILLAGER - 8 different deaths animation, varies with angle
+        villager_death_sprites = {}
+        villager_death_animation = {}
+        villager_death_animation_group = {}
+        villager_death ={}
+        villager_death["animation"] = {}
+        villager_death["group"] = {}
+
+        for folder in range(0, 8):
+            villager_death_sprites[str(folder*45)] = load_images_better("resources/assets/Models/Units/Villager/death/" + str(int(folder*45)))
+            villager_death_animation[str(folder*45)] = Animation(sprites=villager_death_sprites[str(str(folder*45))])
+
+            villager_death_animation_group[str(int(folder*45))] = pygame.sprite.Group()
+            villager_death_animation_group[str(int(folder*45))].add(villager_death_animation[str(int(folder*45))])
+
+            villager_death["animation"][str(int(folder*45))] = villager_death_animation[str(int(folder*45))]
+            villager_death["group"] = villager_death_animation_group
+
         dic = {"House": house,
-               "Town Center 1": town_center_1}
+               "Town Center 1": town_center_1,
+               "Villager": villager_death}
         return dic
 
     def create_all_attack_animations(self):
 
-        anim_speed = Villager.attack_speed / 1000
+        anim_speed = 0.65
         villager_attack_animation_0 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/0"), animation_speed=anim_speed)
         villager_attack_animation_1 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/45"), animation_speed=anim_speed)
         villager_attack_animation_2 = Animation(300, 300, sprites=load_images_better("Resources/assets/Models/Units/Villager/attack/90"), animation_speed=anim_speed)

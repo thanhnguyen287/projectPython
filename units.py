@@ -375,6 +375,7 @@ class Unit:
         self.current_health = self.max_health
         self.is_alive = True
         self.angle = angle
+        self.sprite_index = 0
         #pathfinding
         self.move_timer = pygame.time.get_ticks()
         self.searching_for_path = False
@@ -426,7 +427,7 @@ class Unit:
             #update position in the world
             self.change_tile(new_pos)
             self.path_index += 1
-            self.move_timer = self.now
+            self.move_timer = self.map.timer
             if self.path_index == len(self.path):
                 self.searching_for_path = False
 
@@ -607,7 +608,6 @@ class Villager(Unit):
 
     def update(self):
         self.now = pygame.time.get_ticks()
-
         if self.now - self.move_timer > 400:
             if self.searching_for_path:
 

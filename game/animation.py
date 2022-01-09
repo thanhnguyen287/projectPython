@@ -11,7 +11,7 @@ pygame.mixer.init()
 class Animation(pygame.sprite.Sprite):
     # change this to make the animation quicker or slower
 
-    def __init__(self, pos_x, pos_y, sprites=[], animation_speed=0.15):
+    def __init__(self, pos_x=0, pos_y=0, sprites=[], animation_speed=0.15):
         super().__init__()
 
         self.sprites = sprites

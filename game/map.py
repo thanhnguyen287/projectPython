@@ -43,6 +43,9 @@ class Map:
         # used when examining elements of the map
         self.examined_tile = None
 
+        #universal timer
+        self.timer = 0
+
         self.place_starting_units(playerOne)
         self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
 
@@ -63,7 +66,7 @@ class Map:
         return map
 
     def update(self, camera, screen):
-
+        self.timer = pygame.time.get_ticks()
         mouse_pos = pygame.mouse.get_pos()
         mouse_action = pygame.mouse.get_pressed()
         if mouse_action[1] and self.hud.examined_tile is not None:
@@ -171,43 +174,7 @@ class Map:
 
                 else:
                     pass
-        print("""
-        # right click, gathering and moving units (fighting in future)
-        if mouse_action[2] and 0 <= grid_pos[0] <= self.grid_length_x and 0 <= grid_pos[1] <= self.grid_length_y:
 
-            # There is a bug with collecting ressources on the side of the map !!!
-
-            if self.hud.examined_tile is not None and self.hud.examined_tile.name == "Villager":
-                villager_pos = self.hud.examined_tile.pos
-                this_villager = self.units[villager_pos[0]][villager_pos[1]]
-                pos_mouse = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
-                pos_x = pos_mouse[0]
-                pos_y = pos_mouse[1]
-                # ATTACK
-                if self.units[pos_x][pos_y] is not None or self.buildings[pos_x][pos_y] is not None:
-                    # si les deux unites sont adjacentes:
-                    target_to_attack = self.units[pos_x][pos_y] if self.units[pos_x][pos_y] is not None else \
-                        self.buildings[pos_x][pos_y]
-                    this_villager.target = target_to_attack
-
-                    if this_villager.is_adjacent_to(target_to_attack):
-                        this_villager.is_fighting = True
-                    else:
-                        this_villager_dest = self.get_empty_adjacent_tiles((pos_x, pos_y))[0]
-                        this_villager.move_to(self.map[this_villager_dest[0]][this_villager_dest[1]])
-                        this_villager.is_moving_to_attack = True
-
-                # ONLY MOVEMENT
-                if not self.map[grid_pos[0]][grid_pos[1]]["collision"] and \
-                        not this_villager.is_gathering and this_villager.target is None:
-                    this_villager.move_to(self.map[grid_pos[0]][grid_pos[1]])
-
-                # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving
-                # if the tile next to him is a ressource and we right click on it and he is not moving, he will gather it
-                if not this_villager.searching_for_path \
-                        and (self.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"]):
-                    this_villager.go_to_ressource((pos_x, pos_y))
-""") if False else ...
     def draw(self, screen, camera):
         # displaying grass tiles
         screen.blit(self.grass_tiles, (camera.scroll.x, camera.scroll.y))
@@ -242,11 +209,12 @@ class Map:
             for y in range(self.grid_length_y):
                 render_pos = self.map[x][y]["render_pos"]
                 # displaying resources (tree, berrybush, rocks, etc....
-                if self.map[x][y]["tile"] != "building" and self.map[x][y]["tile"] != "unit":
-                    self.display_resources_on_tile(self.map[x][y], screen, camera)
                 # displaying units
                 if self.units[x][y] is not None:
                     self.display_unit(self.units[x][y], screen, camera, render_pos)
+
+                if self.map[x][y]["tile"] != "building" and self.map[x][y]["tile"] != "unit":
+                    self.display_resources_on_tile(self.map[x][y], screen, camera)
 
         # temp tile is a dictionary containing name + image + render pos + iso_poly + collision
         # if player is looking for a tile to place a building, we highlight the tested tiles in RED or GREEN if the tile is free or not
@@ -588,6 +556,10 @@ class Map:
         elif issubclass(type(entity), Unit):
             self.units[entity.pos[0]][entity.pos[1]] = None
             self.collision_matrix[entity.pos[1]][entity.pos[0]] = 1
+            death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
+            death_pos = (
+                death_pos[0] + self.grass_tiles.get_width() / 2 + scroll.x,
+                death_pos[1] - (self.hud.villager_sprites[0].get_height() - TILE_SIZE) + scroll.y)
 
         self.examined_tile = None
         self.hud.examined_tile = None
@@ -600,6 +572,10 @@ class Map:
         elif type(entity) == TownCenter:
             entity.owner.max_population -= 10
             self.hud.death_animations["Town Center 1"]["animation"].play(death_pos)
+        elif type(entity) == Villager:
+            entity.owner.current_population -= 1
+            self.hud.death_animations["Villager"]["animation"][str(entity.angle)].play(death_pos)
+
 
 
     # remove resources from tile to get an empty tile
@@ -903,21 +879,21 @@ class Map:
         We have to calculate the angle between the villager's target and him
         """
         if unit.angle == 45:
-            index = 6
+            unit.sprite_index = 6
         elif unit.angle == 135:
-            index = 1
+            unit.sprite_index = 1
         elif unit.angle == 225:
-            index = 3
+            unit.sprite_index = 3
         elif unit.angle == 180:
-            index = 2
+            unit.sprite_index = 2
         elif unit.angle == 90:
-            index = 7
+            unit.sprite_index = 7
         elif unit.angle == 270:
-            index = 4
+            unit.sprite_index = 4
         elif unit.angle == 0:
-            index = 0
+            unit.sprite_index = 0
         elif unit.angle == 315:
-            index = 5
+            unit.sprite_index = 5
 
         if unit.is_fighting or unit.is_gathering:
             animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
@@ -928,9 +904,9 @@ class Map:
         else:
             #fixed sprite
              #+ 20 because of sprite offset
-            screen.blit(self.hud.villager_sprites[index], (
+            screen.blit(self.hud.villager_sprites[unit.sprite_index], (
                 render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 32,
-                render_pos[1] - (self.hud.villager_sprites[index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+                render_pos[1] - (self.hud.villager_sprites[unit.sprite_index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
                         )
 
             #idle animation
