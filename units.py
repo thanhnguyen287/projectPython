@@ -654,8 +654,9 @@ class Villager(Unit):
 
                 # movement
                 # for debug, because the first tile of our path is the pos of unit, not the first tile where we must go
-                if self.path[self.path_index] == self.pos and self.path_index < len(self.path):
+                if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
+                    print("debug path index, path)", self.path_index, len(self.path))
                 new_pos = self.path[self.path_index]
 
                 #update position in the world

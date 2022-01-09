@@ -471,13 +471,13 @@ class Hud:
 
         # buildings
         if issubclass(type(self.examined_tile), Building):
-            temp_pos = (action_menu.get_width() + 20 + 130, self.height * 0.79 + 110)
+            temp_pos = (action_menu.get_width() + 20 + 130, self.height * 0.79 + 100)
             screen.blit(building_armor_icon, temp_pos)
         # units
         else:
-            temp_pos = (action_menu.get_width() + 20 + 130, self.height * 0.79 + 45)
+            temp_pos = (action_menu.get_width() + 20 + 130, self.height * 0.79 + 50)
             screen.blit(melee_attack_icon, temp_pos)
-            temp_pos = (action_menu.get_width() + 20 + 130, self.height * 0.79 + 110)
+            temp_pos = (action_menu.get_width() + 20 + 130, self.height * 0.79 + 105)
             screen.blit(armor_icon, temp_pos)
 
             temp_pos = (action_menu.get_width() + 20 + 175, self.height * 0.79 + 45)

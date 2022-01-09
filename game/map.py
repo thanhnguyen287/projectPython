@@ -722,7 +722,7 @@ class Map:
             elif unit.is_fighting or unit.is_gathering or unit.is_moving_to_gather:
                 screen.blit(scale_image(attack_icon, w=40), (
                     render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
-                    render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y - 80)
+                    render_pos[1] - (self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 80)
                             )
 
             elif unit.is_building or unit.is_moving_to_build:
@@ -896,7 +896,7 @@ class Map:
             animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
             animation_pos = (
                 animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
-                animation_pos[1] - (self.hud.villager_sprites[0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+                animation_pos[1] - (self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
             self.hud.villager_attack_animations[str(unit.angle)]["animation"].play((animation_pos), anchor_list = self.anchor_points)
         else:
             #fixed sprite
