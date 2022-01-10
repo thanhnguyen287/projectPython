@@ -43,7 +43,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            self.IA.run()
+            #self.IA.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -70,6 +70,14 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # the player left click to train a villager or build a building
                 if event.button == 1 and self.hud.bottom_left_menu is not None:
+
+                    #to have informations about the villager
+                    if self.map.hud.examined_tile is not None and self.map.hud.examined_tile.name == "Villager":
+                        villager_pos = self.map.hud.examined_tile.pos
+                        this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
+                        print("Info about villager, print is in game, events")
+                        this_villager.print_state()
+
                     for button in self.hud.bottom_left_menu:
                         if button["rect"].collidepoint(mouse_pos):
                             if button["name"] == "STOP":
@@ -110,6 +118,7 @@ class Game:
                         if self.map.hud.examined_tile is not None and self.map.hud.examined_tile.name == "Villager":
                             villager_pos = self.map.hud.examined_tile.pos
                             this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
+
                             pos_mouse = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
                             pos_x = pos_mouse[0]
                             pos_y = pos_mouse[1]

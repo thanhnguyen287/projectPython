@@ -438,6 +438,7 @@ class Unit:
                 self.searching_for_path = False
 
 
+
 class Villager(Unit):
 
     # Training : 50 FOOD, 20s
@@ -584,7 +585,7 @@ class Villager(Unit):
                 self.target = None
 
     def gather_ressources(self):
-        if self.target is not None:
+        if self.target is not None and type(self.target) != Villager:
             this_target = self.map.map[self.target[0]][self.target[1]]
             self.angle = self.map.get_angle_between(self.pos, self.target, self) if self.map.get_angle_between(self.pos,
                                                                                                  self.target, self) != -1 else ...
@@ -658,6 +659,17 @@ class Villager(Unit):
         if self.is_fighting:
             self.attack()
 
+
+    def print_state(self):
+        print("Gathering : ", self.is_gathering)
+        print("Moving to gather : ", self.is_moving_to_gather)
+        print("Building : ", self.building_to_create)
+        print("Moving to build : ", self.is_moving_to_build)
+        print("Moving : ", self.searching_for_path)
+
+        if self.searching_for_path:
+            print("Current pos : ", self.pos)
+            print("Starting pos : ", self.start)
 
 class Bowman(Unit):
 

@@ -531,7 +531,7 @@ class Map:
     def remove_entity(self, entity, scroll):
         self.entities.remove(entity)
         if issubclass(type(entity), Building):
-            if not issubclass(type(entity, Farm)):
+            if not issubclass(type(entity), Farm):
 
                 death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
                 death_pos = (
