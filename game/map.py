@@ -665,9 +665,7 @@ class Map:
                 #        (y + self.height / 4) / minimap_scaling + 820) for x, y in mini]  # position x + ...., y  + ...
                 mini = [(x / minimap_scaling + 0.89 * self.width,
                          y / minimap_scaling + 0.82 * self.height) for x, y in mini]  # position x + ...., y  + ...
-                pygame.draw.polygon(screen, "WHITE", mini, 1)
-
-                pygame.draw.polygon(screen, "WHITE", mini, 1)
+                # pygame.draw.polygon(screen, "WHITE", mini, 1)
 
                 # Draw small dot representing entities
                 render_pos = self.map[x][y]["render_pos"]
