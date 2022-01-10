@@ -171,9 +171,6 @@ class TownCenter(Building):
             self.map.units[self.pos[0]][self.pos[1] + 1] = Villager((self.pos[0], self.pos[1] + 1), self.owner,
                                                                     self.map)
 
-            #we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0]][self.pos[1] + 1])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0]] = 0
@@ -184,9 +181,6 @@ class TownCenter(Building):
             self.map.units[self.pos[0] + 1][self.pos[1] + 1] = Villager((self.pos[0] + 1, self.pos[1] + 1),
                                                                         self.owner, self.map)
 
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0] + 1][self.pos[1] + 1])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 1] = 0
@@ -197,9 +191,6 @@ class TownCenter(Building):
             self.map.units[self.pos[0] - 1][self.pos[1] + 1] = Villager((self.pos[0] - 1, self.pos[1] + 1),
                                                                         self.owner, self.map)
 
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0] - 1][self.pos[1] + 1])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0] - 1] = 0
@@ -210,9 +201,7 @@ class TownCenter(Building):
             self.map.units[self.pos[0] + 2][self.pos[1] + 1] = Villager((self.pos[0] + 2, self.pos[1] + 1),
                                                                         self.owner, self.map)
 
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0] + 2][self.pos[1] + 1])
-            self.owner.unit_occupied.append(0)
+
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] + 1][self.pos[0] + 2] = 0
@@ -224,9 +213,6 @@ class TownCenter(Building):
             self.map.units[self.pos[0] - 1][self.pos[1]] = Villager((self.pos[0] - 1, self.pos[1]),
                                                                     self.owner, self.map)
 
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0] - 1][self.pos[1]])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1]][self.pos[0] - 1] = 0
@@ -237,9 +223,6 @@ class TownCenter(Building):
             self.map.units[self.pos[0] + 2][self.pos[1]] = Villager((self.pos[0] + 2, self.pos[1]),
                                                                     self.owner, self.map)
 
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0] + 2][self.pos[1]])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1]][self.pos[0] + 2] = 0
@@ -250,9 +233,6 @@ class TownCenter(Building):
             self.map.units[self.pos[0] - 1][self.pos[1] - 1] = Villager((self.pos[0] - 1, self.pos[1] - 1),
                                                                         self.owner, self.map)
 
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0] - 1][self.pos[1] - 1])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 1][self.pos[0] - 1] = 0
@@ -262,10 +242,6 @@ class TownCenter(Building):
             # new villager
             self.map.units[self.pos[0] + 2][self.pos[1] - 1] = Villager((self.pos[0] + 2, self.pos[1] - 1),
                                                                         self.owner, self.map)
-
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0] + 2][self.pos[1] - 1])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 1][self.pos[0] + 2] = 0
@@ -278,9 +254,6 @@ class TownCenter(Building):
             self.map.units[self.pos[0] - 1][self.pos[1] - 2] = Villager((self.pos[0] - 1, self.pos[1] - 2),
                                                                         self.owner, self.map)
 
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0] - 1][self.pos[1] - 2])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] - 1] = 0
@@ -291,9 +264,6 @@ class TownCenter(Building):
             self.map.units[self.pos[0]][self.pos[1] - 2] = Villager((self.pos[0], self.pos[1] - 2),
                                                                     self.owner, self.map)
 
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0]][self.pos[1] - 2])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0]] = 0
@@ -304,9 +274,6 @@ class TownCenter(Building):
             self.map.units[self.pos[0] + 1][self.pos[1] - 2] = Villager((self.pos[0] + 1, self.pos[1] - 2),
                                                                         self.owner, self.map)
 
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0] + 1][self.pos[1] - 2])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 1] = 0
@@ -317,9 +284,6 @@ class TownCenter(Building):
             self.map.units[self.pos[0] + 2][self.pos[1] - 2] = Villager((self.pos[0] + 2, self.pos[1] - 2),
                                                                         self.owner, self.map)
 
-            # we add the unit we created to the list of units of the player
-            self.owner.unit_list.append(self.map.units[self.pos[0] + 2][self.pos[1] - 2])
-            self.owner.unit_occupied.append(0)
 
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 2] = 0
@@ -334,9 +298,6 @@ class TownCenter(Building):
                                                                     self.map)
         self.map.map[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]]["tile"] = "unit"
         self.map.map[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]]["collision"] = True
-        #we add the unit we created to the list of units of the player
-        self.owner.unit_list.append(self.map.units[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]])
-        self.owner.unit_occupied.append(0)
 
         # update collision for new villager
         self.map.collision_matrix[available_tile_for_spawn[0][1]][available_tile_for_spawn[0][0]] = 0
@@ -410,6 +371,10 @@ class Unit:
         self.map.map[self.pos[0]][self.pos[1]]["tile"] = "unit"
         # 0 means collision = True
         self.map.collision_matrix[self.pos[0]][self.pos[1]] = 0
+
+        # we add the unit we created to the list of units of the player
+        self.owner.unit_list.append(self)
+        self.owner.current_population += 1
 
         self.current_health = self.max_health
         self.is_alive = True
@@ -595,22 +560,22 @@ class Villager(Unit):
 
         # else we go to an adjacent tile
         else:
-            if 0 <= pos[0] - 1 <= self.map.grid_length_x and self.map.map[pos[0] - 1][pos[1]]["tile"] == "":
+            if 0 <= pos[0] - 1 < self.map.grid_length_x and self.map.map[pos[0] - 1][pos[1]]["tile"] == "":
                 self.move_to(self.map.map[pos[0] - 1][pos[1]])
                 self.target = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
-            elif 0 <= pos[0] + 1 <= self.map.grid_length_x and self.map.map[pos[0] + 1][pos[1]]["tile"] == "":
+            elif 0 <= pos[0] + 1 < self.map.grid_length_x and self.map.map[pos[0] + 1][pos[1]]["tile"] == "":
                 self.move_to(self.map.map[pos[0] + 1][pos[1]])
                 self.target = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
-            elif 0 <= pos[1] - 1 <= self.map.grid_length_y and self.map.map[pos[0]][pos[1] - 1]["tile"] == "":
+            elif 0 <= pos[1] - 1 < self.map.grid_length_y and self.map.map[pos[0]][pos[1] - 1]["tile"] == "":
                 self.move_to(self.map.map[pos[0]][pos[1] - 1])
                 self.target = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
-            elif 0 <= pos[0] + 1 <= self.map.grid_length_y and self.map.map[pos[0]][pos[1] + 1]["tile"] == "":
+            elif 0 <= pos[0] + 1 < self.map.grid_length_y and self.map.map[pos[0]][pos[1] + 1]["tile"] == "":
                 self.move_to(self.map.map[pos[0]][pos[1] + 1])
                 self.target = (pos[0], pos[1])
                 self.is_moving_to_gather = True
