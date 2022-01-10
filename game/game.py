@@ -61,10 +61,7 @@ class Game:
                 # Enable - Disable health bars
                 if event.key == pygame.K_LALT or event.key == pygame.K_RALT:
                     global ENABLE_HEALTH_BARS
-                    if ENABLE_HEALTH_BARS == False:
-                        ENABLE_HEALTH_BARS = True
-                    else:
-                        ENABLE_HEALTH_BARS = False
+                    ENABLE_HEALTH_BARS = not ENABLE_HEALTH_BARS
 
             # USER PRESSED A MOUSEBUTTON
             elif event.type == pygame.MOUSEBUTTONDOWN:
