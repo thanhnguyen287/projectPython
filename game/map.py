@@ -241,7 +241,7 @@ class Map:
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
         tree = pygame.image.load("Resources/assets/Models/Map/Trees/1.png").convert_alpha()
         rock = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/7.png")).convert_alpha()
-        grass_tile = scale_image(pygame.image.load("Resources/assets/Models/Map/grass_01.png").convert_alpha(), w=132)
+        grass_tile = scale_image(pygame.image.load("Resources/assets/Models/Map/grass_01.png").convert_alpha(), w=128)
         gold = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/4.png")).convert_alpha()
         berrybush = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/1.png")).convert_alpha()
 
@@ -462,6 +462,8 @@ class Map:
             # (x : 0 if left, 1 if right ; y : 1 if bottom, 0 if top)
             place_x = random.randint(0, 1)
             place_y = random.randint(0, 1)
+            place_x = 0
+            place_y = 0
 
             # top_left
             if (place_x, place_y) == (0, 0):
@@ -667,9 +669,7 @@ class Map:
                 #        (y + self.height / 4) / minimap_scaling + 820) for x, y in mini]  # position x + ...., y  + ...
                 mini = [(x / minimap_scaling + 0.89 * self.width,
                          y / minimap_scaling + 0.82 * self.height) for x, y in mini]  # position x + ...., y  + ...
-                pygame.draw.polygon(screen, "WHITE", mini, 1)
-
-                pygame.draw.polygon(screen, "WHITE", mini, 1)
+                # pygame.draw.polygon(screen, "WHITE", mini, 1)
 
                 # Draw small dot representing entities
                 render_pos = self.map[x][y]["render_pos"]
