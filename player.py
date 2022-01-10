@@ -131,7 +131,7 @@ class Player:
 
         draw_text(screen, age_text, 18, "WHITE", (screen.get_size()[0] - age_panel.get_width() + 90, 17))
 
-playerOne = Player("Tristan", True, [140, 10000, 10000, 10000], color="YELLOW")
+playerOne = Player("Tristan", True, [140, 10000, 10000, 10000], color="RED")
 playerOne.age = 1
 player_list = [playerOne]
 #  INIT FOR RESSOURCES DISPLAY

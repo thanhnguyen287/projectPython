@@ -531,7 +531,7 @@ class Map:
     def remove_entity(self, entity, scroll):
         self.entities.remove(entity)
         if issubclass(type(entity), Building):
-            if not issubclass(type(entity, Farm)):
+            if not issubclass(type(entity), Farm):
 
                 death_pos = (self.grid_to_renderpos(entity.pos[0], entity.pos[1]))
                 death_pos = (
@@ -580,13 +580,15 @@ class Map:
 
         if type(entity) == House:
             entity.owner.max_population -= 5
-            self.hud.death_animations[entity.__class__.__name__]["animation"].play(death_pos)
+            self.hud.death_animations[entity.__class__.__name__]["animation"].play(death_pos, age=entity.owner.age, color=entity.owner.color)
         elif type(entity) == TownCenter:
+
             entity.owner.max_population -= 10
-            self.hud.death_animations["Town Center 1"]["animation"].play(death_pos)
+            self.hud.death_animations["Town Center"]["animation"].play(death_pos, color=entity.owner.color, age=entity.owner.age)
         elif type(entity) == Villager:
             entity.owner.current_population -= 1
-            self.hud.death_animations["Villager"]["animation"][str(entity.angle)].play(death_pos)
+            print("death anim", self.hud.death_animations)
+            self.hud.death_animations["Villager"]["animation"].play(death_pos, color=entity.owner.color, angle=entity.angle)
 
     # remove resources from tile to get an empty tile
     def clear_tile(self, grid_x, grid_y):
@@ -910,7 +912,7 @@ class Map:
             animation_pos = (
                 animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
                 animation_pos[1] - (self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
-            self.hud.villager_attack_animations[str(unit.angle)]["animation"].play((animation_pos), anchor_list = self.anchor_points)
+            self.hud.villager_attack_animations["Villager"]["animation"].play((animation_pos),color=unit.owner.color, angle=unit.angle)
         else:
             #fixed sprite
              #+ 20 because of sprite offset
@@ -919,62 +921,56 @@ class Map:
                 render_pos[1] - (self.hud.villager_sprites[unit.owner.color][unit.sprite_index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
                         )
 
-            #idle animation
-            #animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
-           # animation_pos = (
-            #    animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
-           #     animation_pos[1] - (self.hud.villager_sprites[0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
-           # self.hud.villager_idle_animations[str(unit.angle)]["animation"].play(animation_pos)
     #returns the angle between the origin tile and the destination tile. Angle goes from 0 to 360, 0 top, 90 right, etc...
     def get_angle_between(self, origin_tile_pos: [int, int], end_tile_pos: [int, int], unit):
         # first we calculate angle between grid, then we will apply some maths to get the "real" isometric angle
         #if origin == destination, no calcul
-        self.angle = 0
+        angle = 0
 
         #linear movement : left right ; y the same, x varies
         if end_tile_pos[1] == origin_tile_pos[1]:
             # from left to right
             if end_tile_pos[0] > origin_tile_pos[0]:
-                self.angle = 90
+                angle = 90
             #else from right to left
             else:
-                self.angle = 270
+                angle = 270
 
         # linear movement : top bottom ; x the same, y varies
         elif end_tile_pos[0] == origin_tile_pos[0]:
             # from top to bottom
             if end_tile_pos[1] > origin_tile_pos[1]:
-                self.angle = 180
+                angle = 180
 
             # else from bottom to top
             else:
-                self.angle = 0
+                angle = 0
 
 
         #diagonal movement : top left bottom right ; dx = dy
         elif end_tile_pos[0] - origin_tile_pos[0] == end_tile_pos[1] - origin_tile_pos[1]:
             # if going down
             if end_tile_pos[0] - origin_tile_pos[0] > 0:
-                self.angle = 135
+                angle = 135
 
             # else he is going up
             else:
-                self.angle = 315
+                angle = 315
 
         # diagonal movement : top right bottom left ; dx = - dy
         elif end_tile_pos[0] - origin_tile_pos[0] == - (end_tile_pos[1] - origin_tile_pos[1]):
             # if going towards top right
             if end_tile_pos[0] - origin_tile_pos[0] > 0:
-                self.angle = 45
+                angle = 45
 
             # else he is going bottom left
             else:
-                self.angle = 225
+                angle = 225
 
         #transformation to get isometric
-        self.angle = self.angle + 45
+        angle = angle + 45
 
-        return self.angle
+        return angle
 
     def load_anchor_points(self, path):
         anchor_dic = {}

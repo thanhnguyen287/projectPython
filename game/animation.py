@@ -8,6 +8,7 @@ pygame.init()
 pygame.mixer.init()
 
 
+#for unit
 class Animation(pygame.sprite.Sprite):
     # change this to make the animation quicker or slower
 
@@ -15,6 +16,12 @@ class Animation(pygame.sprite.Sprite):
         super().__init__()
 
         self.sprites = sprites
+        self.current_sprite = 0
+
+        self.selected_sprites_list = self.sprites["BLUE"]["0"][self.current_sprite]
+        # used to know if we must use the angle stuff (only for units, no need for buildings)
+        self.angle = "0"
+        self.color = "BLUE"
         self.index = 0
         self.current_frame = 0
         self.animation_speed = animation_speed
@@ -35,19 +42,32 @@ class Animation(pygame.sprite.Sprite):
             self.sprites.append(pygame.image.load("resources/assets/Boom/496_11.png"))
             self.sprites.append(pygame.image.load("resources/assets/Boom/496_12.png"))
             self.sprites.append(pygame.image.load("resources/assets/Boom/496_13.png"))
+            self.image = self.sprites[self.current_sprite]
 
-        # for i in range (14):
-        #	self.sprites.append(pygame.image.load('"496_" + str(i)) '))
-
-        self.current_sprite = 0
-        self.image = self.sprites[self.current_sprite]
+        else:
+            self.image = self.sprites["BLUE"]["0"][self.current_sprite]
 
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos_x, pos_y]
-        self.anchor_list = None
 
-    #pos : render_pos_x, render_pos_y
-    def play(self, pos=(0,0), anchor_list=None):
+        # old stuff, will maybe be used one day. Kinda a file with offset for every sprite.
+        #self.anchor_list = None
+
+    #######################################################################################################
+    #pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
+    # example : play(render_pos_0, render_pos_1, age=3, color="YELLOW", angle = 180)                      #
+    #######################################################################################################
+    def play(self, pos=(0, 0), anchor_list=None, color="BLUE", angle="0"):
+        self.color = color
+        self.angle = angle
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos[0], pos[1]]
+        #self.image = self.sprites["BLUE"][0][self.current_sprite]
+
+        #we determine which sprites list to use with angle, color and age arguments
+        #sprites list go from 0 to 3 for ages, not 1 to 4, hence the -1
+        self.selected_sprites_list = self.sprites[self.color][str(angle)]
+
         if anchor_list is not None:
             self.anchor_list = anchor_list
         self.rect.topleft = [ pos[0], pos[1]]
@@ -56,15 +76,58 @@ class Animation(pygame.sprite.Sprite):
     def update(self):
         if self.to_be_played:
             self.current_sprite += self.animation_speed
-        if floor(self.current_sprite) >= len(self.sprites):
+        if floor(self.current_sprite) >= len(self.selected_sprites_list):
             self.to_be_played = False
             self.current_sprite = 0
-        self.image = self.sprites[int(self.current_sprite)]
+        self.image = self.selected_sprites_list[int(self.current_sprite)]
 
 
-player = Animation(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
-moving_sprites = pygame.sprite.Group()
-moving_sprites.add(player)
+class BuildingAnimation(pygame.sprite.Sprite):
+    # change this to make the animation quicker or slower
+
+    def __init__(self, pos_x=0, pos_y=0, sprites=[], animation_speed=0.15):
+        super().__init__()
+
+        self.sprites = sprites
+        self.selected_sprites_list = []
+        self.age = 1
+        # used to know if we must use the angle stuff (only for units, no need for buildings)
+        self.color = "BLUE"
+        self.index = 0
+        self.current_frame = 0
+        self.current_sprite = 0
+        self.animation_speed = animation_speed
+
+        self.to_be_played = False
+
+        self.image = self.sprites["BLUE"]["1"][self.current_sprite]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos_x, pos_y]
+
+        # old stuff, will maybe be used one day. Kinda a file with offset for every sprite.
+        #self.anchor_list = None
+
+    #######################################################################################################
+    #pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
+    # example : play(render_pos_0, render_pos_1, age=3, color="YELLOW", angle = 180)                      #
+    #######################################################################################################
+    def play(self, pos=(0, 0), age=1, color="BLUE"):
+        self.age = age
+        self.color = color
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos[0], pos[1]]
+        #we determine which sprites list to use with color and age arguments
+
+        self.selected_sprites_list = self.sprites[self.color][str(self.age)]
+        self.to_be_played = True
+
+    def update(self):
+        if self.to_be_played:
+            self.current_sprite += self.animation_speed
+        if floor(self.current_sprite) >= len(self.selected_sprites_list):
+            self.to_be_played = False
+            self.current_sprite = 0
+        self.image = self.selected_sprites_list[int(self.current_sprite)]
 
 
 def load_images_better(path):

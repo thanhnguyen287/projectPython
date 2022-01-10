@@ -623,8 +623,7 @@ class Villager(Unit):
     def gather_ressources(self):
         if self.target is not None:
             this_target = self.map.map[self.target[0]][self.target[1]]
-            self.angle = self.map.get_angle_between(self.pos, self.target, self) if self.map.get_angle_between(self.pos,
-                                                                                                 self.target, self) != -1 else ...
+            self.angle = self.map.get_angle_between(self.pos, self.target, self)
 
             if self.is_gathering and (self.now - self.attack_cooldown > self.attack_speed):
 
@@ -648,7 +647,7 @@ class Villager(Unit):
                     self.map.collision_matrix[this_target["grid"][1]][this_target["grid"][0]] = 1
                     self.target = None
                     self.is_gathering = False
-                    self.map.hud.villager_attack_animations[str(self.angle)]["animation"].to_be_played = False
+                    self.map.hud.villager_attack_animations["Villager"]["animation"].to_be_played = False
 
     def update(self):
         self.now = pygame.time.get_ticks()

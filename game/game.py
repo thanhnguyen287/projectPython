@@ -43,7 +43,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            self.IA.run()
+            #self.IA.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -161,8 +161,6 @@ class Game:
         #standard_cursor_rect.center = pygame.mouse.get_pos()  # update position
         #self.screen.blit(standard_cursor, standard_cursor_rect)  # draw the cursor
         #Boom animation
-        moving_sprites.draw(self.screen)
-        moving_sprites.update()
         #Draw FPS, must be the last to shown -> put it right on top of the display.flip
         draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())),20,(255,0,0),(5,55))
         pygame.display.flip()
