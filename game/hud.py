@@ -731,8 +731,11 @@ class Hud:
 
         tree_sprites = {"1": tree_1, "2": tree_2, "3": tree_3, "4": tree_4}
 
+        #grass
+        grass_sprites = load_images_better("resources/assets/Models/Map/grass")
+
         resources_sprites = {"rock": rock_sprites, "gold": gold_sprites, "berrybush": berry_bush_sprites,
-                             "tree": tree_sprites}
+                             "tree": tree_sprites, "grass":grass_sprites}
 
         return resources_sprites
 

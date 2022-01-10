@@ -11,7 +11,6 @@ from settings import *
 from player import playerOne, player_list
 from units import Villager, Unit, Farm, TownCenter, House, Building
 
-
 class Map:
     def __init__(self, hud, entities, grid_length_x, grid_length_y, width, height):
         self.hud = hud
@@ -63,8 +62,12 @@ class Map:
                 map[grid_x].append(map_tile)
                 render_pos = map_tile["render_pos"]
                 # self.grass_tiles.getwidth()/2 : offset
-                self.grass_tiles.blit(self.tiles["grass"],
-                                      (render_pos[0] + self.grass_tiles.get_width() / 2, render_pos[1]))
+                #enable this for no grid display
+                self.grass_tiles.blit(self.hud.resources_sprites["grass"][random.randint(0, 10)],
+                                     (render_pos[0] + self.grass_tiles.get_width() / 2, render_pos[1]))
+                #enable this for grid display
+                #self.grass_tiles.blit(scale_image(self.hud.resources_sprites["grass"][random.randint(0,10)], w=125),
+                 #                     (render_pos[0] + self.grass_tiles.get_width() / 2, render_pos[1]))
                 scroll = pygame.Vector2(0, 0)
                 scroll.x = 0
                 scroll.y = 0
@@ -241,15 +244,14 @@ class Map:
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
         tree = pygame.image.load("Resources/assets/Models/Map/Trees/1.png").convert_alpha()
         rock = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/7.png")).convert_alpha()
-        grass_tile = scale_image(pygame.image.load("Resources/assets/Models/Map/grass_01.png").convert_alpha(), w=128)
+        #grass_tile = scale_image(pygame.image.load("Resources/assets/Models/Map/grass_01.png").convert_alpha(), w=128)
+        grass_tile = scale_image(pygame.image.load("Resources/assets/Models/Map/grass/t_grass_aoe1_x2_001.png").convert_alpha(), w=125)
         gold = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/4.png")).convert_alpha()
         berrybush = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/1.png")).convert_alpha()
 
-        town_center = pygame.image.load(
-            "Resources/assets/Models/Buildings/Town_Center/BLUE/town_center_x1.png").convert_alpha()
+        town_center = pygame.image.load("Resources/assets/Models/Buildings/Town_Center/BLUE/town_center_x1.png").convert_alpha()
         house = pygame.image.load("Resources/assets/Models/Buildings/House/BLUE/house_1BLUE.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farmBLUE.png").convert_alpha()
-        #villager = pygame.image.load("resources/assets/villager.png").convert_alpha()
         villager = None
 
         images = {
@@ -302,6 +304,7 @@ class Map:
 
             else:
                 tile = ""
+                variation = random.randint(1, 11)
 
         # perlin = noise.
         out = {
@@ -701,7 +704,13 @@ class Map:
                 resource_tile["grid"][1] == self.examined_tile[1]) \
                     or resource_tile["health"] != resource_tile["max_health"]:
                 self.hud.display_life_bar(screen, resource_tile, self, camera=camera, for_hud=False, for_resource=True)
-
+        #elif tile_type == "":
+         #   screen.blit(self.hud.resources_sprites["grass"][
+        #                    self.map[resource_tile["grid"][0]][resource_tile["grid"][1]]["variation"]], (
+         #                   render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+         #                   render_pos[1] - (self.hud.resources_sprites["grass"][
+         #                   self.map[resource_tile["grid"][0]][resource_tile["grid"][1]]["variation"]].get_height() - TILE_SIZE) + camera.scroll.y)
+         #               )
     def display_unit(self, unit, screen, camera, render_pos):
         # HERE WE DRAW THE UNITS ON THE MAP
         # we extract from the units list the unit we want to display
@@ -920,6 +929,7 @@ class Map:
                 render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 32,
                 render_pos[1] - (self.hud.villager_sprites[unit.owner.color][unit.sprite_index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
                         )
+
 
     #returns the angle between the origin tile and the destination tile. Angle goes from 0 to 360, 0 top, 90 right, etc...
     def get_angle_between(self, origin_tile_pos: [int, int], end_tile_pos: [int, int], unit):
