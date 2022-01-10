@@ -1,5 +1,5 @@
 from player import player_list
-from .utils import tile_founding, look_around, RESSOURCE_LIST
+from .utils import tile_founding, look_around, better_look_around, RESSOURCE_LIST
 from units import Villager
 from random import randint
 
@@ -97,11 +97,15 @@ class IA:
     def neutral_routine(self):
         self.planning_gathering()
 
+        #print("buildings : ", len(self.player.building_list) + len(self.in_building_tiles))
+        #print("unit : ", len(self.player.unit_list))
+        #print(self.player.unit_list)
+
         #if we dont need ressources, we are not training units, we have free pop space and we have at least as many
         #buildings as units, then we can train a new unit
         if not self.needed_ressource and self.player.towncenter.queue == 0 and \
                 self.player.current_population < self.player.max_population and \
-                len(self.player.building_list) - 1 + len(self.in_building_tiles) >= len(self.player.unit_list):
+                len(self.player.building_list) >= len(self.player.unit_list):
 
             self.population_developpement_routine()
 
@@ -110,13 +114,14 @@ class IA:
             for u in self.player.unit_list:
 
                 #if we need ressources and the unit is a villager and he is free, he will go gather
-                if self.needed_ressource and isinstance(u, Villager) and u.building_to_create is None:
+                if self.needed_ressource and isinstance(u, Villager) and u.building_to_create is None and \
+                        len(self.player.building_list) + len(self.in_building_tiles) >= len(self.player.unit_list):
                     self.gathering_routine(u)
 
                 #if we dont need ressources or when the villager is building, we are using the building routine
-                elif isinstance(u,Villager) and\
-                        (len(self.player.building_list) - 1 + len(self.in_building_tiles) < len(self.player.unit_list)
-                         or u.target is not None):
+                elif isinstance(u,Villager) and \
+                        (len(self.player.building_list) + len(self.in_building_tiles) < len(self.player.unit_list)
+                         or u.building_to_create is not None):
                     self.building_routine(u)
 
         self.free_tiles()
@@ -146,7 +151,7 @@ class IA:
                     if tiles_to_gather:
                         pos_x = tiles_to_gather[i][0]
                         pos_y = tiles_to_gather[i][1]
-                        if look_around((pos_x, pos_y), self.map) and not found and \
+                        if better_look_around(unit.pos, (pos_x, pos_y), self.map) and not found and \
                                 (pos_x, pos_y) not in self.targeted_tiles:
                             unit.go_to_ressource(tiles_to_gather[i])
                             self.targeted_tiles.append((pos_x, pos_y))
@@ -197,15 +202,12 @@ class IA:
             for b in unit.owner.building_list:
                 if b.pos[0] == pos_x and b.pos[1] == pos_y and not unit.is_moving_to_build:
                     if not b.is_being_built:
-                        print("in_building_tiles : ", self.in_building_tiles)
-                        print("building_to_create pos", unit.building_to_create["pos"])
                         self.in_building_tiles.remove(unit.building_to_create["pos"])
                         unit.building_to_create = None
 
 
     def population_developpement_routine(self):
         self.player.towncenter.check_collision_and_spawn_villager_where_possible()
-        self.player.current_population += 1
 
 # ======================================================================================================================
 # -----------------------------------------------USEFUL FUNCTIONS-------------------------------------------------------
@@ -234,3 +236,7 @@ class IA:
         for tile in self.targeted_tiles:
             if self.map[tile[0]][tile[1]]["tile"] == "":
                 self.targeted_tiles.remove(tile)
+
+
+    def free_villagers(self):
+        pass

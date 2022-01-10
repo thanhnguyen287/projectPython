@@ -324,6 +324,7 @@ class TownCenter(Building):
             # update collision for new villager
             self.map.collision_matrix[self.pos[1] - 2][self.pos[0] + 2] = 0
 
+
     #trying to simplify that shit
     def check_collision_and_spawn_villager_where_possible(self):
 
@@ -409,9 +410,6 @@ class Unit:
         self.map.map[self.pos[0]][self.pos[1]]["tile"] = "unit"
         # 0 means collision = True
         self.map.collision_matrix[self.pos[0]][self.pos[1]] = 0
-
-        # we add the unit we created to the list of units of the player
-        self.owner.unit_list.append(self)
 
         self.current_health = self.max_health
         self.is_alive = True

@@ -174,3 +174,31 @@ def look_around(pos, map):
         list.append(False)
 
     return True if any(list) else False
+
+def better_look_around(villager_pos, ressource_pos, map):
+    list = []
+    if 0 <= ressource_pos[0] + 1 < MAP_SIZE_X and map[ressource_pos[0] + 1][ressource_pos[1]]["tile"] == "" and \
+            villager_pos[0] >= ressource_pos[0]:
+        list.append(True)
+    else:
+        list.append(False)
+
+    if 0 <= ressource_pos[0] - 1 < MAP_SIZE_X and map[ressource_pos[0] - 1][ressource_pos[1]]["tile"] == "" and \
+            villager_pos[0] <= ressource_pos[0]:
+        list.append(True)
+    else:
+        list.append(False)
+
+    if 0 <= ressource_pos[1] + 1 < MAP_SIZE_Y and map[ressource_pos[0]][ressource_pos[1] + 1]["tile"] == "" and \
+            villager_pos[1] >= ressource_pos[1]:
+        list.append(True)
+    else:
+        list.append(False)
+
+    if 0 <= ressource_pos[1] - 1 < MAP_SIZE_Y and map[ressource_pos[0]][ressource_pos[1] - 1]["tile"] == "" and \
+            villager_pos[1] <= ressource_pos[1]:
+        list.append(True)
+    else:
+        list.append(False)
+
+    return True if any(list) else False
