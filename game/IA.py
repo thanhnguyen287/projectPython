@@ -29,6 +29,9 @@ class IA:
         #number of each ressource needed for every villager
         self.limit = 150
 
+        #to know if we are developping pop or not to know if we can build a building or not
+        self.dev_pop = False
+
 # ======================================================================================================================
 # ------------------------------------------CONTROL AND RUNNING FUNCTIONS-----------------------------------------------
 # ======================================================================================================================
@@ -89,6 +92,7 @@ class IA:
         elif self.behaviour == "attack":
             self.attack_routine()
 
+
 # ======================================================================================================================
 # --------------------------------------------------MAIN ROUTINES-------------------------------------------------------
 # ======================================================================================================================
@@ -97,10 +101,6 @@ class IA:
     def neutral_routine(self):
         self.planning_gathering()
 
-        #print("buildings : ", len(self.player.building_list) + len(self.in_building_tiles))
-        #print("unit : ", len(self.player.unit_list))
-        #print(self.player.unit_list)
-
         #if we dont need ressources, we are not training units, we have free pop space and we have at least as many
         #buildings as units, then we can train a new unit
         if not self.needed_ressource and self.player.towncenter.queue == 0 and \
@@ -108,6 +108,7 @@ class IA:
                 len(self.player.building_list) >= len(self.player.unit_list):
 
             self.population_developpement_routine()
+            self.dev_pop = True
 
         #if we dont train unit, we will try to gather or to build
         else:
@@ -115,16 +116,15 @@ class IA:
 
                 #if we need ressources and the unit is a villager and he is free, he will go gather
                 if self.needed_ressource and isinstance(u, Villager) and u.building_to_create is None and \
-                        len(self.player.building_list) + len(self.in_building_tiles) >= len(self.player.unit_list):
+                        not self.dev_pop:
                     self.gathering_routine(u)
 
                 #if we dont need ressources or when the villager is building, we are using the building routine
-                elif isinstance(u,Villager) and \
-                        (len(self.player.building_list) + len(self.in_building_tiles) < len(self.player.unit_list)
-                         or u.building_to_create is not None):
+                elif isinstance(u,Villager) and (not self.dev_pop or u.building_to_create is not None):
                     self.building_routine(u)
 
         self.free_tiles()
+        self.dev_pop = False
 
     def defense_routine(self):
         pass
@@ -166,7 +166,8 @@ class IA:
                 for i in range(len(tiles_to_build)):
                     if tiles_to_build:
                         random_number = randint(0, len(tiles_to_build) - 1)
-                        if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles:
+                        if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles \
+                                and unit.building_to_create is None:
                             unit.go_to_build(tiles_to_build[random_number], "House")
                             self.in_building_tiles.append(tiles_to_build[random_number])
 
@@ -179,7 +180,8 @@ class IA:
                 for i in range(len(tiles_to_build)):
                     if tiles_to_build:
                         random_number = randint(0, len(tiles_to_build) - 1)
-                        if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles:
+                        if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles \
+                                and unit.building_to_create is None:
                             unit.go_to_build(tiles_to_build[random_number], "Farm")
                             self.in_building_tiles.append(tiles_to_build[random_number])
 
