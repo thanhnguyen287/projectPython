@@ -429,8 +429,9 @@ class Unit:
     def change_tile(self, new_tile):
         # remove the unit from its current position on the map
         if self.pos != new_tile:
-            self.angle = self.map.get_angle_between(self.pos, new_tile, self) if self.map.get_angle_between(self.pos,
-                                                                                                     new_tile, self) != -1 else ...
+            self.angle = self.map.get_angle_between(self.pos, new_tile, self) if \
+                self.map.get_angle_between(self.pos, new_tile, self) != -1 else ...
+
         self.map.units[self.pos[0]][self.pos[1]] = None
         self.map.map[self.pos[0]][self.pos[1]]["tile"] = ""
         #remove collision from old position

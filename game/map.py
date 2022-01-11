@@ -8,7 +8,7 @@ import pygame.mouse
 from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
-from player import playerOne, playerTwo, player_list
+from player import playerOne, playerTwo, player_list, MAIN_PLAYER
 from units import Villager, Unit, Farm, TownCenter, House, Building
 
 
@@ -436,7 +436,7 @@ class Map:
         return collision_matrix
 
     # here is the fonction that places the townhall randomly on the map
-    def place_townhall(self, the_player=playerOne):
+    def place_townhall(self, the_player=MAIN_PLAYER):
         while not the_player.townhall_placed:
             place_x = random.randint(0, self.grid_length_x - 2)
             place_y = random.randint(1, self.grid_length_y - 1)
@@ -466,7 +466,7 @@ class Map:
             self.map[place_x + 1][place_y - 1]["collision"] = True
 
     # here is the fonction that randomly places a player's starting units 4 tiles from the corner
-    def place_starting_units(self, the_player=playerOne):
+    def place_starting_units(self, the_player=MAIN_PLAYER):
         townhall_placed = False
 
         while not townhall_placed:
@@ -811,7 +811,7 @@ class Map:
     # temp tile is a dictionary containing name + image + render pos + iso_poly + collision
     # if player is looking for a tile to place a building, we highlight the tested tiles in RED or GREEN if the tile is free or not
     # we display the future building on the tested tile every time
-    def display_potential_building(self, screen, camera, the_player=playerOne):
+    def display_potential_building(self, screen, camera, the_player=MAIN_PLAYER):
         render_pos = self.temp_tile["render_pos"]
         grid = self.renderpos_to_grid(render_pos[0], render_pos[1])
 
@@ -838,7 +838,7 @@ class Map:
         self.display_building(screen, self.temp_tile, the_player.color, camera.scroll, render_pos, the_player,
                               is_hypothetical_building=True)
 
-    def display_building(self, screen, building, color: str, scroll, render_pos, the_player=playerOne,
+    def display_building(self, screen, building, color: str, scroll, render_pos, the_player=MAIN_PLAYER,
                          is_hypothetical_building=False,
                          is_build_possibility_display=False):
         # we either display the building fully constructed or being built ( 4 possible states )

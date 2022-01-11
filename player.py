@@ -102,18 +102,18 @@ class Player:
 
         resource_text_pos = 70
         for resource_type in range(4):
-            screen.blit(myfont.render(str(playerOne.resources[resource_type]), True, (255, 255, 255)),
+            screen.blit(myfont.render(str(MAIN_PLAYER.resources[resource_type]), True, (255, 255, 255)),
                         (resource_text_pos, 17))
             resource_text_pos += 83
 
         #population
-        population_text = str(playerOne.current_population) + "/" + str(playerOne.max_population)
+        population_text = str(MAIN_PLAYER.current_population) + "/" + str(MAIN_PLAYER.max_population)
 
         screen.blit(myfont.render(population_text, True, (255, 255, 255)), (resource_text_pos, 17))
         # age
         screen.blit(age_panel, (screen.get_size()[0]-age_panel.get_width(), 0))
         screen.blit(age_1, (screen.get_size()[0] - age_panel.get_width() + 12, 9))
-        population_text = str(playerOne.current_population) + "/" + str(playerOne.max_population)
+        population_text = str(MAIN_PLAYER.current_population) + "/" + str(MAIN_PLAYER.max_population)
         if self.age == 1:
             screen.blit(age_1, (screen.get_size()[0] - age_panel.get_width() + 12, 9))
             age_text = "Dark Age"
@@ -132,15 +132,17 @@ class Player:
 
         draw_text(screen, age_text, 18, "WHITE", (screen.get_size()[0] - age_panel.get_width() + 90, 17))
 
-#THIS ONE MUST BE THE PLAYER CONTROLLED BY US
+
 playerOne = Player("Lucien", True, [1000, 10000, 10000, 10000], color="BLUE")
 playerOne.age = 1
 
-# THIS ONE MUST BE THE PLAYER CONTROLLED BY THE AI
 playerTwo = Player("AI", True, [1000, 1000, 1000, 1000], color="RED")
-playerTwo.age = 2
+playerTwo.age = 1
 player_list = [playerOne, playerTwo]
 #  INIT FOR RESSOURCES DISPLAY
+
+#define which player is controlled by us
+MAIN_PLAYER = playerTwo
 
 def str_to_entity_class(name: str):
     if name == "TownCenter":

@@ -2,7 +2,7 @@ from settings import *
 import pygame
 from math import floor
 from .utils import draw_text, scale_image, get_color_code
-from player import playerOne, playerTwo, player_list
+from player import playerOne, playerTwo, player_list, MAIN_PLAYER
 from units import Villager, TownCenter, House, Farm, Building
 # from buildings import TownCenter, House, Farm, Building
 from .ActionMenu import *
@@ -126,7 +126,7 @@ class Hud:
 
         return tiles
 
-    def update(self, screen, the_player=playerOne):
+    def update(self, screen, the_player=MAIN_PLAYER):
 
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         mouse_action = pygame.mouse.get_pressed()
@@ -197,7 +197,7 @@ class Hud:
 
         # display
 
-    def draw(self, screen, map, camera, the_player=playerOne):
+    def draw(self, screen, map, camera, the_player=MAIN_PLAYER):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         # entity is string corresponding to class unit/building name
         for entity in self.death_animations:
@@ -414,9 +414,7 @@ class Hud:
         # as we are scaling it, we make a copy
         if isinstance(self.examined_tile, Building):
             if self.examined_tile.__class__.__name__ != "Farm":
-                img = \
-                self.first_age_building_sprites[self.examined_tile.__class__.__name__][self.examined_tile.owner.color][
-                    self.examined_tile.owner.age - 1].copy()
+                img = self.first_age_building_sprites[self.examined_tile.__class__.__name__][self.examined_tile.owner.color][self.examined_tile.owner.age - 1].copy()
             else:
                 img = self.first_age_building_sprites[self.examined_tile.__class__.__name__][
                     self.examined_tile.owner.color].copy()
@@ -541,7 +539,7 @@ class Hud:
                       (self.trained_unit_icon_pos[0] + 43, self.trained_unit_icon_pos[1] + 37))
 
     # display what entity, its costs, and a brief description
-    def display_construction_tooltip(self, screen, entity, the_player=playerOne):
+    def display_construction_tooltip(self, screen, entity, the_player=MAIN_PLAYER):
         display_tooltip_for_entity = True
         display_tooltip_for_tech = False
         if entity == "Villager":
