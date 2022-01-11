@@ -4,7 +4,7 @@ from units import Villager
 from random import randint
 
 
-class IA:
+class AI:
 
     def __init__(self, player, map):
         self.player = player
@@ -89,6 +89,7 @@ class IA:
             self.defense_routine()
         elif self.behaviour == "attack":
             self.attack_routine()
+
 
     # ==================================================================================================================
     # ------------------------------------------------MAIN ROUTINES-----------------------------------------------------
@@ -266,7 +267,7 @@ class IA:
                     if type(u) != Villager:
                         number_of_their_attack_unit += 1
 
-                if number_of_my_attack_unit >= 1.25 * number_of_their_attack_unit:
+                if number_of_my_attack_unit != 0 and number_of_my_attack_unit >= 1.25 * number_of_their_attack_unit:
                     return True
                 else:
                     return False

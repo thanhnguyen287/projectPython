@@ -3,7 +3,7 @@ from .map import *
 from .utils import draw_text
 from .hud import Hud
 from .animation import *
-from .IA import IA
+from .AI import AI
 
 
 class Game:
@@ -33,7 +33,8 @@ class Game:
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
 
         # IA
-        self.IA = IA(playerOne, self.map.map)
+        self.AI_1 = AI(playerTwo, self.map.map)
+        #self.AI_2 = AI(playerOne, self.map.map)
 
     def run(self):
         self.playing = True
@@ -42,7 +43,8 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            #self.IA.run()
+            self.AI_1.run()
+            #self.AI_2.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -71,8 +73,8 @@ class Game:
                     if self.map.hud.examined_tile is not None and self.map.hud.examined_tile.name == "Villager":
                         villager_pos = self.map.hud.examined_tile.pos
                         this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
-                        print("Info about villager, print is in game, events")
-                        this_villager.print_state()
+                        #("Info about villager, print is in game, events")
+                        #this_villager.print_state()
 
                     for button in self.hud.bottom_left_menu:
                         if button["rect"].collidepoint(mouse_pos):

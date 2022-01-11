@@ -2,7 +2,7 @@ from settings import *
 import pygame
 from math import floor
 from .utils import draw_text, scale_image, get_color_code
-from player import playerOne
+from player import playerOne, playerTwo, player_list
 from units import Villager, TownCenter, House, Farm, Building
 # from buildings import TownCenter, House, Farm, Building
 from .ActionMenu import *

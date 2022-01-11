@@ -19,7 +19,6 @@ class Building:
 
         #allows to test the types of target in game
         BUILDING_TYPES.append(type(self))
-        print(BUILDING_TYPES)
 
         # pos is the tile position, for ex : (4,4)
         self.pos = pos

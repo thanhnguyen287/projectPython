@@ -25,6 +25,7 @@ class Player:
 
         self.towncenter_pos = None
         self.towncenter = None
+        self.townhall_placed = False
 
         self.entity_costs = {
             "Farm": {"wood": 100, "food": 0, "gold": 0, "stone": 0},
@@ -131,11 +132,14 @@ class Player:
 
         draw_text(screen, age_text, 18, "WHITE", (screen.get_size()[0] - age_panel.get_width() + 90, 17))
 
-playerOne = Player("Tristan", True, [100, 10000, 10000, 10000], color="BLUE")
+#THIS ONE MUST BE THE PLAYER CONTROLLED BY US
+playerOne = Player("Lucien", True, [1000, 10000, 10000, 10000], color="BLUE")
 playerOne.age = 1
 
-
-player_list = [playerOne]
+# THIS ONE MUST BE THE PLAYER CONTROLLED BY THE AI
+playerTwo = Player("AI", True, [1000, 1000, 1000, 1000], color="RED")
+playerTwo.age = 2
+player_list = [playerOne, playerTwo]
 #  INIT FOR RESSOURCES DISPLAY
 
 def str_to_entity_class(name: str):

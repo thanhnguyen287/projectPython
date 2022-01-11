@@ -8,7 +8,7 @@ import pygame.mouse
 from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
-from player import playerOne, player_list
+from player import playerOne, playerTwo, player_list
 from units import Villager, Unit, Farm, TownCenter, House, Building
 
 
@@ -35,8 +35,7 @@ class Map:
         self.resources_list = []
 
         self.map = self.create_map()
-        # used in the fonction that places the townhall randomly on the map
-        self.townhall_placed = False
+
         self.place_x = 0
         self.place_y = 0
         # here we place the townhall randomly on the map
@@ -214,7 +213,7 @@ class Map:
                                                     camera.scroll,
                                                     multiple_tiles_tiles_flag=True)
                 self.display_building(screen, building, building.owner.color, camera.scroll,
-                                      self.grid_to_renderpos(building.pos[0], building.pos[1]))
+                                      self.grid_to_renderpos(building.pos[0], building.pos[1]), player)
                 if self.examined_tile is not None:
                     if (building.pos[0] == self.examined_tile[0]) and (building.pos[1] == self.examined_tile[1]):
                         self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
@@ -222,7 +221,7 @@ class Map:
             # units display. If units selected, we highlight the tile. If units not full health, we display its health bar
             for unit in player.unit_list:
                 if unit.current_health <= 0:
-                    #self.remove_entity(unit, camera.scroll)
+                    # self.remove_entity(unit, camera.scroll)
                     ...
                 elif unit.current_health < unit.max_health:
                     self.hud.display_life_bar(screen, unit, self, for_hud=False, camera=camera)
@@ -243,8 +242,9 @@ class Map:
         # temp tile is a dictionary containing name + image + render pos + iso_poly + collision
         # if player is looking for a tile to place a building, we highlight the tested tiles in RED or GREEN if the tile is free or not
         # we display the future building on the tested tile every time
-        if self.temp_tile is not None:
-            self.display_potential_building(screen, camera)
+        for p in player_list:
+            if self.temp_tile is not None:
+                self.display_potential_building(screen, camera, p)
 
     def load_images(self):
         block = pygame.image.load(os.path.join(assets_path, "block.png")).convert_alpha()
@@ -437,7 +437,7 @@ class Map:
 
     # here is the fonction that places the townhall randomly on the map
     def place_townhall(self, the_player=playerOne):
-        while not self.townhall_placed:
+        while not the_player.townhall_placed:
             place_x = random.randint(0, self.grid_length_x - 2)
             place_y = random.randint(1, self.grid_length_y - 1)
 
@@ -451,7 +451,7 @@ class Map:
             self.entities.append(new_building)
             self.buildings[place_x][place_y] = new_building
 
-            self.townhall_placed = True
+            the_player.townhall_placed = True
 
             the_player.towncenter_pos = (place_x, place_y)
             the_player.towncenter = new_building
@@ -473,8 +473,12 @@ class Map:
             # (x : 0 if left, 1 if right ; y : 1 if bottom, 0 if top)
             place_x = random.randint(0, 1)
             place_y = random.randint(0, 1)
-            place_x = 0
-            place_y = 0
+            if the_player == playerTwo:
+                place_x = 0
+                place_y = 0
+            elif the_player == playerOne:
+                place_x = 1
+                place_y = 0
 
             # top_left
             if (place_x, place_y) == (0, 0):
@@ -524,7 +528,8 @@ class Map:
                 # we place towncenter
                 new_building = TownCenter((self.grid_length_x - 6, self.grid_length_y - 5), self, the_player)
                 # starting unit
-                start_unit = Villager(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"], the_player, self)
+                start_unit = Villager(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"], the_player,
+                                      self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"])
 
@@ -602,7 +607,7 @@ class Map:
                                                                        age=entity.owner.age)
         elif type(entity) == Villager:
             entity.owner.current_population -= 1
-            print("death anim", self.hud.death_animations)
+            #print("death anim", self.hud.death_animations)
             self.hud.death_animations["Villager"]["animation"].play(death_pos, color=entity.owner.color,
                                                                     angle=entity.angle)
 
@@ -616,7 +621,7 @@ class Map:
     # returns true if there is collision, else False
     def is_there_collision(self, grid_pos: [int, int]):
         return True if (self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 or self.map[grid_pos[0]][grid_pos[1]][
-            "collision"] == True) else False
+            "collision"]) else False
 
     # return a list of empty tiles around origin
     def get_empty_adjacent_tiles(self, origin_pos: [int, int], origin_size=1):
@@ -743,11 +748,11 @@ class Map:
             if (type(unit.target) in UNIT_TYPES and unit.target.pos != unit.pos) or type(unit.target) in BUILDING_TYPES:
                 target = unit.target
 
-            #if we attack a ressource, we go gather it
+            # if we attack a ressource, we go gather it
             if unit.targeted_ressource is not None:
                 target = unit.map.map[unit.targeted_ressource[0]][unit.targeted_ressource[1]]
 
-            #if the unit is attacking, we highlight the tile she is attacking in DARK RED
+            # if the unit is attacking, we highlight the tile she is attacking in DARK RED
             if target is not None and (unit.is_attacking or unit.is_moving_to_attack):
                 # target highlighted in dark red
                 self.highlight_tile(target.pos[0], target.pos[1], screen, "DARK_RED", camera.scroll)
@@ -784,9 +789,10 @@ class Map:
                     future_building = unit.building_to_create
                     future_building_render_pos = self.grid_to_renderpos(future_building["pos"][0],
                                                                         future_building["pos"][1])
-                    self.display_building(screen, future_building, unit.owner.color, camera.scroll,
-                                          future_building_render_pos,
-                                          is_hypothetical_building=True, is_build_possibility_display=True)
+                    for p in player_list:
+                        self.display_building(screen, future_building, unit.owner.color, camera.scroll,
+                                              future_building_render_pos, p,
+                                              is_hypothetical_building=True, is_build_possibility_display=True)
             # display unit model
             if type(unit) != Villager:
                 screen.blit(unit.sprite, (
@@ -814,8 +820,8 @@ class Map:
         if self.temp_tile["name"] == "TownCenter":
             # collision matrix : 0 if collision, else 1, we check the 4 cases of the town center
             if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or \
-                    self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or self.collision_matrix[grid[1] - 1][
-                grid[0]] == 0:
+                    self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or \
+                    self.collision_matrix[grid[1] - 1][grid[0]] == 0:
                 self.highlight_tile(grid[0], grid[1] - 1, screen, "RED", camera.scroll, multiple_tiles_tiles_flag=True)
             else:
                 self.highlight_tile(grid[0], grid[1] - 1, screen, "GREEN", camera.scroll,
@@ -829,11 +835,12 @@ class Map:
                 self.highlight_tile(grid[0], grid[1], screen, "GREEN", camera.scroll)
 
         # display the buildable building on the tile
-        self.display_building(screen, self.temp_tile, the_player.color, camera.scroll, render_pos,
+        self.display_building(screen, self.temp_tile, the_player.color, camera.scroll, render_pos, the_player,
                               is_hypothetical_building=True)
 
-    def display_building(self, screen, building, color: str, scroll, render_pos, is_hypothetical_building=False,
-                         is_build_possibility_display=False, the_player=playerOne):
+    def display_building(self, screen, building, color: str, scroll, render_pos, the_player=playerOne,
+                         is_hypothetical_building=False,
+                         is_build_possibility_display=False):
         # we either display the building fully constructed or being built ( 4 possible states )
         if not is_hypothetical_building:
             offset = (0, 0)
