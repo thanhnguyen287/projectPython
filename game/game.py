@@ -115,12 +115,12 @@ class Game:
                             # ATTACK
                             if self.map.units[pos_x][pos_y] is not None or self.map.buildings[pos_x][pos_y] is not None:
                                 # si les deux unites sont adjacentes:
-                                target_to_attack = self.map.units[pos_x][pos_y] if self.map.units[pos_x][pos_y] is not None else \
-                                    self.map.buildings[pos_x][pos_y]
+                                target_to_attack = self.map.units[pos_x][pos_y] if \
+                                    self.map.units[pos_x][pos_y] is not None else self.map.buildings[pos_x][pos_y]
                                 this_villager.targeted_ressource = target_to_attack
 
                                 if this_villager.is_adjacent_to(target_to_attack):
-                                    this_villager.is_fighting = True
+                                    this_villager.is_attacking = True
                                 else:
                                     this_villager_dest = self.map.get_empty_adjacent_tiles((pos_x, pos_y))[0]
                                     this_villager.move_to(self.map.map[this_villager_dest[0]][this_villager_dest[1]])

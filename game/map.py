@@ -735,7 +735,7 @@ class Map:
             if unit.target is not None and type(unit.target) != Villager:
                 target = unit.map.map[unit.target[0]][unit.target[1]]
 
-            if unit.is_fighting or unit.is_moving_to_fight:
+            if unit.is_attacking or unit.is_moving_to_attack:
                 # target highlighted in dark red
                 self.highlight_tile(target.pos[0], target.pos[1], screen, "DARK_RED", camera.scroll)
 
@@ -743,13 +743,14 @@ class Map:
                 ...
                 # self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
 
-            if unit.searching_for_path and not unit.is_moving_to_gather and not unit.is_moving_to_build and not unit.is_moving_to_gather:
+            if unit.searching_for_path and not unit.is_moving_to_gather and not unit.is_moving_to_build and \
+                    not unit.is_moving_to_gather:
                 screen.blit(scale_image(move_icon, w=40), (
                     render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
                     render_pos[1] - (
                             self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 80)
                             )
-            elif unit.is_fighting or unit.is_gathering or unit.is_moving_to_gather:
+            elif unit.is_attacking or unit.is_gathering or unit.is_moving_to_gather:
                 screen.blit(scale_image(attack_icon, w=40), (
                     render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
                     render_pos[1] - (
@@ -928,7 +929,7 @@ class Map:
         elif unit.angle == 315:
             unit.sprite_index = 7
 
-        if unit.is_fighting or unit.is_gathering:
+        if unit.is_attacking or unit.is_gathering:
             animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
             animation_pos = (
                 animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
