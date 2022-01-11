@@ -7,7 +7,7 @@ from tech import Age_II, Age_III, Age_IV
 import os
 import pygame
 from math import ceil
-from game.utils import tile_founding
+from game.utils import tile_founding, GENERAL_UNIT_LIST
 
 
 class Building:
@@ -386,6 +386,7 @@ class Unit:
 
         # we add the unit we created to the list of units of the player
         self.owner.unit_list.append(self)
+        GENERAL_UNIT_LIST.append(self)
         self.owner.current_population += 1
 
         self.current_health = self.max_health
@@ -414,8 +415,8 @@ class Unit:
 
     # returns True if entity is adjacent to unit/building calling it, else False
     def is_adjacent_to(self, entity):
-        if (abs(self.pos[0] - entity.pos[0]) == 1 and abs(self.pos[1] - entity.pos[1]) == 0) or \
-                (abs(self.pos[0] - entity.pos[0]) == 0 and abs(self.pos[1] - entity.pos[1]) == 1):
+        if (abs(self.pos[0] - entity.pos[0]) <= 1 and self.pos[1] == entity.pos[1]) or \
+                (self.pos[0] == entity.pos[0] and abs(self.pos[1] - entity.pos[1]) <= 1):
             return True
         else:
             return False
@@ -535,11 +536,32 @@ class Villager(Unit):
             self.move_to(self.map.map[unit_dest[0]][unit_dest[1]])
             self.is_moving_to_attack = True
 
-            self.target = pos
+            for u in GENERAL_UNIT_LIST:
+                if u.pos == pos:
+                    self.target = u
 
     def attack(self):
-        #if self.
-        pass
+        if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
+
+            self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
+
+            if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
+
+                if self.target.current_health >= 0:
+                    self.target.current_health -= self.attack_dmg
+                    self.attack_cooldown = self.now
+                    self.gathered_resources_stack += 1
+
+                # else the unit is dead
+                else:
+                    pass
+                    #tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
+                    #tile["tile"] = ""
+                    #tile["collision"] = False
+                    #self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
+                    self.target = None
+                    self.is_attacking = False
+                    #self.map.hud.villager_attack_animations["Villager"]["animation"].to_be_played = False
 
     def go_to_build(self, pos, name):
         if self.map.get_empty_adjacent_tiles(pos):
@@ -687,6 +709,9 @@ class Villager(Unit):
 
         if self.is_gathering:
             self.gather_ressources()
+
+        if self.is_attacking:
+            self.attack()
 
 
     def print_state(self):

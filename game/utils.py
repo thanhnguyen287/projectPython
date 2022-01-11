@@ -4,6 +4,8 @@ from settings import MAP_SIZE_X, MAP_SIZE_Y
 
 RESSOURCE_LIST = ["wood", "food", "gold", "stone"]
 
+GENERAL_UNIT_LIST = []
+
 def draw_text(screen, text, size, color, pos):
     # create a Font object from the system fonts
     # SysFont(name, size, bold=False, italic=False)
@@ -202,3 +204,14 @@ def better_look_around(villager_pos, ressource_pos, map):
         list.append(False)
 
     return True if any(list) else False
+
+
+def is_adjacent_to(pos1, pos2):
+    if 0 <= pos1[0] < MAP_SIZE_X and 0 <= pos2[0] < MAP_SIZE_X and 0 <= pos1[1] < MAP_SIZE_Y and \
+            0 <= pos2[1] < MAP_SIZE_Y:
+        if (abs(pos1[0] - pos2[0]) <= 1 and pos1[1] == pos2[1]) or \
+                (abs(pos1[1] - pos2[1]) <= 1 and pos1[0] == pos2[0]):
+            return True
+
+        else:
+            return False

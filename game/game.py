@@ -43,7 +43,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            self.IA.run()
+            #self.IA.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -115,16 +115,22 @@ class Game:
                             # ATTACK
                             if self.map.units[pos_x][pos_y] is not None or self.map.buildings[pos_x][pos_y] is not None:
                                 # si les deux unites sont adjacentes:
-                                target_to_attack = self.map.units[pos_x][pos_y] if \
+                                this_villager.go_to_attack((pos_x, pos_y))
+                                """target_to_attack = self.map.units[pos_x][pos_y] if \
                                     self.map.units[pos_x][pos_y] is not None else self.map.buildings[pos_x][pos_y]
-                                this_villager.targeted_ressource = target_to_attack
+                                this_villager.target = target_to_attack
+
+                                if self.map.map[pos_x][pos_y]["tile"] != "" and \
+                                        self.map.map[pos_x][pos_y]["tile"] != "building" and \
+                                        self.map.map[pos_x][pos_y]["tile"] != "unit":
+                                    this_villager.targeted_ressource = (pos_x, pos_y)
 
                                 if this_villager.is_adjacent_to(target_to_attack):
                                     this_villager.is_attacking = True
                                 else:
                                     this_villager_dest = self.map.get_empty_adjacent_tiles((pos_x, pos_y))[0]
                                     this_villager.move_to(self.map.map[this_villager_dest[0]][this_villager_dest[1]])
-                                    this_villager.is_moving_to_attack = True
+                                    this_villager.is_moving_to_attack = True"""
 
                             # ONLY MOVEMENT
                             if not self.map.map[grid_pos[0]][grid_pos[1]]["collision"] and \

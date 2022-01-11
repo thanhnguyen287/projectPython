@@ -220,7 +220,8 @@ class Map:
             # units display. If units selected, we highlight the tile. If units not full health, we display its health bar
             for unit in player.unit_list:
                 if unit.current_health <= 0:
-                    self.remove_entity(unit, camera.scroll)
+                    #self.remove_entity(unit, camera.scroll)
+                    ...
                 elif unit.current_health < unit.max_health:
                     self.hud.display_life_bar(screen, unit, self, for_hud=False, camera=camera)
                 # if building is selected, we highlight its tile
@@ -732,8 +733,11 @@ class Map:
             if type(unit.target) == Villager and unit.target.pos == unit.pos:
                 unit.target = None
 
-            if unit.target is not None and type(unit.target) != Villager:
-                target = unit.map.map[unit.target[0]][unit.target[1]]
+            if type(unit.target) == Villager and unit.target.pos != unit.pos:
+                target = unit.target
+
+            if unit.targeted_ressource is not None:
+                target = unit.map.map[unit.targeted_ressource[0]][unit.targeted_ressource[1]]
 
             if unit.is_attacking or unit.is_moving_to_attack:
                 # target highlighted in dark red
@@ -741,7 +745,7 @@ class Map:
 
             elif unit.is_gathering or unit.is_moving_to_gather:
                 ...
-                # self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
+                self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
 
             if unit.searching_for_path and not unit.is_moving_to_gather and not unit.is_moving_to_build and \
                     not unit.is_moving_to_gather:
