@@ -83,7 +83,7 @@ class Player:
             entity_class = str_to_entity_class(entity_class)
         for resource_type in range(4):
             self.resources[resource_type] -= entity_class.construction_cost[resource_type]
-        self.current_population += entity_class.population_produced
+        #self.current_population += entity_class.population_produced
 
     def refund_entity_cost(self, entity_class):
         for resource_type in range(4):

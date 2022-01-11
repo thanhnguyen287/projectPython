@@ -43,7 +43,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            #self.IA.run()
+            self.IA.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -88,15 +88,8 @@ class Game:
                             else:
                                 if button["affordable"]:
                                     if button["name"] == "Villager" and not self.hud.examined_tile.is_being_built:
-                                        self.hud.examined_tile.queue += 1
-                                        #if the town center is not working
-                                        if not self.hud.examined_tile.is_working:
-                                            self.hud.examined_tile.unit_type_currently_trained = Villager
-                                            self.hud.examined_tile.is_working = True
-                                            self.hud.examined_tile.resource_manager_cooldown = pygame.time.get_ticks()
-                                        #pay training cost
-                                        unit_type_trained = self.hud.examined_tile.unit_type_currently_trained
-                                        self.hud.examined_tile.owner.pay_entity_cost_bis(unit_type_trained)
+                                        self.hud.examined_tile.train(Villager)
+
                                     elif button["name"] == "Advance to Feudal Age" or button["name"] == "Advance to Castle Age" or button["name"] == "Advance to Imperial Age":
                                         self.hud.examined_tile.research_tech(button["name"])
                                     else:
@@ -124,7 +117,7 @@ class Game:
                                 # si les deux unites sont adjacentes:
                                 target_to_attack = self.map.units[pos_x][pos_y] if self.map.units[pos_x][pos_y] is not None else \
                                     self.map.buildings[pos_x][pos_y]
-                                this_villager.target = target_to_attack
+                                this_villager.targeted_ressource = target_to_attack
 
                                 if this_villager.is_adjacent_to(target_to_attack):
                                     this_villager.is_fighting = True
@@ -135,7 +128,7 @@ class Game:
 
                             # ONLY MOVEMENT
                             if not self.map.map[grid_pos[0]][grid_pos[1]]["collision"] and \
-                                    not this_villager.is_gathering and this_villager.target is None:
+                                    not this_villager.is_gathering and this_villager.targeted_ressource is None:
                                 this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
 
                             # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving

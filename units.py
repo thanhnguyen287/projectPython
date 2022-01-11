@@ -318,6 +318,18 @@ class TownCenter(Building):
             self.owner.resources[resource_type] -= tech.construction_costs[resource_type]
 
 
+    def train(self, unit_type):
+        self.queue += 1
+        # if the town center is not working
+        if not self.is_working:
+            self.unit_type_currently_trained = unit_type
+            self.is_working = True
+            self.resource_manager_cooldown = pygame.time.get_ticks()
+        # pay training cost
+        unit_type_trained = self.unit_type_currently_trained
+        self.owner.pay_entity_cost_bis(unit_type_trained)
+
+
 class House(Building):
     description = " Each House increases the maximum population by 5."
     construction_tooltip = " Build a House"
@@ -465,18 +477,29 @@ class Villager(Unit):
         self.range = 0
         # used to gather ressources
         # between 0 and 360, 0 being top, 90 right, etc.... Only 0, 45, 90, 135, etc (up to 360 ofc) supported for now
-        self.is_moving_to_build = False
-        self.is_moving_to_fight = False
+
         self.display_pos = pos
+
+        #to build
+        self.is_moving_to_build = False
         self.building_to_create = None
+
+        #to gather
         self.is_moving_to_gather = False
-        self.is_building = False
+        self.targeted_ressource = None
+
+        #to attack
+        self.is_moving_to_attack = False
         self.target = None
+
+        self.is_building = False
         self.is_gathering = False
-        self.is_fighting = False
+        self.is_attacking = False
+
         self.gathered_resources_stack = 0
-        #Training : 50 FOOD, 2s
-        self.construction_cost = [0, 10, 25, 0]
+
+        #Training : 25 food and 10 gold, 2s
+        self.construction_cost = [0, 25, 10, 0]
         self.construction_time = 5
         self.population_produced = 1
         self.now = 0
@@ -490,7 +513,7 @@ class Villager(Unit):
         else:
             ...
 
-    def attack(self):
+    """def attack(self):
         #target has enough health to survive
         if self.is_fighting and (self.now - self.attack_cooldown > self.attack_speed):
             self.angle = self.map.get_angle_between(self.pos, new_tile, self) if self.map.get_angle_between(self.pos,
@@ -504,7 +527,19 @@ class Villager(Unit):
             else:
                 self.map.remove_entity(self.target)
                 self.target = None
-                self.is_fighting = False
+                self.is_fighting = False"""
+
+    def go_to_attack(self, pos):
+        if self.map.get_empty_adjacent_tiles(pos):
+            unit_dest = self.map.get_empty_adjacent_tiles(pos)[0]
+            self.move_to(self.map.map[unit_dest[0]][unit_dest[1]])
+            self.is_moving_to_attack = True
+
+            self.target = pos
+
+    def attack(self):
+        #if self.
+        pass
 
     def go_to_build(self, pos, name):
         if self.map.get_empty_adjacent_tiles(pos):
@@ -556,38 +591,38 @@ class Villager(Unit):
         # if the ressource is near us, we directly gather it
         if (abs(pos[0] - self.pos[0]) <= 1 and abs(pos[1] - self.pos[1]) == 0) or \
                 (abs(pos[0] - self.pos[0]) == 0 and abs(pos[1] - self.pos[1]) <= 1):
-            self.target = (pos[0], pos[1])
+            self.targeted_ressource = (pos[0], pos[1])
             self.is_gathering = True
 
         # else we go to an adjacent tile
         else:
             if 0 <= pos[0] - 1 < self.map.grid_length_x and self.map.map[pos[0] - 1][pos[1]]["tile"] == "":
                 self.move_to(self.map.map[pos[0] - 1][pos[1]])
-                self.target = (pos[0], pos[1])
+                self.targeted_ressource = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
             elif 0 <= pos[0] + 1 < self.map.grid_length_x and self.map.map[pos[0] + 1][pos[1]]["tile"] == "":
                 self.move_to(self.map.map[pos[0] + 1][pos[1]])
-                self.target = (pos[0], pos[1])
+                self.targeted_ressource = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
             elif 0 <= pos[1] - 1 < self.map.grid_length_y and self.map.map[pos[0]][pos[1] - 1]["tile"] == "":
                 self.move_to(self.map.map[pos[0]][pos[1] - 1])
-                self.target = (pos[0], pos[1])
+                self.targeted_ressource = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
             elif 0 <= pos[0] + 1 < self.map.grid_length_y and self.map.map[pos[0]][pos[1] + 1]["tile"] == "":
                 self.move_to(self.map.map[pos[0]][pos[1] + 1])
-                self.target = (pos[0], pos[1])
+                self.targeted_ressource = (pos[0], pos[1])
                 self.is_moving_to_gather = True
 
             else:
-                self.target = None
+                self.targeted_ressource = None
 
     def gather_ressources(self):
-        if self.target is not None and type(self.target) != Villager:
-            this_target = self.map.map[self.target[0]][self.target[1]]
-            self.angle = self.map.get_angle_between(self.pos, self.target, self)
+        if self.targeted_ressource is not None and type(self.targeted_ressource) != Villager:
+            this_target = self.map.map[self.targeted_ressource[0]][self.targeted_ressource[1]]
+            self.angle = self.map.get_angle_between(self.pos, self.targeted_ressource, self)
 
             if self.is_gathering and (self.now - self.attack_cooldown > self.attack_speed):
 
@@ -609,7 +644,7 @@ class Villager(Unit):
                     this_target["tile"] = ""
                     this_target["collision"] = False
                     self.map.collision_matrix[this_target["grid"][1]][this_target["grid"][0]] = 1
-                    self.target = None
+                    self.targeted_ressource = None
                     self.is_gathering = False
                     self.map.hud.villager_attack_animations["Villager"]["animation"].to_be_played = False
 
@@ -636,9 +671,9 @@ class Villager(Unit):
                         self.is_building = True
                         self.build()
                         self.is_moving_to_build = False
-                    elif self.is_moving_to_fight:
-                        self.is_fighting = True
-                        self.is_moving_to_fight = False
+                    elif self.is_moving_to_attack:
+                        self.is_attacking = True
+                        self.is_moving_to_attack = False
                     elif self.is_moving_to_gather:
                         self.is_gathering = True
                         self.is_moving_to_gather = False
@@ -652,11 +687,6 @@ class Villager(Unit):
 
         if self.is_gathering:
             self.gather_ressources()
-
-
-            # fighting
-        if self.is_fighting:
-            self.attack()
 
 
     def print_state(self):
