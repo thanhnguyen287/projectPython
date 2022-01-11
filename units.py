@@ -393,7 +393,6 @@ class Unit:
 
         # allows to test the types of target in game
         UNIT_TYPES.append(type(self))
-        print(UNIT_TYPES)
 
         self.is_alive = True
         self.angle = angle
