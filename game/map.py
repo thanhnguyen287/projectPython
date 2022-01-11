@@ -733,6 +733,7 @@ class Map:
             if type(unit.target) == Villager and unit.target.pos == unit.pos:
                 unit.target = None
 
+            #gerer le cas ou c'est un batiment !!!
             if type(unit.target) == Villager and unit.target.pos != unit.pos:
                 target = unit.target
 

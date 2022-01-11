@@ -492,6 +492,7 @@ class Villager(Unit):
         #to attack
         self.is_moving_to_attack = False
         self.target = None
+        self.strike = 0
 
         self.is_building = False
         self.is_gathering = False
@@ -551,17 +552,24 @@ class Villager(Unit):
                     self.target.current_health -= self.attack_dmg
                     self.attack_cooldown = self.now
                     self.gathered_resources_stack += 1
+                    self.strike += 1
 
                 # else the unit is dead
                 else:
                     pass
-                    #tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
-                    #tile["tile"] = ""
-                    #tile["collision"] = False
-                    #self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
+                    tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
+                    tile["tile"] = ""
+                    tile["collision"] = False
+                    self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
                     self.target = None
                     self.is_attacking = False
-                    #self.map.hud.villager_attack_animations["Villager"]["animation"].to_be_played = False
+                    self.map.hud.villager_attack_animations["Villager"]["animation"].to_be_played = False
+                    self.strike = 0
+
+        if self.target is not None and not self.target.is_attacking and self.strike > 1:
+            self.target.target = self
+            self.target.is_attacking = True
+            self.target.attack()
 
     def go_to_build(self, pos, name):
         if self.map.get_empty_adjacent_tiles(pos):

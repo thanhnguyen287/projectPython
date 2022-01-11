@@ -60,6 +60,7 @@ class Animation(pygame.sprite.Sprite):
     def play(self, pos=(0, 0), anchor_list=None, color="BLUE", angle="0"):
         self.color = color
         self.angle = angle
+        if angle == 360: angle = 0
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos[0], pos[1]]
         #self.image = self.sprites["BLUE"][0][self.current_sprite]
