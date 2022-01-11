@@ -124,9 +124,22 @@ class IA:
         self.dev_pop = False
 
     def defense_routine(self):
-        pass
+        for p in player_list:
+            if p != self.player:
+                for u in p.unit_list:
+                    if abs(self.tc_pos[0] - u.pos[0]) < 10 and abs(self.tc_pos[1] - u.pos[1]) < 10:  # in tiles
+                        pos_unit_to_attack = u.pos
 
-    # TODO
+                        focused = False
+
+                        for my_u in self.player.unit_list:
+                            # et rajouter si le type de l'unité n'est pas un villageois
+                            if my_u.building_to_create is None and my_u.targeted_ressource is None and \
+                                    my_u.target is None and not focused:
+                                my_u.go_to_attack(pos_unit_to_attack)
+                                focused = True
+        #creer une routine de repli des villageois près de l'hotel de ville
+
 
     def attack_routine(self):
         pass
@@ -236,11 +249,24 @@ class IA:
                 self.needed_ressource.remove(RESSOURCE_LIST[i])
 
     def is_stronger(self):
+        #we count the number of attack unit we get
+        number_of_my_attack_unit = 0
+        for u in self.player.unit_list:
+            if type(u) != Villager:
+                number_of_my_attack_unit += 1
+
+
+    # for each enemy player we count the number of their enemy attack unit to know if we are stronger
         for p in player_list:
+            number_of_their_attack_unit = 0
             if p != self.player:
                 # we have at least 25% more units, only works without fog of war because we are looking at all
                 # enemy units
-                if len(self.player.unit_list) >= 1.25 * len(p.unit_list):
+                for u in p.unit_list:
+                    if type(u) != Villager:
+                        number_of_their_attack_unit += 1
+
+                if number_of_my_attack_unit >= 1.25 * number_of_their_attack_unit:
                     return True
                 else:
                     return False

@@ -50,7 +50,9 @@ class Map:
         # universal timer
         self.timer = 0
 
-        self.place_starting_units(playerOne)
+        for p in player_list:
+            self.place_starting_units(p)
+
         self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
 
     def create_map(self):
@@ -434,7 +436,7 @@ class Map:
         return collision_matrix
 
     # here is the fonction that places the townhall randomly on the map
-    def place_townhall(self):
+    def place_townhall(self, the_player=playerOne):
         while not self.townhall_placed:
             place_x = random.randint(0, self.grid_length_x - 2)
             place_y = random.randint(1, self.grid_length_y - 1)
@@ -442,7 +444,7 @@ class Map:
             self.place_x = place_x
             self.place_y = place_y
 
-            new_building = TownCenter((place_x, place_y), self, playerOne)
+            new_building = TownCenter((place_x, place_y), self, the_player)
             new_building.is_being_built = False
             new_building.construction_progress = 100
             new_building.current_health = new_building.max_health
@@ -451,8 +453,8 @@ class Map:
 
             self.townhall_placed = True
 
-            playerOne.towncenter_pos = (place_x, place_y)
-            playerOne.towncenter = new_building
+            the_player.towncenter_pos = (place_x, place_y)
+            the_player.towncenter = new_building
 
             self.map[place_x][place_y]["tile"] = "building"
             self.map[place_x][place_y]["collision"] = True
@@ -464,7 +466,7 @@ class Map:
             self.map[place_x + 1][place_y - 1]["collision"] = True
 
     # here is the fonction that randomly places a player's starting units 4 tiles from the corner
-    def place_starting_units(self, player):
+    def place_starting_units(self, the_player=playerOne):
         townhall_placed = False
 
         while not townhall_placed:
@@ -481,9 +483,9 @@ class Map:
                     for y in range(2, 8):
                         self.clear_tile(x, y)
                 # we place towncenter
-                new_building = TownCenter((4, 5), self, playerOne)
+                new_building = TownCenter((4, 5), self, the_player)
                 # starting unit
-                start_unit = Villager(self.map[4][6]["grid"], player, self)
+                start_unit = Villager(self.map[4][6]["grid"], the_player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[4][6]["grid"])
 
@@ -494,9 +496,9 @@ class Map:
                     for y in range(2, 8):
                         self.clear_tile(x, y)
                 # we place towncenter
-                new_building = TownCenter((self.grid_length_x - 6, 5), self, playerOne)
+                new_building = TownCenter((self.grid_length_x - 6, 5), self, the_player)
                 # starting unit
-                start_unit = Villager(self.map[self.grid_length_x - 6][6]["grid"], player, self)
+                start_unit = Villager(self.map[self.grid_length_x - 6][6]["grid"], the_player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[self.grid_length_x - 6][6]["grid"])
 
@@ -507,9 +509,9 @@ class Map:
                     for y in range(self.grid_length_y - 8, self.grid_length_y - 2):
                         self.clear_tile(x, y)
                 # we place towncenter
-                new_building = TownCenter((4, self.grid_length_y - 5), self, playerOne)
+                new_building = TownCenter((4, self.grid_length_y - 5), self, the_player)
                 # starting unit
-                start_unit = Villager(self.map[4][self.grid_length_y - 4]["grid"], player, self)
+                start_unit = Villager(self.map[4][self.grid_length_y - 4]["grid"], the_player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[4][self.grid_length_y - 4]["grid"])
 
@@ -520,9 +522,9 @@ class Map:
                     for y in range(self.grid_length_y - 8, self.grid_length_y - 2):
                         self.clear_tile(x, y)
                 # we place towncenter
-                new_building = TownCenter((self.grid_length_x - 6, self.grid_length_y - 5), self, playerOne)
+                new_building = TownCenter((self.grid_length_x - 6, self.grid_length_y - 5), self, the_player)
                 # starting unit
-                start_unit = Villager(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"], player, self)
+                start_unit = Villager(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"], the_player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"])
 
@@ -532,11 +534,11 @@ class Map:
             new_building.current_health = new_building.max_health
 
             townhall_placed = True
-            player.towncenter_pos = new_building.pos
-            player.towncenter = new_building
+            the_player.towncenter_pos = new_building.pos
+            the_player.towncenter = new_building
 
             # for starting villagers
-            player.pay_entity_cost_bis(Villager)
+            the_player.pay_entity_cost_bis(Villager)
 
     def remove_entity(self, entity, scroll):
         self.entities.remove(entity)
@@ -803,7 +805,7 @@ class Map:
     # temp tile is a dictionary containing name + image + render pos + iso_poly + collision
     # if player is looking for a tile to place a building, we highlight the tested tiles in RED or GREEN if the tile is free or not
     # we display the future building on the tested tile every time
-    def display_potential_building(self, screen, camera):
+    def display_potential_building(self, screen, camera, the_player=playerOne):
         render_pos = self.temp_tile["render_pos"]
         grid = self.renderpos_to_grid(render_pos[0], render_pos[1])
 
@@ -827,11 +829,11 @@ class Map:
                 self.highlight_tile(grid[0], grid[1], screen, "GREEN", camera.scroll)
 
         # display the buildable building on the tile
-        self.display_building(screen, self.temp_tile, playerOne.color, camera.scroll, render_pos,
+        self.display_building(screen, self.temp_tile, the_player.color, camera.scroll, render_pos,
                               is_hypothetical_building=True)
 
     def display_building(self, screen, building, color: str, scroll, render_pos, is_hypothetical_building=False,
-                         is_build_possibility_display=False):
+                         is_build_possibility_display=False, the_player=playerOne):
         # we either display the building fully constructed or being built ( 4 possible states )
         if not is_hypothetical_building:
             offset = (0, 0)
@@ -903,7 +905,7 @@ class Map:
         # we have to display hypothetical building sprite to show the villager wants to build there
         else:
             if building["name"] != "Farm":
-                sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color][playerOne.age - 1]
+                sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color][the_player.age - 1]
             else:
                 sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color]
 

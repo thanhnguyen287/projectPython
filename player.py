@@ -133,6 +133,8 @@ class Player:
 
 playerOne = Player("Tristan", True, [100, 10000, 10000, 10000], color="BLUE")
 playerOne.age = 1
+
+
 player_list = [playerOne]
 #  INIT FOR RESSOURCES DISPLAY
 

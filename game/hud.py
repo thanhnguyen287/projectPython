@@ -126,7 +126,7 @@ class Hud:
 
         return tiles
 
-    def update(self, screen):
+    def update(self, screen, the_player=playerOne):
 
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         mouse_action = pygame.mouse.get_pressed()
@@ -138,7 +138,7 @@ class Hud:
         if self.bottom_left_menu is not None:
             for button in self.bottom_left_menu:
                 if button["name"] != "STOP":
-                    if playerOne.can_afford(button["name"]):
+                    if the_player.can_afford(button["name"]):
                         button["affordable"] = True
                     else:
                         button["affordable"] = False
@@ -197,7 +197,7 @@ class Hud:
 
         # display
 
-    def draw(self, screen, map, camera):
+    def draw(self, screen, map, camera, the_player=playerOne):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         # entity is string corresponding to class unit/building name
         for entity in self.death_animations:
@@ -211,7 +211,7 @@ class Hud:
                 self.villager_attack_animations[entity]["animation"].update()
 
         # resources bar
-        playerOne.update_resources_bar(screen)
+        the_player.update_resources_bar(screen)
         # bottom menu
 
         if self.examined_tile is not None:
@@ -238,7 +238,7 @@ class Hud:
                     for tile in self.bottom_left_menu:
                         icon = tile["icon"].copy()
                         # if player cant affort to build/train entity, we make the icon transparent
-                        if tile["name"] != "STOP" and not playerOne.can_afford(tile["name"]):
+                        if tile["name"] != "STOP" and not the_player.can_afford(tile["name"]):
                             icon.set_alpha(100)
                         screen.blit(icon, tile["rect"].topleft)
                         if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP":
@@ -541,7 +541,7 @@ class Hud:
                       (self.trained_unit_icon_pos[0] + 43, self.trained_unit_icon_pos[1] + 37))
 
     # display what entity, its costs, and a brief description
-    def display_construction_tooltip(self, screen, entity):
+    def display_construction_tooltip(self, screen, entity, the_player=playerOne):
         display_tooltip_for_entity = True
         display_tooltip_for_tech = False
         if entity == "Villager":
@@ -592,14 +592,14 @@ class Hud:
             temp_pos = (30, self.height - action_menu.get_height() - self.tooltip_rect.height + 35)
             # resources
             for resource_type in range(0, 4):
-                if entity.construction_cost[resource_type] > playerOne.resources[resource_type]:
+                if entity.construction_cost[resource_type] > the_player.resources[resource_type]:
                     display_color = "RED"
                 else:
                     display_color = "GOLD"
                 draw_text(screen, str(entity.construction_cost[resource_type]), 12, display_color, temp_pos)
                 temp_pos = temp_pos[0] + 55, temp_pos[1]
             # pop cost
-            if playerOne.current_population + entity.population_produced > playerOne.max_population:
+            if the_player.current_population + entity.population_produced > the_player.max_population:
                 display_color = "RED"
             else:
                 display_color = "GOLD"
@@ -634,7 +634,7 @@ class Hud:
             temp_pos = (30, self.height - action_menu.get_height() - self.tooltip_rect.height + 35)
             # resources
             for resource_type in range(0, 4):
-                if entity.construction_costs[resource_type] > playerOne.resources[resource_type]:
+                if entity.construction_costs[resource_type] > the_player.resources[resource_type]:
                     display_color = "RED"
                 else:
                     display_color = "GOLD"
