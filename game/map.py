@@ -746,12 +746,12 @@ class Map:
                 target = unit.map.map[unit.targeted_ressource[0]][unit.targeted_ressource[1]]
 
             #if the unit is attacking, we highlight the tile she is attacking in DARK RED
-            if target is not None and unit.is_attacking or unit.is_moving_to_attack:
+            if target is not None and (unit.is_attacking or unit.is_moving_to_attack):
                 # target highlighted in dark red
                 self.highlight_tile(target.pos[0], target.pos[1], screen, "DARK_RED", camera.scroll)
 
             # if the unit is going to gather we highlight the tile she is going to gather in GREEN
-            elif target is not None and unit.is_gathering or unit.is_moving_to_gather:
+            elif target is not None and (unit.is_gathering or unit.is_moving_to_gather):
                 ...
                 self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
 
