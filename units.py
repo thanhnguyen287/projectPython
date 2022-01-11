@@ -1,13 +1,10 @@
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from pathfinding.finder.a_star import DiagonalMovement
-from time import sleep
 from tech import Age_II, Age_III, Age_IV
-#from player import *
-import os
 import pygame
 from math import ceil
-from game.utils import tile_founding, GENERAL_UNIT_LIST
+from game.utils import tile_founding, GENERAL_UNIT_LIST, GENERAL_BUILDING_LIST, UNIT_TYPES, BUILDING_TYPES
 
 
 class Building:
@@ -18,6 +15,12 @@ class Building:
     def __init__(self, pos, map, player_owner_of_unit, ):
         self.owner = player_owner_of_unit
         self.owner.building_list.append(self)
+        GENERAL_BUILDING_LIST.append(self)
+
+        #allows to test the types of target in game
+        BUILDING_TYPES.append(type(self))
+        print(BUILDING_TYPES)
+
         # pos is the tile position, for ex : (4,4)
         self.pos = pos
         self.map = map
@@ -389,7 +392,10 @@ class Unit:
         GENERAL_UNIT_LIST.append(self)
         self.owner.current_population += 1
 
-        self.current_health = self.max_health
+        # allows to test the types of target in game
+        UNIT_TYPES.append(type(self))
+        print(UNIT_TYPES)
+
         self.is_alive = True
         self.angle = angle
         self.sprite_index = 0
@@ -470,6 +476,7 @@ class Villager(Unit):
         # DISPLAY
         # DATA
         self.max_health = 25
+        self.current_health = self.max_health
         self.attack_dmg = 3
         self.attack_speed = 1500
         self.movement_speed = 1.1
@@ -537,9 +544,17 @@ class Villager(Unit):
             self.move_to(self.map.map[unit_dest[0]][unit_dest[1]])
             self.is_moving_to_attack = True
 
-            for u in GENERAL_UNIT_LIST:
-                if u.pos == pos:
-                    self.target = u
+            if self.map.map[pos[0]][pos[1]]["tile"] == "building":
+                for b in GENERAL_BUILDING_LIST:
+                    if b.pos == pos:
+                        self.target = b
+                        break
+            else:
+                for u in GENERAL_UNIT_LIST:
+                    if u.pos == pos:
+                        self.target = u
+                        break
+
 
     def attack(self):
         if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
@@ -566,10 +581,15 @@ class Villager(Unit):
                     self.map.hud.villager_attack_animations["Villager"]["animation"].to_be_played = False
                     self.strike = 0
 
-        if self.target is not None and not self.target.is_attacking and self.strike > 1:
-            self.target.target = self
-            self.target.is_attacking = True
-            self.target.attack()
+            if self.target is not None and type(self.target) == Villager and \
+                    not self.target.is_attacking and self.strike > 1:
+                self.target.target = self
+                self.target.is_attacking = True
+                self.target.attack()
+        else:
+            ind = GENERAL_UNIT_LIST.index(self.target)
+            pos = GENERAL_UNIT_LIST[ind].pos
+            self.go_to_attack(pos)
 
     def go_to_build(self, pos, name):
         if self.map.get_empty_adjacent_tiles(pos):
@@ -744,7 +764,7 @@ class Bowman(Unit):
 
         # DATA
         self.max_health = 35
-        self.current_health = 35
+        self.current_health = self.max_health
         self.attack = 3
         self.attack_speed = 1.4
         self.movement_speed = 1.2
@@ -768,7 +788,7 @@ class Clubman(Unit):
 
         # DATA
         self.max_health = 40
-        self.current_health = 40
+        self.current_health = self.max_health
         self.attack = 3
         self.attack_speed = 1.5
         self.movement_speed = 1.2

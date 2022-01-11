@@ -1,10 +1,13 @@
 import pygame
-#from units import *
 from settings import MAP_SIZE_X, MAP_SIZE_Y
 
 RESSOURCE_LIST = ["wood", "food", "gold", "stone"]
 
 GENERAL_UNIT_LIST = []
+GENERAL_BUILDING_LIST = []
+
+UNIT_TYPES = []
+BUILDING_TYPES = []
 
 def draw_text(screen, text, size, color, pos):
     # create a Font object from the system fonts

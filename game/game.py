@@ -4,7 +4,6 @@ from .utils import draw_text
 from .hud import Hud
 from .animation import *
 from .IA import IA
-from settings import SHOW_GRID_SETTING
 
 
 class Game:
@@ -100,8 +99,7 @@ class Game:
                     #player.play()
                     # right click, gathering and moving units (fighting in future)
                     grid_pos = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
-                    if 0 <= grid_pos[0] <= self.map.grid_length_x and 0 <= grid_pos[
-                        1] <= self.map.grid_length_y:
+                    if 0 <= grid_pos[0] <= self.map.grid_length_x and 0 <= grid_pos[1] <= self.map.grid_length_y:
 
                         # There is a bug with collecting ressources on the side of the map !!!
 
@@ -116,29 +114,16 @@ class Game:
                             if self.map.units[pos_x][pos_y] is not None or self.map.buildings[pos_x][pos_y] is not None:
                                 # si les deux unites sont adjacentes:
                                 this_villager.go_to_attack((pos_x, pos_y))
-                                """target_to_attack = self.map.units[pos_x][pos_y] if \
-                                    self.map.units[pos_x][pos_y] is not None else self.map.buildings[pos_x][pos_y]
-                                this_villager.target = target_to_attack
-
-                                if self.map.map[pos_x][pos_y]["tile"] != "" and \
-                                        self.map.map[pos_x][pos_y]["tile"] != "building" and \
-                                        self.map.map[pos_x][pos_y]["tile"] != "unit":
-                                    this_villager.targeted_ressource = (pos_x, pos_y)
-
-                                if this_villager.is_adjacent_to(target_to_attack):
-                                    this_villager.is_attacking = True
-                                else:
-                                    this_villager_dest = self.map.get_empty_adjacent_tiles((pos_x, pos_y))[0]
-                                    this_villager.move_to(self.map.map[this_villager_dest[0]][this_villager_dest[1]])
-                                    this_villager.is_moving_to_attack = True"""
 
                             # ONLY MOVEMENT
                             if not self.map.map[grid_pos[0]][grid_pos[1]]["collision"] and \
-                                    not this_villager.is_gathering and this_villager.targeted_ressource is None:
+                                    not this_villager.is_gathering and this_villager.targeted_ressource is None and \
+                                    not this_villager.is_attacking:
                                 this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
 
-                            # we check if the tile we right click on is a ressource and if its on an adjacent tile of the villager pos, and if the villager isnt moving
-                            # if the tile next to him is a ressource and we right click on it and he is not moving, he will gather it
+                            # we check if the tile we right click on is a ressource and if its on an adjacent tile of
+                            # the villager pos, and if the villager isnt moving if the tile next to him is a ressource
+                            # and we right click on it and he is not moving, he will gather it
                             if not this_villager.searching_for_path \
                                     and (self.map.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"]):
                                 this_villager.go_to_ressource((pos_x, pos_y))

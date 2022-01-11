@@ -730,21 +730,28 @@ class Map:
                                         camera.scroll)
                     self.hud.display_life_bar(screen, unit, self, for_hud=False, camera=camera, for_resource=False)
 
-            if type(unit.target) == Villager and unit.target.pos == unit.pos:
+            # we initialize target to None just in case
+            target = None
+
+            # if we select the unit, she wont attack herself
+            if type(unit.target) in UNIT_TYPES and unit.target.pos == unit.pos:
                 unit.target = None
 
-            #gerer le cas ou c'est un batiment !!!
-            if type(unit.target) == Villager and unit.target.pos != unit.pos:
+            # if we select a building or a unit, the unit go attack it
+            if (type(unit.target) in UNIT_TYPES and unit.target.pos != unit.pos) or type(unit.target) in BUILDING_TYPES:
                 target = unit.target
 
+            #if we attack a ressource, we go gather it
             if unit.targeted_ressource is not None:
                 target = unit.map.map[unit.targeted_ressource[0]][unit.targeted_ressource[1]]
 
-            if unit.is_attacking or unit.is_moving_to_attack:
+            #if the unit is attacking, we highlight the tile she is attacking in DARK RED
+            if target is not None and unit.is_attacking or unit.is_moving_to_attack:
                 # target highlighted in dark red
                 self.highlight_tile(target.pos[0], target.pos[1], screen, "DARK_RED", camera.scroll)
 
-            elif unit.is_gathering or unit.is_moving_to_gather:
+            # if the unit is going to gather we highlight the tile she is going to gather in GREEN
+            elif target is not None and unit.is_gathering or unit.is_moving_to_gather:
                 ...
                 self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
 
