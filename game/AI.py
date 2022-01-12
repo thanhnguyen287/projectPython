@@ -115,7 +115,10 @@ class AI:
                 # if we need ressources and the unit is a villager and he is free, he will go gather
                 if self.needed_ressource and isinstance(u, Villager) and u.building_to_create is None and \
                         not self.dev_pop:
-                    self.gathering_routine(u)
+                    if u.gathered_ressource_stack < u.stack_max:
+                        self.gathering_routine(u)
+                    else:
+                        u.go_to_townhall()
 
                 # if we dont need ressources or when the villager is building, we are using the building routine
                 elif isinstance(u, Villager) and (not self.dev_pop or u.building_to_create is not None):
@@ -154,17 +157,27 @@ class AI:
     def gathering_routine(self, unit):
         for r in self.needed_ressource:
             if unit.targeted_ressource is None:
-                tiles_to_gather = tile_founding(10, 1, self.range, self.map, self.player, r)
-                found = False
-                for i in range(len(tiles_to_gather)):
-                    if tiles_to_gather:
-                        pos_x = tiles_to_gather[i][0]
-                        pos_y = tiles_to_gather[i][1]
-                        if better_look_around(unit.pos, (pos_x, pos_y), self.map) and not found and \
-                                (pos_x, pos_y) not in self.targeted_tiles:
-                            unit.go_to_ressource(tiles_to_gather[i])
-                            self.targeted_tiles.append((pos_x, pos_y))
-                            found = True
+                ressource = None
+                if r == "wood": ressource = "tree"
+                elif r == "stone": ressource = "rock"
+                elif r == "gold": ressource = "gold"
+                elif r == "berrybush": ressource = "food"
+
+                if unit.gathered_ressource_stack == 0 or unit.stack_type == ressource:
+                    tiles_to_gather = tile_founding(10, 1, self.range, self.map, self.player, r)
+                    found = False
+                    for i in range(len(tiles_to_gather)):
+                        if tiles_to_gather:
+                            pos_x = tiles_to_gather[i][0]
+                            pos_y = tiles_to_gather[i][1]
+                            if better_look_around(unit.pos, (pos_x, pos_y), self.map) and not found and \
+                                    (pos_x, pos_y) not in self.targeted_tiles:
+                                unit.go_to_ressource(tiles_to_gather[i])
+                                self.targeted_tiles.append((pos_x, pos_y))
+                                found = True
+
+                else:
+                    unit.go_to_townhall()
 
     def building_routine(self, unit):
         # if we have more than 90% of our pop capacity occupied, we build a house

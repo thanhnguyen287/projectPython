@@ -34,7 +34,7 @@ class Game:
 
         # IA
         self.AI_1 = AI(playerTwo, self.map.map)
-        #self.AI_2 = AI(playerOne, self.map.map)
+        self.AI_2 = AI(playerOne, self.map.map)
 
     def run(self):
         self.playing = True
@@ -44,7 +44,7 @@ class Game:
             self.update()
             self.draw()
             self.AI_1.run()
-            #self.AI_2.run()
+            self.AI_2.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -127,8 +127,15 @@ class Game:
                             # the villager pos, and if the villager isnt moving if the tile next to him is a ressource
                             # and we right click on it and he is not moving, he will gather it
                             if not this_villager.searching_for_path \
-                                    and (self.map.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"]):
+                                    and (self.map.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"])\
+                                    and this_villager.gathered_ressource_stack < this_villager.stack_max and \
+                                    (this_villager.stack_type is None or
+                                     this_villager.stack_type == self.map.map[pos_x][pos_y]["tile"]):
+
                                 this_villager.go_to_ressource((pos_x, pos_y))
+
+                            if this_villager.gathered_ressource_stack >= this_villager.stack_max:
+                                this_villager.go_to_townhall()
 
     def update(self):
         self.camera.update()

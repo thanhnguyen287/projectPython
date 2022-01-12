@@ -4,6 +4,7 @@ from pathfinding.finder.a_star import DiagonalMovement
 from tech import Age_II, Age_III, Age_IV
 import pygame
 from math import ceil
+from random import randint
 from game.utils import tile_founding, GENERAL_UNIT_LIST, GENERAL_BUILDING_LIST, UNIT_TYPES, BUILDING_TYPES
 
 
@@ -18,7 +19,8 @@ class Building:
         GENERAL_BUILDING_LIST.append(self)
 
         #allows to test the types of target in game
-        BUILDING_TYPES.append(type(self))
+        if type(self) not in BUILDING_TYPES:
+            BUILDING_TYPES.append(type(self))
 
         # pos is the tile position, for ex : (4,4)
         self.pos = pos
@@ -392,7 +394,8 @@ class Unit:
         self.owner.current_population += 1
 
         # allows to test the types of target in game
-        UNIT_TYPES.append(type(self))
+        if type(self) not in UNIT_TYPES:
+            UNIT_TYPES.append(type(self))
 
         self.is_alive = True
         self.angle = angle
@@ -428,8 +431,8 @@ class Unit:
     def change_tile(self, new_tile):
         # remove the unit from its current position on the map
         if self.pos != new_tile:
-            self.angle = self.map.get_angle_between(self.pos, new_tile, self) if \
-                self.map.get_angle_between(self.pos, new_tile, self) != -1 else ...
+            if self.map.get_angle_between(self.pos, new_tile, self) != -1:
+                self.angle = self.map.get_angle_between(self.pos, new_tile, self)
 
         self.map.units[self.pos[0]][self.pos[1]] = None
         self.map.map[self.pos[0]][self.pos[1]]["tile"] = ""
@@ -504,7 +507,9 @@ class Villager(Unit):
         self.is_gathering = False
         self.is_attacking = False
 
-        self.gathered_resources_stack = 0
+        self.stack_max = 30
+        self.gathered_ressource_stack = 0
+        self.stack_type = None
 
         #Training : 25 food and 10 gold, 2s
         self.construction_cost = [0, 25, 10, 0]
@@ -515,27 +520,34 @@ class Villager(Unit):
         super().__init__(pos, player_owner_of_unit, map, angle)
         self.owner.unit_occupied.append(0)
 
+    def go_to_townhall(self):
+        if not self.searching_for_path:
+            pos_list = tile_founding(10, 1, 1, self.map.map, self.owner, "")
+            r = randint(0, len(pos_list)-1)
+            pos = pos_list[r]
+            tile = self.map.map[pos[0]][pos[1]]
+            self.move_to(tile)
+
+        if abs(self.pos[0] - self.owner.towncenter_pos[0]) <= 1 and \
+                abs(self.pos[1] - self.owner.towncenter_pos[1]) <= 1:
+            if self.stack_type == "tree":
+                self.owner.update_resource("WOOD", self.gathered_ressource_stack)
+            elif self.stack_type == "rock":
+                self.owner.update_resource("STONE", self.gathered_ressource_stack)
+            elif self.stack_type == "gold":
+                self.owner.update_resource("GOLD", self.gathered_ressource_stack)
+            elif self.stack_type == "berrybush":
+                self.owner.update_resource("FOOD", self.gathered_ressource_stack)
+
+            self.gathered_ressource_stack = 0
+            self.stack_type = None
+
+
     def repair(self, building):
         if building.current_health != building.max_health:
             ...
         else:
             ...
-
-    """def attack(self):
-        #target has enough health to survive
-        if self.is_fighting and (self.now - self.attack_cooldown > self.attack_speed):
-            self.angle = self.map.get_angle_between(self.pos, new_tile, self) if self.map.get_angle_between(self.pos,
-                                                                                                      new_tile, self) != -1 else ...
-
-            if self.target.current_health > self.attack_dmg:
-                self.target.current_health -= self.attack_dmg
-                self.attack_cooldown = self.now
-
-            #unit doesnt survive attack
-            else:
-                self.map.remove_entity(self.target)
-                self.target = None
-                self.is_fighting = False"""
 
     def go_to_attack(self, pos):
         if self.map.get_empty_adjacent_tiles(pos):
@@ -565,12 +577,11 @@ class Villager(Unit):
                 if self.target.current_health >= 0:
                     self.target.current_health -= self.attack_dmg
                     self.attack_cooldown = self.now
-                    self.gathered_resources_stack += 1
+                    self.gathered_ressource_stack += 1
                     self.strike += 1
 
                 # else the unit is dead
                 else:
-                    pass
                     tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
                     tile["tile"] = ""
                     tile["collision"] = False
@@ -678,17 +689,20 @@ class Villager(Unit):
                 if this_target["health"] > self.attack_dmg:
                     this_target["health"] -= self.attack_dmg
                     self.attack_cooldown = self.now
-                    self.gathered_resources_stack += 1
                 # no resource is remaining, we destroy it and give resource to the player:
                 else:
                     if this_target["tile"] == "tree":
-                        self.owner.update_resource("WOOD", 10)
+                        self.stack_type = "tree"
+                        self.gathered_ressource_stack += 10
                     elif this_target["tile"] == "rock":
-                        self.owner.update_resource("STONE", 10)
+                        self.stack_type = "rock"
+                        self.gathered_ressource_stack += 10
                     elif this_target["tile"] == "gold":
-                        self.owner.update_resource("GOLD", 10)
+                        self.stack_type = "gold"
+                        self.gathered_ressource_stack += 10
                     elif this_target["tile"] == "berrybush":
-                        self.owner.update_resource("FOOD", 10)
+                        self.stack_type = "berrybush"
+                        self.gathered_ressource_stack += 10
 
                     this_target["tile"] = ""
                     this_target["collision"] = False

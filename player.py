@@ -142,7 +142,7 @@ player_list = [playerOne, playerTwo]
 #  INIT FOR RESSOURCES DISPLAY
 
 #define which player is controlled by us
-MAIN_PLAYER = playerOne
+MAIN_PLAYER = playerTwo
 
 def str_to_entity_class(name: str):
     if name == "TownCenter":
