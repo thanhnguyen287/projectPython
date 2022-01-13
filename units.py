@@ -31,7 +31,7 @@ class Building:
         self.map.entities.append(self)
         self.map.map[self.pos[0]][self.pos[1]]["tile"] = "building"
         # 0 means collision = True
-        self.map.collision_matrix[self.pos[0]][self.pos[1]] = 0
+        self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
 
         # will be used in the timer to increase resources of the player
         self.resource_manager_cooldown = pygame.time.get_ticks()
@@ -110,7 +110,7 @@ class TownCenter(Building):
         map.collision_matrix[pos[1] - 1][pos[0]] = 0
 
         map.map[pos[0] + 1][pos[1] - 1]["tile"] = "building"
-        map.collision_matrix[pos[0] + 1][pos[1] - 1] = 0
+        map.collision_matrix[pos[1] - 1][pos[0] + 1] = 0
 
         self.construction_cost = [0, 0, 0, 0]
 
@@ -400,7 +400,7 @@ class Barracks(Building):
         map.collision_matrix[pos[1] - 1][pos[0]] = 0
 
         map.map[pos[0] + 1][pos[1] - 1]["tile"] = "building"
-        map.collision_matrix[pos[0] + 1][pos[1] - 1] = 0
+        map.collision_matrix[pos[1] - 1][pos[0] + 1] = 0
 
         self.construction_cost = [500, 0, 0, 200]
 
@@ -493,7 +493,7 @@ class Unit:
         self.map.entities.append(self)
         self.map.map[self.pos[0]][self.pos[1]]["tile"] = "unit"
         # 0 means collision = True
-        self.map.collision_matrix[self.pos[0]][self.pos[1]] = 0
+        self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
 
         # we add the unit we created to the list of units of the player
         self.owner.unit_list.append(self)
@@ -778,8 +778,6 @@ class Villager(Unit):
         pos_x = self.building_to_create["pos"][0]
         pos_y = self.building_to_create["pos"][1]
         self.map.map[pos_x][pos_y]["tile"] = "building"
-        self.is_building = False
-        self.building_to_create = None
 
     def go_to_ressource(self, pos):
         # if the ressource is near us, we directly gather it

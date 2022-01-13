@@ -483,12 +483,16 @@ class Map:
 
             self.map[place_x][place_y]["tile"] = "building"
             self.map[place_x][place_y]["collision"] = True
+            self.collision_matrix[place_y][place_x] = 0
             self.map[place_x + 1][place_y]["tile"] = "building"
             self.map[place_x + 1][place_y]["collision"] = True
+            self.collision_matrix[place_y][place_x+1] = 0
             self.map[place_x][place_y - 1]["tile"] = "building"
             self.map[place_x][place_y - 1]["collision"] = True
+            self.collision_matrix[place_y-1][place_x] = 0
             self.map[place_x + 1][place_y - 1]["tile"] = "building"
             self.map[place_x + 1][place_y - 1]["collision"] = True
+            self.collision_matrix[place_y-1][place_x+1] = 0
 
     # here is the fonction that randomly places a player's starting units 4 tiles from the corner
     def place_starting_units(self, the_player=MAIN_PLAYER):

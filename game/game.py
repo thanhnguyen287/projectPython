@@ -1,6 +1,6 @@
 from .camera import Camera
 from .map import *
-from .utils import draw_text
+from .utils import draw_text, find_owner
 from .hud import Hud
 from .animation import *
 from .AI import AI
@@ -153,7 +153,7 @@ class Game:
                     #player.play()
                     # right click, gathering and moving units (fighting in future)
                     grid_pos = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
-                    if 0 <= grid_pos[0] <= self.map.grid_length_x and 0 <= grid_pos[1] <= self.map.grid_length_y:
+                    if 0 <= grid_pos[0] < self.map.grid_length_x and 0 <= grid_pos[1] < self.map.grid_length_y:
 
                         # There is a bug with collecting ressources on the side of the map !!!
 
@@ -165,14 +165,17 @@ class Game:
                             pos_x = pos_mouse[0]
                             pos_y = pos_mouse[1]
                             # ATTACK
-                            if self.map.units[pos_x][pos_y] is not None or self.map.buildings[pos_x][pos_y] is not None:
-                                # si les deux unites sont adjacentes:
+                            if (self.map.units[pos_x][pos_y] is not None
+                                or self.map.buildings[pos_x][pos_y] is not None) \
+                                    and not this_villager.owner == find_owner([pos_x, pos_y]):
+                                # attack !
                                 this_villager.go_to_attack((pos_x, pos_y))
 
                             # ONLY MOVEMENT
-                            if not self.map.map[grid_pos[0]][grid_pos[1]]["collision"] and \
+                            if self.map.collision_matrix[grid_pos[1]][grid_pos[0]] and \
                                     not this_villager.is_gathering and this_villager.targeted_ressource is None and \
                                     not this_villager.is_attacking:
+                                print(self.map.collision_matrix[grid_pos[1]][grid_pos[0]])
                                 this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
 
                             # we check if the tile we right click on is a ressource and if its on an adjacent tile of
