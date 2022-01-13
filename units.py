@@ -586,7 +586,7 @@ class Villager(Unit):
         # DATA
         self.max_health = 25
         self.current_health = self.max_health
-        self.attack_dmg = 3
+        self.attack_dmg = 50
         self.attack_speed = 1500
         self.movement_speed = 1.1
         # unit type : melee
@@ -708,6 +708,8 @@ class Villager(Unit):
                 else:
                     tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
                     tile["tile"] = ""
+                    if type(self.target) == TownCenter:
+                        self.target.owner.towncenter = None
                     tile["collision"] = False
                     self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
                     self.target = None
