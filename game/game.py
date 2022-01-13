@@ -4,6 +4,7 @@ from .utils import draw_text
 from .hud import Hud
 from .animation import *
 from .AI import AI
+from time import sleep
 
 
 class Game:
@@ -21,6 +22,8 @@ class Game:
         # map
         self.map = Map(self.hud, self.entities, 50, 50, self.width, self.height)
 
+        self.timer = self.map.timer
+
         # camera
         self.camera = Camera(self.width, self.height)
         # on centre la camera au milieu de la carte
@@ -36,6 +39,9 @@ class Game:
         #self.AI_1 = AI(playerTwo, self.map.map)
         #self.AI_2 = AI(playerOne, self.map.map)
 
+        #defeated player
+        self.defeated_player = None
+
         # chat
         self.chat_color = (40, 40, 40, 150)
         self.input_box = pygame.Rect(self.width // 2 - 70, self.height // 2 - 16, 140, 45)
@@ -46,6 +52,9 @@ class Game:
         self.chat_text = ""
         self.chat_text_color = get_color_code("WHITE")
         self.chat_display_timer = pygame.time.get_ticks()
+
+        self.victory = pygame.image.load("resources/assets/Images_for_in_game_menu_Oussama/Victory.png")
+        self.defeat = pygame.image.load("resources/assets/Images_for_in_game_menu_Oussama/defeat.png")
 
     def run(self):
         self.playing = True
@@ -189,12 +198,56 @@ class Game:
 
         for p in player_list:
             if p.towncenter is None:
-                player_list.remove(p)
-                #p.defeat()
+                self.is_chat_activated = False
+                self.display_msg_flag = True
+                self.chat_text = str(p.name) + "has been defeated"
 
-        if len(player_list) == 1:
-            #player_list[0].victory()
-            pass
+                player_list.remove(p)
+                self.timer = self.map.timer
+                self.defeated_player =  p
+
+        time = pygame.time.get_ticks()
+        if time - self.timer > 3000:
+            if self.defeated_player is not None and self.defeated_player == MAIN_PLAYER:
+                print("DEFEAT")
+                self.screen.fill((0, 0, 0))
+                pos_x = (self.width - self.defeat.get_width())/2
+                pos_y = (self.height - self.defeat.get_height())/2
+
+                pos_text_x = (self.width - self.defeat.get_width()*0.35)/2
+                pos_text_y = (self.height - self.defeat.get_height()*0.2)/2
+
+                self.screen.blit(self.defeat, (pos_x, pos_y))
+
+                draw_text(self.screen, "DEFEAT", 110, get_color_code("DARK_GRAY"), (pos_text_x, pos_text_y))
+
+                pygame.display.flip()
+                sleep(3)
+
+                pygame.quit()
+                sys.exit()
+            else:
+                if len(player_list) == 1:
+                    player_list[0].victory()
+                    print("VICTORY")
+
+                    self.screen.fill((0, 0, 0))
+                    pos_x = (self.width - self.defeat.get_width()) / 2
+                    pos_y = (self.height - self.defeat.get_height()) / 2
+
+                    pos_text_x = (self.width - self.defeat.get_width() * 0.4) / 2
+                    pos_text_y = (self.height - self.defeat.get_height() * 0.2) / 2
+
+                    self.screen.blit(self.victory, (pos_x, pos_y))
+
+                    draw_text(self.screen, "VICTORY", 110, get_color_code("GOLD"), (pos_text_x, pos_text_y))
+
+                    pygame.display.flip()
+                    sleep(3)
+
+                    pygame.quit()
+                    sys.exit()
+                self.defeated_player = None
 
 
     # GAME DISPLAY
@@ -241,7 +294,6 @@ class Game:
                 self.chat_display_timer = now
                 self.chat_enabled = True
 
-        #Boom animation
         #Draw FPS, must be the last to shown -> put it right on top of the display.flip
         draw_text(self.screen,'fps={}'.format(round(self.clock.get_fps())),20,(255,0,0),(5,55))
         pygame.display.flip()

@@ -1,6 +1,7 @@
 from settings import *
 from units import House, TownCenter,Farm, Barracks, Villager, Clubman, Bowman
 from game.utils import draw_text
+from time import sleep
 
 
 class Player:
@@ -49,6 +50,13 @@ class Player:
             "Villager": 1
 
         }
+
+    def defeat(self):
+        print(self.name, " has been defeated...")
+
+
+    def victory(self):
+        print(self.name, " has won !!!")
 
     def update_resource(self, resource_type: str, amount):
 
@@ -144,7 +152,7 @@ player_list = [playerOne, playerTwo]
 #  INIT FOR RESSOURCES DISPLAY
 
 #define which player is controlled by us
-MAIN_PLAYER = playerTwo
+MAIN_PLAYER = playerOne
 
 def str_to_entity_class(name: str):
     if name == "TownCenter":

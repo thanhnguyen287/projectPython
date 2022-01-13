@@ -81,6 +81,12 @@ def get_color_code(color: str):
     elif color == "DARK_RED":
         return 138, 3, 3
 
+    elif color == "DEFEAT_RED":
+        return 158, 43, 43
+
+    elif color == "DARK_GRAY":
+        return 25, 25, 25
+
     elif color == "ORANGE":
         return 255, 127, 0
 
