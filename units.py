@@ -586,7 +586,7 @@ class Villager(Unit):
         # DATA
         self.max_health = 25
         self.current_health = self.max_health
-        self.attack_dmg = 50
+        self.attack_dmg = 3
         self.attack_speed = 1500
         self.movement_speed = 1.1
         # unit type : melee
@@ -645,8 +645,10 @@ class Villager(Unit):
             tile = self.map.map[pos[0]][pos[1]]
             self.move_to(tile)
 
-        if abs(self.pos[0] - self.owner.towncenter_pos[0]) <= 1 and \
-                abs(self.pos[1] - self.owner.towncenter_pos[1]) <= 1:
+        if (abs(self.pos[0] - self.owner.towncenter_pos[0]) <= 1 and
+                abs(self.pos[1] - self.owner.towncenter_pos[1]) <= 1) or \
+                (abs(self.pos[0] - (self.owner.towncenter_pos[0]+1)) <= 1 and
+                 abs(self.pos[1] - (self.owner.towncenter_pos[1]-1)) <= 1):
             if self.stack_type == "tree":
                 self.owner.update_resource("WOOD", self.gathered_ressource_stack)
             elif self.stack_type == "rock":

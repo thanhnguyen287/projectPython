@@ -228,12 +228,10 @@ def is_adjacent_to(pos1, pos2):
 def find_owner(pos):
     for u in GENERAL_UNIT_LIST:
         unit_pos = list(u.pos)
-        print(pos, unit_pos)
-        if u.pos == pos:
+        if unit_pos == pos:
             return u.owner
 
     for b in GENERAL_BUILDING_LIST:
         bat_pos= list(b.pos)
-        print(pos, bat_pos)
         if bat_pos == pos:
             return b.owner
