@@ -37,6 +37,12 @@ gold_icon = pygame.image.load("resources/assets/gold.png")
 stone_icon = pygame.image.load("resources/assets/stone_icon.png")
 pop_icon = pygame.image.load("resources/assets/pop_icon.png")
 
+BIG_wood_icon = pygame.image.load("resources/assets/icons/resourceicons_18.png")
+BIG_food_icon = pygame.image.load("resources/assets/icons/resourceicons_03.png")
+BIG_gold_icon = pygame.image.load("resources/assets/icons/resourceicons_06.png")
+BIG_stone_icon = pygame.image.load("resources/assets/icons/resourceicons_15.png")
+
+
 #ages icons
 age_1 = pygame.image.load("resources/assets/age_1.png")
 age_2 = pygame.image.load("resources/assets/age_2.png")

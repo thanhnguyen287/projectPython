@@ -453,7 +453,26 @@ class Hud:
         # name
         temp_pos = (action_menu.get_width() + 30, self.height * 0.79 + 20)
         if isinstance(self.examined_tile, Villager):
+            villager = self.examined_tile
             temp_pos = temp_pos[0] + 13, temp_pos[1]
+            # resources carried display if he has gathered smth
+            if villager.gathered_ressource_stack > 0:
+                if villager.stack_type == "tree":
+                    screen.blit(scale_image(BIG_wood_icon,w=40), (action_menu.get_width() + selection_panel.get_width() -200, self.height * 0.79 + 50))
+                    #self.gathered_ressource_stack = 0
+
+                elif villager.stack_type == "rock":
+                    screen.blit(scale_image(BIG_stone_icon,w=40), (action_menu.get_width() + selection_panel.get_width() -200, self.height * 0.79 + 50))
+
+                elif villager.stack_type == "berrybush":
+                    screen.blit(scale_image(BIG_food_icon,w=40), (action_menu.get_width() + selection_panel.get_width() -200, self.height * 0.79 + 50))
+
+                elif villager.stack_type == "gold":
+                    screen.blit(scale_image(BIG_gold_icon,w=40), (action_menu.get_width() + selection_panel.get_width() -200, self.height * 0.79 + 50))
+                draw_text(screen, "Carried resources : ", 15, get_color_code("GOLD"), (action_menu.get_width() + selection_panel.get_width() -150,  self.height - selection_panel.get_height() + 65))
+
+                draw_text(screen, str(villager.gathered_ressource_stack), 14, (255, 255, 255), (action_menu.get_width() + selection_panel.get_width() -120, self.height - selection_panel.get_height() + 90))
+
         elif isinstance(self.examined_tile, Farm) or isinstance(self.examined_tile, House) or \
                 isinstance(self.examined_tile, Barracks):
             temp_pos = temp_pos[0] + 16, temp_pos[1]
@@ -465,7 +484,7 @@ class Hud:
         # attack and armor display
         temp_pos = (action_menu.get_width() + 20 + 175, self.height * 0.79 + 107)
         text = "Armor : "
-        draw_text(screen, text, 15, (255, 201, 14), temp_pos)
+        draw_text(screen, text, 15, get_color_code("GOLD"), temp_pos)
         temp_pos = (action_menu.get_width() + 20 + 178, self.height * 0.79 + 128)
         draw_text(screen, str(self.examined_tile.armor), 12, (255, 255, 255), temp_pos)
 
@@ -480,10 +499,10 @@ class Hud:
             temp_pos = (action_menu.get_width() + 20 + 130, self.height * 0.79 + 105)
             screen.blit(armor_icon, temp_pos)
 
-            temp_pos = (action_menu.get_width() + 20 + 175, self.height * 0.79 + 45)
+            temp_pos = (action_menu.get_width() + 20 + 175, self.height - selection_panel.get_height() + 66)
             text = "Damage : "
             draw_text(screen, text, 15, (255, 201, 14), temp_pos)
-            temp_pos = (action_menu.get_width() + 20 + 178, self.height * 0.79 + 65)
+            temp_pos = (action_menu.get_width() + 20 + 178, self.height - selection_panel.get_height() + 86)
             draw_text(screen, str(self.examined_tile.attack_dmg) + " - " + str(self.examined_tile.attack_dmg + 1),
                       12, (255, 255, 255), temp_pos)
 
