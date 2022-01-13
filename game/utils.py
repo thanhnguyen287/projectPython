@@ -9,6 +9,8 @@ GENERAL_BUILDING_LIST = []
 UNIT_TYPES = []
 BUILDING_TYPES = []
 
+TEST_MODE = False
+
 def draw_text(screen, text, size, color, pos):
     # create a Font object from the system fonts
     # SysFont(name, size, bold=False, italic=False)

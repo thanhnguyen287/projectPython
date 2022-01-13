@@ -127,7 +127,7 @@ class Game:
                         this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
                         #("Info about villager, print is in game, events")
                         #this_villager.print_state()
-                        if this_villager.owner == MAIN_PLAYER:
+                        if this_villager.owner == MAIN_PLAYER or TEST_MODE:
                             for button in self.hud.bottom_left_menu:
                                 if button["rect"].collidepoint(mouse_pos):
                                     if button["name"] == "STOP":
@@ -159,7 +159,7 @@ class Game:
                             villager_pos = self.map.hud.examined_tile.pos
                             this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
 
-                            if this_villager.owner == MAIN_PLAYER:
+                            if this_villager.owner == MAIN_PLAYER or TEST_MODE:
                                 pos_mouse = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
                                 pos_x = pos_mouse[0]
                                 pos_y = pos_mouse[1]
@@ -187,9 +187,6 @@ class Game:
 
                                     this_villager.go_to_ressource((pos_x, pos_y))
 
-
-                                print(this_villager.owner.towncenter.pos[0], this_villager.owner.towncenter.pos[1])
-                                print(pos_x, pos_y)
                                 if this_villager.gathered_ressource_stack >= this_villager.stack_max \
                                         or (this_villager.owner.towncenter.pos[0] <= pos_x <=
                                         this_villager.owner.towncenter.pos[0]+1

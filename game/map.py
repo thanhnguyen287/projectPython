@@ -88,7 +88,9 @@ class Map:
         self.temp_tile = None
 
         # the player selects a building in the hud
-        if self.hud.selected_tile is not None and self.hud.examined_tile is not None:
+        if self.hud.selected_tile is not None and self.hud.examined_tile is not None \
+                and ((self.hud.examined_tile.owner == MAIN_PLAYER and self.hud.selected_tile.owner == MAIN_PLAYER)
+                     or TEST_MODE):
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             # if we can't place the building on the tile, there's no need to do the following
 
@@ -161,7 +163,7 @@ class Map:
                     unit = self.units[grid_pos[0]][grid_pos[1]]
                     if mouse_action[0]:
                         self.examined_tile = grid_pos
-                        if building is not None:
+                        if building is not None and (building.owner == MAIN_PLAYER or TEST_MODE):
                             self.hud.examined_tile = building
 
                             if type(building) == TownCenter:
@@ -169,7 +171,7 @@ class Map:
                             else:
                                 self.hud.bottom_left_menu = None
 
-                        elif unit is not None:
+                        elif unit is not None and (unit.owner == MAIN_PLAYER or TEST_MODE):
                             self.hud.examined_tile = unit
                             if type(unit) == Villager:
                                 self.hud.bottom_left_menu = self.hud.villager_menu
@@ -180,21 +182,34 @@ class Map:
                             if grid_pos[1] + 1 < self.grid_length_y:
                                 building = self.buildings[grid_pos[0]][grid_pos[1] + 1]
                             if building and type(building) == TownCenter or type(building) == Barracks:
-                                self.hud.examined_tile = building
                                 self.examined_tile = (grid_pos[0], grid_pos[1] + 1)
-                                self.hud.bottom_left_menu = self.hud.town_hall_menu
+
+                                # if the owner is the MAIN_PLAYER (us)
+                                if building.owner == MAIN_PLAYER or TEST_MODE:
+                                    self.hud.examined_tile = building
+                                    self.hud.bottom_left_menu = self.hud.town_hall_menu
+
                             elif self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and (type(
                                     self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter
                                     or type(self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == Barracks):
-                                self.hud.examined_tile = self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]
                                 self.examined_tile = (grid_pos[0] - 1, grid_pos[1] + 1)
-                                self.hud.bottom_left_menu = self.hud.town_hall_menu
+
+                                # if the owner is the MAIN_PLAYER (us)
+                                if self.buildings[grid_pos[0] - 1][grid_pos[1] + 1].owner == MAIN_PLAYER or TEST_MODE:
+                                    self.hud.examined_tile = self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]
+                                    self.hud.bottom_left_menu = self.hud.town_hall_menu
+
                             elif self.buildings[grid_pos[0] - 1][grid_pos[1]] and (type(
-                                    self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter
-                                    or type(self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == Barracks):
-                                self.hud.examined_tile = self.buildings[grid_pos[0] - 1][grid_pos[1]]
+                                    self.buildings[grid_pos[0] - 1][grid_pos[1]]) == TownCenter
+                                    or type(self.buildings[grid_pos[0] - 1][grid_pos[1]]) == Barracks):
                                 self.examined_tile = (grid_pos[0] - 1, grid_pos[1])
-                                self.hud.bottom_left_menu = self.hud.town_hall_menu
+
+                                # if the owner is the MAIN_PLAYER (us)
+                                if self.buildings[grid_pos[0] - 1][grid_pos[1]].owner == MAIN_PLAYER or TEST_MODE:
+                                    self.hud.examined_tile = self.buildings[grid_pos[0] - 1][grid_pos[1]]
+                                    self.hud.bottom_left_menu = self.hud.town_hall_menu
+
+
 
                 else:
                     pass
