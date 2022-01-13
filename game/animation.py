@@ -131,6 +131,101 @@ class BuildingAnimation(pygame.sprite.Sprite):
         self.image = self.selected_sprites_list[int(self.current_sprite)]
 
 
+#sprites dic containing 4 lists with death animation sprites for every age
+class BuildingDeathAnimation(pygame.sprite.Sprite):
+
+    def __init__(self, unit, images, pos_x=0, pos_y=0, animation_speed=0.15):
+        super().__init__()
+
+        self.unit = unit
+        self.color = self.unit.owner.color
+        self.age = 1
+        self.sprites = images
+        # age will be updated when we call the death method display to match the unit's owner age.
+
+        self.index = 0
+        self.current_frame = 0
+        self.current_sprite = 0
+        self.animation_speed = animation_speed
+
+        self.to_be_played = False
+        # image is the image we blit, we change it quickly to create the animation
+        self.image = self.sprites[str(self.age)][self.current_sprite]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos_x, pos_y]
+
+        self.unit.death_animation_group.add(self)
+
+    #######################################################################################################
+    # pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
+    # example : play(render_pos_0, render_pos_1, age=3, color="YELLOW", angle = 180)                      #
+    #######################################################################################################
+    def play(self, pos=(0, 0)):
+        self.age = self.unit.owner.age
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos[0], pos[1]]
+        # we determine which sprites list to use with color and age arguments
+
+        self.sprites = self.sprites[str(self.age)]
+        self.to_be_played = True
+
+    def update(self):
+        if self.to_be_played:
+            self.current_sprite += self.animation_speed
+        if floor(self.current_sprite) >= len(self.sprites):
+            self.to_be_played = False
+            self.current_sprite = 0
+        self.image = self.sprites[int(self.current_sprite)]
+
+
+#sprites dic containing 8 lists with angles of attack animation
+class VillagerAttackAnimation(pygame.sprite.Sprite):
+
+    def __init__(self, unit, images, pos_x=0, pos_y=0, animation_speed=0.4):
+        super().__init__()
+
+        self.unit = unit
+        self.color = self.unit.owner.color
+        self.angle = 0
+        self.sprites = images
+        self.selected_angle_sprites = []
+        # age will be updated when we call the death method display to match the unit's owner age.
+
+        self.index = 0
+        self.current_frame = 0
+        self.current_sprite = 0
+        self.animation_speed = animation_speed
+
+        self.to_be_played = False
+        # image is the image we blit, we change it quickly to create the animation
+        self.image = self.sprites[str(self.angle)][self.current_sprite]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos_x, pos_y]
+
+        self.unit.attack_animation_group.add(self)
+
+    #######################################################################################################
+    # pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
+    # example : play(render_pos_0, render_pos_1, age=3, color="YELLOW", angle = 180)                      #
+    #######################################################################################################
+    def play(self, pos=(0, 0)):
+        self.angle = self.unit.angle
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos[0], pos[1]]
+        # we determine which sprites list to use with color and age arguments
+        #self.sprites = self.sprites[str(self.angle)]
+        self.selected_angle_sprites = self.sprites[str(self.angle)]
+        self.to_be_played = True
+
+    def update(self):
+        if self.to_be_played:
+            self.current_sprite += self.animation_speed
+        if floor(self.current_sprite) >= len(self.selected_angle_sprites):
+            self.to_be_played = False
+            self.current_sprite = 0
+        self.image = self.selected_angle_sprites[int(self.current_sprite)]
+
+
 def load_images_better(path):
     """
     Loads all images in directory. The directory must only contain images.

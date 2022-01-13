@@ -1,4 +1,4 @@
-import copy
+#import copy
 import csv
 import random
 import noise
@@ -192,6 +192,18 @@ class Map:
     def draw(self, screen, camera):
         # displaying grass tiles
         screen.blit(self.grass_tiles, (camera.scroll.x, camera.scroll.y))
+        for player in player_list:
+            #building death display, not working for now
+            for building in player.building_list:
+                if type(building) == House and building.death_animation.to_be_played:
+                    building.death_animation_group.draw(screen)
+                    building.death_animation.update()
+
+            #attack villager animation display
+            for unit in player.unit_list:
+                if type(unit) == Villager and unit.attack_animation.to_be_played:
+                    unit.attack_animation_group.draw(screen)
+                    unit.attack_animation.update()
 
         for player in player_list:
 
@@ -286,7 +298,7 @@ class Map:
         ]
         # polygon
         iso_poly = [decarte_to_iso(x, y) for x, y in rect]
-        iso_poly_minimap = copy.deepcopy(iso_poly)
+        #iso_poly_minimap = copy.deepcopy(iso_poly)
         minx = min([x for x, y in iso_poly])
         miny = min([y for x, y in iso_poly])
         r = random.randint(1, 100)
@@ -325,7 +337,7 @@ class Map:
             "max_health": 10,
             "health": 10,
             "variation": variation if tile != "" else 0,
-            "iso_poly_minimap": iso_poly_minimap
+            #"iso_poly_minimap": iso_poly_minimap
         }
         return out
 
@@ -956,8 +968,8 @@ class Map:
                 animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
                 animation_pos[1] - (
                         self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
-            self.hud.villager_attack_animations["Villager"]["animation"].play((animation_pos), color=unit.owner.color,
-                                                                              angle=unit.angle)
+            unit.attack_animation.play(animation_pos)
+
         else:
             # fixed sprite
             # + 20 because of sprite offset

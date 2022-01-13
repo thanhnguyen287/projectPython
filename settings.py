@@ -13,6 +13,7 @@ ENABLE_HEALTH_BARS = False
 
 pygame.font.init()
 myfont = pygame.font.SysFont("monospace", 14)
+chatFont = pygame.font.SysFont("monospace", 25)
 
 #path
 current_path = os.path.dirname(__file__)  #current path of settings.py

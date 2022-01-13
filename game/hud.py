@@ -63,6 +63,7 @@ class Hud:
         self.villager_attack_animations = self.create_all_attack_animations()
 
     #        self.villager_walk_animations = self.create_all_walk_animations()
+        self.all_buildings_death_animations = self.create_all_building_death_animations()
 
     def create_train_menu_town_hall(self):
         render_pos = [25, self.height - action_menu.get_height() + 40]
@@ -811,7 +812,8 @@ class Hud:
         villager_attack_animation_group = pygame.sprite.Group()
         villager_attack_animation_group.add(villager_attack_animation)
         villager = {"animation": villager_attack_animation,
-                    "group": villager_attack_animation_group
+                    "group": villager_attack_animation_group,
+                    "sprites": villager_attack_sprites_list
                     }
 
         dic = {"Villager": villager}
@@ -828,3 +830,42 @@ class Hud:
     # work in progress, not finished
     #def create_all_walking_animations(self):
 
+
+    def create_all_building_death_animations(self):
+        # HOUSE - RED, BLUE, GREEN and YELLOW available, need to specify the current age too.
+        house_death_sprites_list = {"BLUE": {}, "RED": {}, "GREEN": {}, "YELLOW": {}}
+        # loop for the 4 ages
+        for folder in range(1, 5):
+            house_death_sprites_list["BLUE"][str(folder)] = load_images_better(
+                "resources/assets/Models/Buildings/House/death/BLUE/" + str(folder))
+            house_death_sprites_list["RED"][str(folder)] = load_images_better(
+                "resources/assets/Models/Buildings/House/death/RED/" + str(folder))
+            house_death_sprites_list["GREEN"][str(folder)] = load_images_better(
+                "resources/assets/Models/Buildings/House/death/GREEN/" + str(folder))
+            house_death_sprites_list["YELLOW"][str(folder)] = load_images_better(
+                "resources/assets/Models/Buildings/House/death/YELLOW/" + str(folder))
+
+        # house_death_animation = BuildingAnimation(sprites=house_death_sprites_list)
+        # house_death_animation_group = pygame.sprite.Group()
+        # house_death_animation_group.add(house_death_animation)
+
+        # TOWN CENTER
+        town_center_death_sprites_list = {"BLUE": {}, "RED": {}, "GREEN": {}, "YELLOW": {}}
+        # loop for the 4 ages
+        for folder in range(1, 5):
+            town_center_death_sprites_list["BLUE"][str(folder)] = load_images_better(
+                "resources/assets/Models/Buildings/Town_Center/death/BLUE/" + str(folder))
+            town_center_death_sprites_list["RED"][str(folder)] = load_images_better(
+                "resources/assets/Models/Buildings/Town_Center/death/RED/" + str(folder))
+            town_center_death_sprites_list["GREEN"][str(folder)] = load_images_better(
+                "resources/assets/Models/Buildings/Town_Center/death/GREEN/" + str(folder))
+            town_center_death_sprites_list["YELLOW"][str(folder)] = load_images_better(
+                "resources/assets/Models/Buildings/Town_Center/death/YELLOW/" + str(folder))
+
+        # town_center_death_animation = BuildingAnimation(sprites=town_center_death_sprites_list)
+        # town_center_death_animation_group = pygame.sprite.Group()
+        # town_center_death_animation_group.add(town_center_death_animation)
+
+        dic = {"House": house_death_sprites_list,
+               "Town Center": town_center_death_sprites_list}
+        return dic

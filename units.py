@@ -6,6 +6,7 @@ import pygame
 from math import ceil
 from random import randint
 from game.utils import tile_founding, GENERAL_UNIT_LIST, GENERAL_BUILDING_LIST, UNIT_TYPES, BUILDING_TYPES
+from game.animation import BuildingDeathAnimation, VillagerAttackAnimation
 
 
 class Building:
@@ -350,6 +351,9 @@ class House(Building):
         player_owner_of_unit.max_population += 5
 
         super().__init__(pos, map, player_owner_of_unit)
+        self.death_animation_group = pygame.sprite.Group()
+        self.death_animation = BuildingDeathAnimation(self, map.hud.all_buildings_death_animations["House"][player_owner_of_unit.color])
+        #buildings death animation
 
     def update(self):
         self.now = pygame.time.get_ticks()
@@ -519,29 +523,10 @@ class Villager(Unit):
 
         super().__init__(pos, player_owner_of_unit, map, angle)
         self.owner.unit_occupied.append(0)
-
-    def go_to_townhall(self):
-        if not self.searching_for_path:
-            pos_list = tile_founding(10, 1, 1, self.map.map, self.owner, "")
-            r = randint(0, len(pos_list)-1)
-            pos = pos_list[r]
-            tile = self.map.map[pos[0]][pos[1]]
-            self.move_to(tile)
-
-        if abs(self.pos[0] - self.owner.towncenter_pos[0]) <= 1 and \
-                abs(self.pos[1] - self.owner.towncenter_pos[1]) <= 1:
-            if self.stack_type == "tree":
-                self.owner.update_resource("WOOD", self.gathered_ressource_stack)
-            elif self.stack_type == "rock":
-                self.owner.update_resource("STONE", self.gathered_ressource_stack)
-            elif self.stack_type == "gold":
-                self.owner.update_resource("GOLD", self.gathered_ressource_stack)
-            elif self.stack_type == "berrybush":
-                self.owner.update_resource("FOOD", self.gathered_ressource_stack)
-
-            self.gathered_ressource_stack = 0
-            self.stack_type = None
-
+        self.attack_animation_group = pygame.sprite.Group()
+        self.attack_animation = VillagerAttackAnimation(self, map.hud.villager_attack_animations["Villager"]["sprites"][
+            player_owner_of_unit.color])
+        # buildings death animation
 
     def repair(self, building):
         if building.current_health != building.max_health:
@@ -588,7 +573,7 @@ class Villager(Unit):
                     self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
                     self.target = None
                     self.is_attacking = False
-                    self.map.hud.villager_attack_animations["Villager"]["animation"].to_be_played = False
+                    self.attack_animation.to_be_played = False
                     self.strike = 0
 
             if self.target is not None and type(self.target) == Villager and \
@@ -612,7 +597,7 @@ class Villager(Unit):
     def build(self):
         self.is_moving_to_build = False
         if self.building_to_create is not None:
-            self.angle = self.map.get_angle_between(self.pos, self.building_to_create["pos"], self) if self.map.get_angle_between(self.pos, self.building_to_create["pos"], self) != -1 else ...
+            self.angle = self.map.get_angle_between(self.pos, self.building_to_create["pos"], self)
 
         new_building = None
         if self.building_to_create["name"] == "Farm":
@@ -709,7 +694,7 @@ class Villager(Unit):
                     self.map.collision_matrix[this_target["grid"][1]][this_target["grid"][0]] = 1
                     self.targeted_ressource = None
                     self.is_gathering = False
-                    self.map.hud.villager_attack_animations["Villager"]["animation"].to_be_played = False
+                    self.attack_animation.to_be_played = False
 
     def update(self):
         self.now = pygame.time.get_ticks()
