@@ -6,7 +6,7 @@ import pygame
 from math import ceil
 from random import randint
 from game.utils import tile_founding, GENERAL_UNIT_LIST, GENERAL_BUILDING_LIST, UNIT_TYPES, BUILDING_TYPES
-from game.animation import BuildingDeathAnimation, VillagerAttackAnimation
+from game.animation import BuildingDeathAnimation, VillagerAttackAnimation, VillagerMiningAnimation
 
 
 class Building:
@@ -523,9 +523,15 @@ class Villager(Unit):
 
         super().__init__(pos, player_owner_of_unit, map, angle)
         self.owner.unit_occupied.append(0)
+        #attack animation
         self.attack_animation_group = pygame.sprite.Group()
         self.attack_animation = VillagerAttackAnimation(self, map.hud.villager_attack_animations["Villager"]["sprites"][
             player_owner_of_unit.color])
+        #mining animation
+        self.mining_animation_group = pygame.sprite.Group()
+        self.mining_animation = VillagerMiningAnimation(self, map.hud.mining_sprites_villager[
+            player_owner_of_unit.color])
+
         # buildings death animation
 
     def go_to_townhall(self):

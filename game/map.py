@@ -204,6 +204,9 @@ class Map:
                 if type(unit) == Villager and unit.attack_animation.to_be_played:
                     unit.attack_animation_group.draw(screen)
                     unit.attack_animation.update()
+                elif type(unit) == Villager and unit.mining_animation.to_be_played:
+                    unit.mining_animation_group.draw(screen)
+                    unit.mining_animation.update()
 
         for player in player_list:
 
@@ -962,7 +965,7 @@ class Map:
         elif unit.angle == 315:
             unit.sprite_index = 7
 
-        if unit.is_attacking or unit.is_gathering:
+        if unit.is_attacking:
             animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
             animation_pos = (
                 animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
@@ -970,6 +973,28 @@ class Map:
                         self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
             unit.attack_animation.play(animation_pos)
 
+        elif unit.is_gathering:
+            tile_type = self.map[unit.targeted_ressource[0]][unit.targeted_ressource[1]]["tile"]
+            #mining
+            # mining villager
+            if tile_type == "gold" or tile_type == "rock":
+                animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
+                animation_pos = (
+                    animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
+                    animation_pos[1] - (
+                            self.hud.mining_sprites_villager["RED"]["0"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+                unit.mining_animation.play(animation_pos)
+
+            #cutting wood or berrybush
+            elif tile_type == "tree" or tile_type == "berrybush":
+                animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
+                animation_pos = (
+                    animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
+                    animation_pos[1] - (
+                            self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+                unit.attack_animation.play(animation_pos)
+
+        #normal villager
         else:
             # fixed sprite
             # + 20 because of sprite offset

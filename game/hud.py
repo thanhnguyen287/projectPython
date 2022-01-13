@@ -64,6 +64,7 @@ class Hud:
 
     #        self.villager_walk_animations = self.create_all_walk_animations()
         self.all_buildings_death_animations = self.create_all_building_death_animations()
+        self.mining_sprites_villager = self.load_mining_sprites_villager()
 
     def create_train_menu_town_hall(self):
         render_pos = [25, self.height - action_menu.get_height() + 40]
@@ -219,7 +220,7 @@ class Hud:
             # Draw minimap
             screen.blit(minimap_panel,
                         (self.width - minimap_panel.get_width(), self.height - selection_panel.get_height()))
-            map.draw_minimap(screen, camera)
+            #map.draw_minimap(screen, camera)
             screen.blit(action_menu, (0, self.height - action_menu.get_height()))
             screen.blit(selection_panel, (action_menu.get_width(), self.height - selection_panel.get_height()))
 
@@ -818,6 +819,19 @@ class Hud:
 
         dic = {"Villager": villager}
         return dic
+
+    def load_mining_sprites_villager(self):
+
+        # VILLAGER - 8 different attacks animation, varies with angle, not with age. Available for RED, BLUE, GREEN and YELLOW players
+        villager_mining_sprites_list = {"BLUE": {}, "RED": {}, "GREEN": {}, "YELLOW": {}}
+        # loop for the 8 angles. folder * 45 because angles are 0, 45, 90, 135, etc... up to 315 for max.
+        for folder in range(0, 8):
+            villager_mining_sprites_list["BLUE"][str(int(folder * 45))] = load_images_better("resources/assets/Models/Units/Villager/BLUE/mine/" + str(int(folder * 45)))
+            villager_mining_sprites_list["RED"][str(int(folder * 45))] = load_images_better("resources/assets/Models/Units/Villager/RED/mine/" + str(int(folder * 45)))
+            villager_mining_sprites_list["GREEN"][str(int(folder * 45))] = load_images_better("resources/assets/Models/Units/Villager/GREEN/mine/" + str(int(folder * 45)))
+            villager_mining_sprites_list["YELLOW"][str(int(folder * 45))] = load_images_better("resources/assets/Models/Units/Villager/YELLOW/mine/" + str(int(folder * 45)))
+        return villager_mining_sprites_list
+
 
     def load_villager_idle_fixed_sprites(self):
         dic = {"BLUE": load_images_better("Resources/assets/Models/Units/Villager/BLUE/Idle/static"),
