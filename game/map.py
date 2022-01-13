@@ -89,7 +89,7 @@ class Map:
 
         # the player selects a building in the hud
         if self.hud.selected_tile is not None and self.hud.examined_tile is not None \
-                and ((self.hud.examined_tile.owner == MAIN_PLAYER and self.hud.selected_tile.owner == MAIN_PLAYER)
+                and ((self.hud.examined_tile.owner == MAIN_PLAYER)
                      or TEST_MODE):
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             # if we can't place the building on the tile, there's no need to do the following
@@ -517,12 +517,15 @@ class Map:
             # (x : 0 if left, 1 if right ; y : 1 if bottom, 0 if top)
             place_x = random.randint(0, 1)
             place_y = random.randint(0, 1)
-            if the_player == playerTwo:
-                place_x = 0
-                place_y = 0
-            elif the_player == playerOne:
-                place_x = 1
-                place_y = 0
+
+            # TO TEST, should be disabled if we play a real game
+            if TEST_MODE:
+                if the_player == playerTwo:
+                    place_x = 0
+                    place_y = 0
+                elif the_player == playerOne:
+                    place_x = 1
+                    place_y = 0
 
             # top_left
             if (place_x, place_y) == (0, 0):
