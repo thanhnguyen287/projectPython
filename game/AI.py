@@ -124,6 +124,11 @@ class AI:
                 elif isinstance(u, Villager) and (not self.dev_pop or u.building_to_create is not None):
                     self.building_routine(u)
 
+        for u in self.player.unit_list:
+            if u.is_moving_to_gather and not u.searching_for_path:
+                u.is_moving_to_gather = False
+                print("reset")
+
         self.free_tiles()
         self.dev_pop = False
 

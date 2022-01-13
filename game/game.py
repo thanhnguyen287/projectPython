@@ -64,7 +64,7 @@ class Game:
             self.update()
             self.draw()
             self.AI_1.run()
-            #self.AI_2.run()
+            self.AI_2.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -126,7 +126,7 @@ class Game:
                         villager_pos = self.map.hud.examined_tile.pos
                         this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
                         #("Info about villager, print is in game, events")
-                        #this_villager.print_state()
+                        this_villager.print_state()
                         if this_villager.owner == MAIN_PLAYER or TEST_MODE:
                             for button in self.hud.bottom_left_menu:
                                 if button["rect"].collidepoint(mouse_pos):
