@@ -1,5 +1,5 @@
 from settings import *
-from units import House, TownCenter,Farm, Villager, Clubman, Bowman
+from units import House, TownCenter,Farm, Barracks, Villager, Clubman, Bowman
 from game.utils import draw_text
 
 
@@ -31,6 +31,7 @@ class Player:
             "Farm": {"wood": 100, "food": 0, "gold": 0, "stone": 0},
             "House": {"wood": 300, "food": 0, "gold": 0, "stone": 50},
             "TownCenter": {"wood": 1000, "food": 0, "gold": 0, "stone": 100},
+            "Barracks": {"wood": 500, "food": 0, "gold": 0, "stone": 200},
 
             "Villager": {"wood": 0, "food": 10, "gold": 25, "stone": 0},
             "Advance to Feudal Age": {"wood": 0, "food": 500, "gold": 0, "stone": 0},
@@ -43,6 +44,7 @@ class Player:
             "Farm": 0,
             "House": 0,
             "TownCenter": 0,
+            "Barracks": 0,
 
             "Villager": 1
 
@@ -151,6 +153,8 @@ def str_to_entity_class(name: str):
         return House
     elif name == "Farm":
         return Farm
+    elif name == "Barracks":
+        return Barracks
     elif name == "Villager":
         return Villager
     elif name == "Clubman":

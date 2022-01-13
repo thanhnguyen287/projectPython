@@ -33,8 +33,8 @@ class Game:
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
 
         # IA
-        self.AI_1 = AI(playerTwo, self.map.map)
-        self.AI_2 = AI(playerOne, self.map.map)
+        #self.AI_1 = AI(playerTwo, self.map.map)
+        #self.AI_2 = AI(playerOne, self.map.map)
 
         # chat
         self.chat_color = (40, 40, 40, 150)
@@ -54,8 +54,8 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            self.AI_1.run()
-            self.AI_2.run()
+            #self.AI_1.run()
+            #self.AI_2.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
