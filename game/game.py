@@ -1,6 +1,6 @@
 from .camera import Camera
 from .map import *
-from .utils import draw_text
+from .utils import draw_text, find_owner
 from .hud import Hud
 from .animation import *
 from .AI import AI
@@ -64,7 +64,7 @@ class Game:
             self.update()
             self.draw()
             self.AI_1.run()
-            #self.AI_2.run()
+            self.AI_2.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -126,34 +126,32 @@ class Game:
                         villager_pos = self.map.hud.examined_tile.pos
                         this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
                         #("Info about villager, print is in game, events")
-                        #this_villager.print_state()
-
-                    for button in self.hud.bottom_left_menu:
-                        if button["rect"].collidepoint(mouse_pos):
-                            if button["name"] == "STOP":
-                                unit_type_trained = self.hud.examined_tile.unit_type_currently_trained
-                                self.hud.examined_tile.owner.refund_entity_cost(unit_type_trained)
-                                self.hud.examined_tile.queue -= 1
-                                #no more units to create
-                                if self.hud.examined_tile.queue == 0:
-                                    self.hud.examined_tile.is_working = False
-                                    self.hud.examined_tile.unit_type_currently_trained = None
-                            else:
-                                if button["affordable"]:
-                                    if button["name"] == "Villager" and not self.hud.examined_tile.is_being_built:
-                                        self.hud.examined_tile.train(Villager)
-
-                                    elif button["name"] == "Advance to Feudal Age" or button["name"] == "Advance to Castle Age" or button["name"] == "Advance to Imperial Age":
-                                        self.hud.examined_tile.research_tech(button["name"])
+                        this_villager.print_state()
+                        if this_villager.owner == MAIN_PLAYER or TEST_MODE:
+                            for button in self.hud.bottom_left_menu:
+                                if button["rect"].collidepoint(mouse_pos):
+                                    if button["name"] == "STOP":
+                                        unit_type_trained = self.hud.examined_tile.unit_type_currently_trained
+                                        self.hud.examined_tile.owner.refund_entity_cost(unit_type_trained)
+                                        self.hud.examined_tile.queue -= 1
+                                        #no more units to create
+                                        if self.hud.examined_tile.queue == 0:
+                                            self.hud.examined_tile.is_working = False
+                                            self.hud.examined_tile.unit_type_currently_trained = None
                                     else:
-                                        self.hud.selected_tile = button
+                                        if button["affordable"]:
+                                            if button["name"] == "Villager" and not self.hud.examined_tile.is_being_built:
+                                                self.hud.examined_tile.train(Villager)
+
+                                            elif button["name"] == "Advance to Feudal Age" or button["name"] == "Advance to Castle Age" or button["name"] == "Advance to Imperial Age":
+                                                self.hud.examined_tile.research_tech(button["name"])
+                                            else:
+                                                self.hud.selected_tile = button
                 #BOOM WHEN RIGHT CLICKING
                 elif event.button == 3:  # RIGHT CLICK
-                    #player.rect.topleft = [pygame.mouse.get_pos()[0]-60, pygame.mouse.get_pos()[1]-100]
-                    #player.play()
                     # right click, gathering and moving units (fighting in future)
                     grid_pos = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
-                    if 0 <= grid_pos[0] <= self.map.grid_length_x and 0 <= grid_pos[1] <= self.map.grid_length_y:
+                    if 0 <= grid_pos[0] < self.map.grid_length_x and 0 <= grid_pos[1] < self.map.grid_length_y:
 
                         # There is a bug with collecting ressources on the side of the map !!!
 
@@ -161,33 +159,41 @@ class Game:
                             villager_pos = self.map.hud.examined_tile.pos
                             this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
 
-                            pos_mouse = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
-                            pos_x = pos_mouse[0]
-                            pos_y = pos_mouse[1]
-                            # ATTACK
-                            if self.map.units[pos_x][pos_y] is not None or self.map.buildings[pos_x][pos_y] is not None:
-                                # si les deux unites sont adjacentes:
-                                this_villager.go_to_attack((pos_x, pos_y))
+                            if this_villager.owner == MAIN_PLAYER or TEST_MODE:
+                                pos_mouse = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
+                                pos_x = pos_mouse[0]
+                                pos_y = pos_mouse[1]
+                                # ATTACK
+                                if (self.map.units[pos_x][pos_y] is not None
+                                    or self.map.buildings[pos_x][pos_y] is not None) \
+                                        and not this_villager.owner == find_owner([pos_x, pos_y]):
+                                    # attack !
+                                    this_villager.go_to_attack((pos_x, pos_y))
 
-                            # ONLY MOVEMENT
-                            if not self.map.map[grid_pos[0]][grid_pos[1]]["collision"] and \
-                                    not this_villager.is_gathering and this_villager.targeted_ressource is None and \
-                                    not this_villager.is_attacking:
-                                this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
+                                # ONLY MOVEMENT
+                                if self.map.collision_matrix[grid_pos[1]][grid_pos[0]] and \
+                                        not this_villager.is_gathering and this_villager.targeted_ressource is None and \
+                                        not this_villager.is_attacking:
+                                    this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
 
-                            # we check if the tile we right click on is a ressource and if its on an adjacent tile of
-                            # the villager pos, and if the villager isnt moving if the tile next to him is a ressource
-                            # and we right click on it and he is not moving, he will gather it
-                            if not this_villager.searching_for_path \
-                                    and (self.map.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"])\
-                                    and this_villager.gathered_ressource_stack < this_villager.stack_max and \
-                                    (this_villager.stack_type is None or
-                                     this_villager.stack_type == self.map.map[pos_x][pos_y]["tile"]):
+                                # we check if the tile we right click on is a ressource and if its on an adjacent tile of
+                                # the villager pos, and if the villager isnt moving if the tile next to him is a ressource
+                                # and we right click on it and he is not moving, he will gather it
+                                if not this_villager.searching_for_path \
+                                        and (self.map.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"])\
+                                        and this_villager.gathered_ressource_stack < this_villager.stack_max and \
+                                        (this_villager.stack_type is None or
+                                         this_villager.stack_type == self.map.map[pos_x][pos_y]["tile"]):
 
-                                this_villager.go_to_ressource((pos_x, pos_y))
+                                    this_villager.go_to_ressource((pos_x, pos_y))
 
-                            if this_villager.gathered_ressource_stack >= this_villager.stack_max:
-                                this_villager.go_to_townhall()
+                                if this_villager.gathered_ressource_stack >= this_villager.stack_max \
+                                        or (this_villager.owner.towncenter.pos[0] <= pos_x <=
+                                        this_villager.owner.towncenter.pos[0]+1
+                                            and this_villager.owner.towncenter.pos[1] <= pos_y <=
+                                        this_villager.owner.towncenter.pos[1]-1):
+                                    this_villager.go_to_townhall()
+
 
     def update(self):
         self.camera.update()

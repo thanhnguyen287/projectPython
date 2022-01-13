@@ -143,7 +143,7 @@ class Player:
         draw_text(screen, age_text, 18, "WHITE", (screen.get_size()[0] - age_panel.get_width() + 90, 17))
 
 
-playerOne = Player("Lucien", True, [1000, 10000, 10000, 10000], color="BLUE")
+playerOne = Player("Lucien", True, [1000, 1000, 1000, 1000], color="BLUE")
 playerOne.age = 1
 
 playerTwo = Player("AI", True, [1000, 1000, 1000, 1000], color="RED")

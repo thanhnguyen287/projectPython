@@ -31,7 +31,7 @@ class Building:
         self.map.entities.append(self)
         self.map.map[self.pos[0]][self.pos[1]]["tile"] = "building"
         # 0 means collision = True
-        self.map.collision_matrix[self.pos[0]][self.pos[1]] = 0
+        self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
 
         # will be used in the timer to increase resources of the player
         self.resource_manager_cooldown = pygame.time.get_ticks()
@@ -110,7 +110,7 @@ class TownCenter(Building):
         map.collision_matrix[pos[1] - 1][pos[0]] = 0
 
         map.map[pos[0] + 1][pos[1] - 1]["tile"] = "building"
-        map.collision_matrix[pos[0] + 1][pos[1] - 1] = 0
+        map.collision_matrix[pos[1] - 1][pos[0] + 1] = 0
 
         self.construction_cost = [0, 0, 0, 0]
 
@@ -400,7 +400,7 @@ class Barracks(Building):
         map.collision_matrix[pos[1] - 1][pos[0]] = 0
 
         map.map[pos[0] + 1][pos[1] - 1]["tile"] = "building"
-        map.collision_matrix[pos[0] + 1][pos[1] - 1] = 0
+        map.collision_matrix[pos[1] - 1][pos[0] + 1] = 0
 
         self.construction_cost = [500, 0, 0, 200]
 
@@ -493,7 +493,7 @@ class Unit:
         self.map.entities.append(self)
         self.map.map[self.pos[0]][self.pos[1]]["tile"] = "unit"
         # 0 means collision = True
-        self.map.collision_matrix[self.pos[0]][self.pos[1]] = 0
+        self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
 
         # we add the unit we created to the list of units of the player
         self.owner.unit_list.append(self)
@@ -586,7 +586,7 @@ class Villager(Unit):
         # DATA
         self.max_health = 25
         self.current_health = self.max_health
-        self.attack_dmg = 50
+        self.attack_dmg = 3
         self.attack_speed = 1500
         self.movement_speed = 1.1
         # unit type : melee
@@ -645,8 +645,10 @@ class Villager(Unit):
             tile = self.map.map[pos[0]][pos[1]]
             self.move_to(tile)
 
-        if abs(self.pos[0] - self.owner.towncenter_pos[0]) <= 1 and \
-                abs(self.pos[1] - self.owner.towncenter_pos[1]) <= 1:
+        if (abs(self.pos[0] - self.owner.towncenter_pos[0]) <= 1 and
+                abs(self.pos[1] - self.owner.towncenter_pos[1]) <= 1) or \
+                (abs(self.pos[0] - (self.owner.towncenter_pos[0]+1)) <= 1 and
+                 abs(self.pos[1] - (self.owner.towncenter_pos[1]-1)) <= 1):
             if self.stack_type == "tree":
                 self.owner.update_resource("WOOD", self.gathered_ressource_stack)
             elif self.stack_type == "rock":
@@ -778,7 +780,6 @@ class Villager(Unit):
         pos_x = self.building_to_create["pos"][0]
         pos_y = self.building_to_create["pos"][1]
         self.map.map[pos_x][pos_y]["tile"] = "building"
-        self.is_building = False
 
     def go_to_ressource(self, pos):
         # if the ressource is near us, we directly gather it
@@ -854,7 +855,7 @@ class Villager(Unit):
                 if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
                 #print("debug path index, path)", self.path_index, len(self.path))
-                new_pos = self.path[self.path_index] if len(self.path) != self.path_index else ...
+                if len(self.path) != self.path_index: new_pos = self.path[self.path_index]
 
                 #update position in the world
                 self.change_tile(new_pos)
@@ -889,6 +890,7 @@ class Villager(Unit):
     def print_state(self):
         print("Gathering : ", self.is_gathering)
         print("Moving to gather : ", self.is_moving_to_gather)
+        print("stack", self.gathered_ressource_stack)
         print("Building : ", self.building_to_create)
         print("Moving to build : ", self.is_moving_to_build)
         print("Moving : ", self.searching_for_path)

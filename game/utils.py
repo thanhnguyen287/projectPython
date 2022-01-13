@@ -9,6 +9,8 @@ GENERAL_BUILDING_LIST = []
 UNIT_TYPES = []
 BUILDING_TYPES = []
 
+TEST_MODE = True
+
 def draw_text(screen, text, size, color, pos):
     # create a Font object from the system fonts
     # SysFont(name, size, bold=False, italic=False)
@@ -224,3 +226,14 @@ def is_adjacent_to(pos1, pos2):
 
         else:
             return False
+
+def find_owner(pos):
+    for u in GENERAL_UNIT_LIST:
+        unit_pos = list(u.pos)
+        if unit_pos == pos:
+            return u.owner
+
+    for b in GENERAL_BUILDING_LIST:
+        bat_pos= list(b.pos)
+        if bat_pos == pos:
+            return b.owner
