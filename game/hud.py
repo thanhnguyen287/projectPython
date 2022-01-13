@@ -61,6 +61,7 @@ class Hud:
         # animations. contains stuff like : self.death_animations["house"]["animation"]
         self.death_animations = self.create_all_death_animations()
         self.villager_sprites = self.load_villager_idle_fixed_sprites()
+        self.clubman_sprites = self.load_clubman_idle_fixed_sprites()
         self.villager_attack_animations = self.create_all_attack_animations()
 
     #        self.villager_walk_animations = self.create_all_walk_animations()
@@ -800,6 +801,26 @@ class Hud:
                     "group": villager_death_animation_group
                        }
 
+        # CLUBMAN - 8 different deaths animation, varies with angle, not with age. Available for RED, BLUE, GREEN and YELLOW players
+        clubman_death_sprites_list = {"BLUE": {}, "RED": {}, "GREEN": {}, "YELLOW": {}}
+        # loop for the 8 angles. folder * 45 because angles are 0, 45, 90, 135, etc... up to 315 for max.
+        for folder in range(0, 8):
+            clubman_death_sprites_list["BLUE"][str(int(folder * 45))] = load_images_better(
+                "resources/assets/Models/Units/Clubman/BLUE/death/" + str(int(folder * 45)))
+            clubman_death_sprites_list["RED"][str(int(folder * 45))] = load_images_better(
+                "resources/assets/Models/Units/Clubman/RED/death/" + str(int(folder * 45)))
+            clubman_death_sprites_list["GREEN"][str(int(folder * 45))] = load_images_better(
+                "resources/assets/Models/Units/Clubman/GREEN/death/" + str(int(folder * 45)))
+            clubman_death_sprites_list["YELLOW"][str(int(folder * 45))] = load_images_better(
+                "resources/assets/Models/Units/Clubman/YELLOW/death/" + str(int(folder * 45)))
+
+        clubman_death_animation = Animation(sprites=villager_death_sprites_list)
+        clubman_death_animation_group = pygame.sprite.Group()
+        clubman_death_animation_group.add(clubman_death_animation)
+        clubman = {"animation": clubman_death_animation,
+                    "group": clubman_death_animation_group
+                    }
+
 
         dic = {"House": house,
                "Town Center": town_center,
@@ -825,8 +846,28 @@ class Hud:
                     "group": villager_attack_animation_group,
                     "sprites": villager_attack_sprites_list
                     }
+        # Clubman - 8 different attacks animation, varies with angle, not with age. Available for RED, BLUE, GREEN and YELLOW players
+        clubman_attack_sprites_list = {"BLUE": {}, "RED": {}, "GREEN": {}, "YELLOW": {}}
+        # loop for the 8 angles. folder * 45 because angles are 0, 45, 90, 135, etc... up to 315 for max.
+        for folder in range(0, 8):
+            clubman_attack_sprites_list["BLUE"][str(int(folder * 45))] = load_images_better(
+                "resources/assets/Models/Units/Clubman/BLUE/attack/" + str(int(folder * 45)))
+            clubman_attack_sprites_list["RED"][str(int(folder * 45))] = load_images_better(
+                "resources/assets/Models/Units/Clubman/RED/attack/" + str(int(folder * 45)))
+            clubman_attack_sprites_list["GREEN"][str(int(folder * 45))] = load_images_better(
+                "resources/assets/Models/Units/Clubman/GREEN/attack/" + str(int(folder * 45)))
+            clubman_attack_sprites_list["YELLOW"][str(int(folder * 45))] = load_images_better(
+                "resources/assets/Models/Units/Clubman/YELLOW/attack/" + str(int(folder * 45)))
 
-        dic = {"Villager": villager}
+        clubman_attack_animation = Animation(sprites=clubman_attack_sprites_list, animation_speed=anim_speed)
+        clubman_attack_animation_group = pygame.sprite.Group()
+        clubman_attack_animation_group.add(clubman_attack_animation)
+        clubman = {"animation": clubman_attack_animation,
+                    "group": clubman_attack_animation_group,
+                    "sprites": clubman_attack_sprites_list
+                    }
+
+        dic = {"Villager": villager, "Clubman": clubman}
         return dic
 
     def load_mining_sprites_villager(self):
@@ -847,6 +888,14 @@ class Hud:
                "RED": load_images_better("Resources/assets/Models/Units/Villager/RED/Idle/static"),
                "GREEN": load_images_better("Resources/assets/Models/Units/Villager/GREEN/Idle/static"),
                "YELLOW": load_images_better("Resources/assets/Models/Units/Villager/YELLOW/Idle/static")
+               }
+        return dic
+
+    def load_clubman_idle_fixed_sprites(self):
+        dic = {"BLUE": load_images_better("Resources/assets/Models/Units/Clubman/BLUE/Idle/static"),
+               "RED": load_images_better("Resources/assets/Models/Units/Clubman/RED/Idle/static"),
+               "GREEN": load_images_better("Resources/assets/Models/Units/Clubman/GREEN/Idle/static"),
+               "YELLOW": load_images_better("Resources/assets/Models/Units/Clubman/YELLOW/Idle/static")
                }
         return dic
 

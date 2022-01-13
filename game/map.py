@@ -9,7 +9,7 @@ from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
 from player import playerOne, playerTwo, player_list, MAIN_PLAYER
-from units import Villager, Unit, Farm, TownCenter, House, Building, Barracks
+from units import Villager, Unit, Farm, TownCenter, House, Building, Barracks, Clubman
 
 
 class Map:
@@ -856,7 +856,10 @@ class Map:
                     render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
                             )
             else:
-                self.display_villager(unit, screen, camera, render_pos)
+                if type(unit) == Clubman:
+                    self.display_clubman(unit, screen, camera, render_pos)
+                else:
+                    self.display_villager(unit, screen, camera, render_pos)
             if unit.searching_for_path:
                 # creates a flag to display where the unit is going
                 screen.blit(destination_flag, (
@@ -1052,6 +1055,46 @@ class Map:
                 render_pos[1] - (self.hud.villager_sprites[unit.owner.color][
                                      unit.sprite_index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
                         )
+
+    def display_clubman(self, unit, screen, camera, render_pos):
+        """
+        We have to calculate the angle between the villager's target and him
+        """
+        if unit.angle == 45:
+            unit.sprite_index = 1
+        elif unit.angle == 135:
+            unit.sprite_index = 3
+        elif unit.angle == 225:
+            unit.sprite_index = 5
+        elif unit.angle == 180:
+            unit.sprite_index = 4
+        elif unit.angle == 90:
+            unit.sprite_index = 2
+        elif unit.angle == 270:
+            unit.sprite_index = 6
+        elif unit.angle == 0:
+            unit.sprite_index = 0
+        elif unit.angle == 315:
+            unit.sprite_index = 7
+
+        if unit.is_attacking:
+            animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
+            animation_pos = (
+                animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
+                animation_pos[1] - (
+                        self.hud.clubman_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+            unit.attack_animation.play(animation_pos)
+
+        #normal clubman
+        else:
+            # fixed sprite
+            # + 20 because of sprite offset
+            screen.blit(self.hud.clubman_sprites[unit.owner.color][unit.sprite_index], (
+                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 32,
+                render_pos[1] - (self.hud.clubman_sprites[unit.owner.color][
+                                     unit.sprite_index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+                        )
+
 
     # returns the angle between the origin tile and the destination tile. Angle goes from 0 to 360, 0 top, 90 right, etc...
     def get_angle_between(self, origin_tile_pos: [int, int], end_tile_pos: [int, int], unit):

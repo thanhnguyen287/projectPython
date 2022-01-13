@@ -925,11 +925,10 @@ class Bowman(Unit):
 
 
 class Clubman(Unit):
-    def __init__(self, pos, player_owner_of_unit, map):
-        super().__init__(pos, player_owner_of_unit, map)
+    def __init__(self, pos, player_owner_of_unit, map, angle=225):
+        super().__init__(pos, player_owner_of_unit, map, angle)
 
         #DISPLAY
-        self.sprite = None
         self.name = "Clubman"
 
         # DATA
@@ -946,4 +945,9 @@ class Clubman(Unit):
         self.population_produced = 1
         self.description = "Basic melee unit."
         self.construction_tooltip = " Train a Clubman"
+
+        # attack animation
+        self.attack_animation_group = pygame.sprite.Group()
+        self.attack_animation = VillagerAttackAnimation(self, map.hud.villager_attack_animations["Clubman"]["sprites"][
+            player_owner_of_unit.color])
 
