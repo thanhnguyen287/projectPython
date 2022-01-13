@@ -2,6 +2,7 @@ from player import player_list
 from .utils import tile_founding, better_look_around, RESSOURCE_LIST
 from units import Villager
 from random import randint
+from settings import MAP_SIZE_X, MAP_SIZE_Y
 
 
 class AI:
@@ -70,14 +71,18 @@ class AI:
         elif self.behaviour == "neutral":
             ressources_available = []
             for r in self.needed_ressource:
-                tiles_to_gather = tile_founding(1, 1, self.range, self.map, self.player, r)
-                if tiles_to_gather:
+                ressources_available = []
+                tiles_to_gather = tile_founding(len(self.player.unit_list), 1, self.range, self.map, self.player, r)
+                if len(tiles_to_gather) >= len(self.player.unit_list):
                     ressources_available.append(True)
                 else:
                     ressources_available.append(False)
 
-            if True not in ressources_available:
-                self.range += 1
+            if self.needed_ressource and True not in ressources_available:
+                if self.range < MAP_SIZE_X and self.range < MAP_SIZE_Y:
+                    self.range += 1
+                    print(self.range)
+
 
     def run(self):
         # looking at state of the game to chose mode (we should look every 5 seconds or so)
