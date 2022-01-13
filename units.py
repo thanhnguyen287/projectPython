@@ -776,8 +776,8 @@ class Villager(Unit):
         pos_x = self.building_to_create["pos"][0]
         pos_y = self.building_to_create["pos"][1]
         self.map.map[pos_x][pos_y]["tile"] = "building"
-        #self.building_to_create = None
         self.is_building = False
+        self.building_to_create = None
 
     def go_to_ressource(self, pos):
         # if the ressource is near us, we directly gather it
@@ -874,8 +874,6 @@ class Villager(Unit):
                         self.is_moving_to_gather = False
             else:
                 ...
-
-
 
             #always at the end to reset the timer
             self.move_timer = self.now

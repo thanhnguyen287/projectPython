@@ -224,10 +224,10 @@ class Map:
             for building in player.building_list:
                 if building.current_health <= 0:
                     self.remove_entity(building, camera.scroll)
-                elif building.current_health < building.max_health:
+                if building.current_health < building.max_health:
                     self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
                 # if building is selected, we highlight its tile
-                elif self.examined_tile is not None:
+                if self.examined_tile is not None:
                     if not building.is_being_built:
                         if (building.pos[0] == self.examined_tile[0]) and (building.pos[1] == self.examined_tile[1]):
                             if type(building) != TownCenter and type(building) != Barracks:
@@ -237,11 +237,9 @@ class Map:
                                 self.highlight_tile(building.pos[0], building.pos[1] - 1, screen, "WHITE",
                                                     camera.scroll,
                                                     multiple_tiles_tiles_flag=True)
+                                self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
                 self.display_building(screen, building, building.owner.color, camera.scroll,
                                       self.grid_to_renderpos(building.pos[0], building.pos[1]), player)
-                if self.examined_tile is not None:
-                    if (building.pos[0] == self.examined_tile[0]) and (building.pos[1] == self.examined_tile[1]):
-                        self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
 
             # units display. If units selected, we highlight the tile. If units not full health, we display its health bar
             for unit in player.unit_list:
@@ -876,6 +874,7 @@ class Map:
         # we either display the building fully constructed or being built ( 4 possible states )
         if not is_hypothetical_building:
             offset = (0, 0)
+            # normal display
             if not building.is_being_built:
                 if building.__class__.__name__ != "Farm":
                     sprite_to_display = \
@@ -886,21 +885,21 @@ class Map:
                     sprite_to_display = self.hud.first_age_building_sprites[building.__class__.__name__][
                         building.owner.color]
 
+                #change the offset to optimise the pos display for every entity
                 if isinstance(building, TownCenter):
                     offset = (10, 13)
-                screen.blit(sprite_to_display, (
-                    render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
-                    render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y + offset[1])
-                            )
-
-                if isinstance(building, Barracks):
+                elif isinstance(building, Barracks):
                     offset = (8, 24)
+
+                #general display
                 screen.blit(sprite_to_display, (
                     render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
                     render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y + offset[1])
                             )
 
 
+
+            #building construction progress
             else:
                 if building.construction_progress == 0:
                     if type(building) == TownCenter or type(building) == Barracks:
@@ -947,7 +946,6 @@ class Map:
                             render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
                             render_pos[1] - (building_construction_4.get_height() - TILE_SIZE) + scroll.y)
                                     )
-
 
         # we have to display hypothetical building sprite to show the villager wants to build there
         else:
