@@ -528,6 +528,28 @@ class Villager(Unit):
             player_owner_of_unit.color])
         # buildings death animation
 
+    def go_to_townhall(self):
+        if not self.searching_for_path:
+            pos_list = tile_founding(10, 1, 1, self.map.map, self.owner, "")
+            r = randint(0, len(pos_list) - 1)
+            pos = pos_list[r]
+            tile = self.map.map[pos[0]][pos[1]]
+            self.move_to(tile)
+
+        if abs(self.pos[0] - self.owner.towncenter_pos[0]) <= 1 and \
+                abs(self.pos[1] - self.owner.towncenter_pos[1]) <= 1:
+            if self.stack_type == "tree":
+                self.owner.update_resource("WOOD", self.gathered_ressource_stack)
+            elif self.stack_type == "rock":
+                self.owner.update_resource("STONE", self.gathered_ressource_stack)
+            elif self.stack_type == "gold":
+                self.owner.update_resource("GOLD", self.gathered_ressource_stack)
+            elif self.stack_type == "berrybush":
+                self.owner.update_resource("FOOD", self.gathered_ressource_stack)
+
+            self.gathered_ressource_stack = 0
+            self.stack_type = None
+
     def repair(self, building):
         if building.current_health != building.max_health:
             ...
