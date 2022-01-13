@@ -21,14 +21,15 @@ class AI:
         # this will be used to know if the AI needs to gather or not, and to expand or not
         self.needed_ressource = []
 
+        # number of each ressource needed per villager
+        self.quantity_of_each_ressource = [150, 50, 25, 100]
+
         # a list of tiles to manage the gathering of ressources with the multiple units
         self.targeted_tiles = []
 
         # a list of the tiles where buildings are being built, to not build more on it
         self.in_building_tiles = []
 
-        # number of each ressource needed for every villager
-        self.limit = 150
 
         # to know if we are developping pop or not to know if we can build a building or not
         self.dev_pop = False
@@ -68,7 +69,7 @@ class AI:
 
         # WARNING i will modify this so the AI expand only if a ressource she needs is lacking
         # or if she is neutral but lacking ressources to gather
-        elif self.behaviour == "neutral":
+        elif self.behaviour == "neutral" and self.range < MAP_SIZE_X and self.range < MAP_SIZE_Y:
             ressources_available = []
             for r in self.needed_ressource:
                 ressources_available = []
@@ -79,9 +80,8 @@ class AI:
                     ressources_available.append(False)
 
             if self.needed_ressource and True not in ressources_available:
-                if self.range < MAP_SIZE_X and self.range < MAP_SIZE_Y:
-                    self.range += 1
-                    print(self.range)
+                self.range += 1
+                print(self.range)
 
 
     def run(self):
@@ -265,10 +265,10 @@ class AI:
 
     def planning_gathering(self):
         for i in range(4):
-            if self.player.resources[i] <= len(self.player.unit_list) * self.limit and \
+            if self.player.resources[i] <= len(self.player.unit_list) * self.quantity_of_each_ressource[i] and \
                     RESSOURCE_LIST[i] not in self.needed_ressource:
                 self.needed_ressource.append(RESSOURCE_LIST[i])
-            elif self.player.resources[i] > len(self.player.unit_list) * self.limit and \
+            elif self.player.resources[i] > len(self.player.unit_list) * self.quantity_of_each_ressource[i] and \
                     RESSOURCE_LIST[i] in self.needed_ressource:
                 self.needed_ressource.remove(RESSOURCE_LIST[i])
 
