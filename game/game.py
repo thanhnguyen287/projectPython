@@ -187,6 +187,15 @@ class Game:
         for an_entity in self.entities:
             an_entity.update()
 
+        for p in player_list:
+            if p.towncenter is None:
+                player_list.remove(p)
+                #p.defeat()
+
+        if len(player_list) == 1:
+            #player_list[0].victory()
+            pass
+
 
     # GAME DISPLAY
     def draw(self):

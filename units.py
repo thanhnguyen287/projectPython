@@ -131,10 +131,10 @@ class TownCenter(Building):
     def update(self):
         self.now = pygame.time.get_ticks()
         # add a button to stop the current action if the town center is working
-        if self.is_working and not self.is_being_built:
+        if self.now - self.resource_manager_cooldown > 5000  and not self.is_being_built:
+            self.resource_manager_cooldown = self.now
+            if self.is_working:
             # if a villager is being created since 5 secs :
-            if self.now - self.resource_manager_cooldown > 5000:
-                self.resource_manager_cooldown = self.now
                 # we determine the nearest free tile and spawn a villager on it
                 self.check_collision_and_spawn_villager_where_possible()
                 # decrease the queue
@@ -142,6 +142,10 @@ class TownCenter(Building):
                 # if there are no more villagers to train, we can stop there
                 if self.queue <= 0:
                     self.is_working = False
+
+            #every 5 sec, it regen 1 pv
+            elif self.current_health < self.max_health:
+                self.current_health += 1
 
         # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
         if self.is_being_built:
@@ -681,7 +685,15 @@ class Villager(Unit):
             if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
 
                 if self.target.current_health >= 0:
-                    self.target.current_health -= self.attack_dmg
+                    #if the target is a building, our damage are divided by 2
+                    if type(self.target) in BUILDING_TYPES:
+                        dmg = int((self.attack_dmg/2) - self.target.armor)
+                    #else its normal damage
+                    else:
+                        dmg = int(self.attack_dmg - self.target.armor)
+                    #if the damage is 0 or less, it is still 1
+                    if dmg <= 0: dmg = 1
+                    self.target.current_health -= dmg
                     self.attack_cooldown = self.now
                     self.gathered_ressource_stack += 1
                     self.strike += 1
