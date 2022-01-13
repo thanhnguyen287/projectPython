@@ -131,10 +131,10 @@ class TownCenter(Building):
     def update(self):
         self.now = pygame.time.get_ticks()
         # add a button to stop the current action if the town center is working
-        if self.is_working and not self.is_being_built:
+        if self.now - self.resource_manager_cooldown > 5000  and not self.is_being_built:
+            self.resource_manager_cooldown = self.now
+            if self.is_working:
             # if a villager is being created since 5 secs :
-            if self.now - self.resource_manager_cooldown > 5000:
-                self.resource_manager_cooldown = self.now
                 # we determine the nearest free tile and spawn a villager on it
                 self.check_collision_and_spawn_villager_where_possible()
                 # decrease the queue
@@ -142,6 +142,10 @@ class TownCenter(Building):
                 # if there are no more villagers to train, we can stop there
                 if self.queue <= 0:
                     self.is_working = False
+
+            #every 5 sec, it regen 1 pv
+            elif self.current_health < self.max_health:
+                self.current_health += 1
 
         # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
         if self.is_being_built:
@@ -376,6 +380,105 @@ class House(Building):
             elif progress_time_pourcent > 25:
                 self.construction_progress = 25
 
+class Barracks(Building):
+    description = " Used to train military units."
+    construction_tooltip = " Build a Barrack"
+    construction_cost = [500, 0, 0, 200]
+    construction_time = 12
+    armor = 2
+    armor_age_bonus = 1
+
+    def __init__(self, pos, map, player_owner_of_unit):
+
+        self.name = "Barracks"
+        # additional collision bc 2x1 building
+
+        map.map[pos[0] + 1][pos[1]]["tile"] = "building"
+        map.collision_matrix[pos[1]][pos[0] + 1] = 0
+
+        map.map[pos[0]][pos[1] - 1]["tile"] = "building"
+        map.collision_matrix[pos[1] - 1][pos[0]] = 0
+
+        map.map[pos[0] + 1][pos[1] - 1]["tile"] = "building"
+        map.collision_matrix[pos[0] + 1][pos[1] - 1] = 0
+
+        self.construction_cost = [500, 0, 0, 200]
+
+        self.max_health = 100
+        #becomes true when you train units
+        self.is_working = False
+        #class of unit being trained
+        self.unit_type_currently_trained = None
+        #used when you order the creation of multiples units
+        self.queue = 0
+        armor = 3
+        self.resource_manager_cooldown = 0
+
+        super().__init__(pos, map, player_owner_of_unit)
+
+    # to create units, research techs and upgrade to second age
+    def update(self):
+        self.now = pygame.time.get_ticks()
+        # add a button to stop the current action if the town center is working
+        if self.is_working and not self.is_being_built:
+            # if a unit is being created since 5 secs :
+            if self.now - self.resource_manager_cooldown > 5000:
+                self.resource_manager_cooldown = self.now
+                # we determine the nearest free tile and spawn a unit on it
+                self.check_collision_and_spawn_villager_where_possible()
+                # decrease the queue
+                self.queue -= 1
+                # if there are no more villagers to train, we can stop there
+                if self.queue <= 0:
+                    self.is_working = False
+
+        # BUILDING CONSTRUCTION - we change the display of the building depending on its construction progression
+        if self.is_being_built:
+            # the current life increases with the construction progress
+            progress_time = ((self.now - self.resource_manager_cooldown) / 1000)
+            progress_time_pourcent = progress_time * 100 / self.construction_time
+            if ceil(progress_time_pourcent * self.max_health*0.01) != 0:
+                self.current_health = ceil(progress_time_pourcent * self.max_health*0.01)
+
+            # if fully built we set is_being_built to 0, else change the progression attribute accordingly
+            if self.now - self.resource_manager_cooldown > self.construction_time * 1000:
+                self.resource_manager_cooldown = self.now
+                self.construction_progress = 100
+                # to fix a little bug
+                self.current_health -= 1
+                self.is_being_built = False
+            elif self.now - self.resource_manager_cooldown > self.construction_time * 750:
+                self.construction_progress = 75
+            elif self.now - self.resource_manager_cooldown > self.construction_time * 500:
+                self.construction_progress = 50
+            elif self.now - self.resource_manager_cooldown > self.construction_time * 250:
+                self.construction_progress = 25
+
+
+    def check_collision_and_spawn_villager_where_possible(self):
+
+        available_tile_for_spawn = tile_founding(1, 1, 2, self.map.map, self.owner, "")
+        #print(available_tile_for_spawn[0][0])
+        self.map.units[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]] = Villager((available_tile_for_spawn[0][0], available_tile_for_spawn[0][1]), self.owner,
+                                                                    self.map)
+        self.map.map[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]]["tile"] = "unit"
+        self.map.map[available_tile_for_spawn[0][0]][available_tile_for_spawn[0][1]]["collision"] = True
+
+        # update collision for new villager
+        self.map.collision_matrix[available_tile_for_spawn[0][1]][available_tile_for_spawn[0][0]] = 0
+
+
+    def train(self, unit_type):
+        self.queue += 1
+        # if the town center is not working
+        if not self.is_working:
+            self.unit_type_currently_trained = unit_type
+            self.is_working = True
+            self.resource_manager_cooldown = pygame.time.get_ticks()
+        # pay training cost
+        unit_type_trained = self.unit_type_currently_trained
+        self.owner.pay_entity_cost_bis(unit_type_trained)
+
 
 class Unit:
     armor = 0
@@ -588,7 +691,15 @@ class Villager(Unit):
             if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
 
                 if self.target.current_health >= 0:
-                    self.target.current_health -= self.attack_dmg
+                    #if the target is a building, our damage are divided by 2
+                    if type(self.target) in BUILDING_TYPES:
+                        dmg = int((self.attack_dmg/2) - self.target.armor)
+                    #else its normal damage
+                    else:
+                        dmg = int(self.attack_dmg - self.target.armor)
+                    #if the damage is 0 or less, it is still 1
+                    if dmg <= 0: dmg = 1
+                    self.target.current_health -= dmg
                     self.attack_cooldown = self.now
                     self.gathered_ressource_stack += 1
                     self.strike += 1
@@ -643,6 +754,14 @@ class Villager(Unit):
         elif self.building_to_create["name"] == "House":
             new_building = House((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
                                  self.owner)
+
+        elif self.building_to_create["name"] == "Barracks":
+            new_building = Barracks((self.building_to_create["pos"][0], self.building_to_create["pos"][1]), self.map,
+                                 self.owner)
+            # additional collision bc barrack is 2x2 tile, not 1x1
+            self.map.collision_matrix[self.building_to_create["pos"][1]][self.building_to_create["pos"][0] + 1] = 0
+            self.map.collision_matrix[self.building_to_create["pos"][1] - 1][self.building_to_create["pos"][0] + 1] = 0
+            self.map.collision_matrix[self.building_to_create["pos"][1] - 1][self.building_to_create["pos"][0]] = 0
 
         # to add it to the entities list on our map
         self.map.entities.append(new_building)

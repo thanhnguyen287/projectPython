@@ -3,7 +3,7 @@ import pygame
 from math import floor
 from .utils import draw_text, scale_image, get_color_code
 from player import playerOne, playerTwo, player_list, MAIN_PLAYER
-from units import Villager, TownCenter, House, Farm, Building
+from units import Villager, TownCenter, House, Farm, Building, Barracks
 # from buildings import TownCenter, House, Farm, Building
 from .ActionMenu import *
 from tech import Age_II, Age_III, Age_IV
@@ -255,6 +255,7 @@ class Hud:
         town_center = pygame.image.load("resources/assets/icons/town_center_icon_hd.png").convert_alpha()
         house = pygame.image.load("Resources/assets/icons/houseDE.png").convert_alpha()
         farm = pygame.image.load("resources/assets/icons/farmDE.png").convert_alpha()
+        barracks = pygame.image.load("resources/assets/icons/barracks_icon.png").convert_alpha()
         # villager = pygame.image.load("resources/assets/icons/villagerde.bmp").convert_alpha()
 
         villager = None
@@ -262,6 +263,7 @@ class Hud:
             "TownCenter": town_center,
             "House": house,
             "Farm": farm,
+            "Barracks": barracks,
             "Villager": villager
         }
         return images
@@ -306,7 +308,7 @@ class Hud:
 
             # health bar size depends on the entity size : 1x1 tile, 2x2 tile, etc...
             # for 2x2 entities
-            if type(entity) == TownCenter:
+            if type(entity) == TownCenter or type(entity) == Barracks:
                 health_bar_length = 200
                 # bar_display_pos
                 display_pos_x = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[
@@ -435,6 +437,11 @@ class Hud:
         elif type(self.examined_tile) == TownCenter:
             img_scaled = scale_image(img, h * 0.60)
             screen.blit(img_scaled, (action_menu.get_width() + 20, self.height - selection_panel.get_height() + 75))
+
+        elif type(self.examined_tile) == Barracks:
+            img_scaled = scale_image(img, h * 0.60)
+            screen.blit(img_scaled, (action_menu.get_width() + 20, self.height - selection_panel.get_height() + 75))
+
         # villager
         else:
             img_scaled = scale_image(img, h * 0.20)
@@ -445,7 +452,8 @@ class Hud:
         temp_pos = (action_menu.get_width() + 30, self.height * 0.79 + 20)
         if isinstance(self.examined_tile, Villager):
             temp_pos = temp_pos[0] + 13, temp_pos[1]
-        elif isinstance(self.examined_tile, Farm) or isinstance(self.examined_tile, House):
+        elif isinstance(self.examined_tile, Farm) or isinstance(self.examined_tile, House) or \
+                isinstance(self.examined_tile, Barracks):
             temp_pos = temp_pos[0] + 16, temp_pos[1]
         draw_text(screen, self.examined_tile.name, 20, (255, 255, 255), temp_pos)
         temp_pos = (action_menu.get_width() + 20 + 120, self.height * 0.79 + 16)
@@ -552,6 +560,8 @@ class Hud:
             entity = House
         elif entity == "TownCenter":
             entity = TownCenter
+        elif entity == "Barracks":
+            entity = Barracks
         else:
             display_tooltip_for_entity = False
 
@@ -680,17 +690,24 @@ class Hud:
 
         # pygame.image.load("Resources/assets/Models/Buildings/Town_Center/town_center_x1.png").convert_alpha()
         house = {"BLUE": load_images_better("Resources/assets/Models/Buildings/House/BLUE/"),
-                 "RED": load_images_better("Resources/assets/Models/Buildings/House/BLUE/"),
-                 "GREEN": load_images_better("Resources/assets/Models/Buildings/House/BLUE/"),
-                 "YELLOW": load_images_better("Resources/assets/Models/Buildings/House/BLUE/")}
+                 "RED": load_images_better("Resources/assets/Models/Buildings/House/RED/"),
+                 "GREEN": load_images_better("Resources/assets/Models/Buildings/House/GREEN/"),
+                 "YELLOW": load_images_better("Resources/assets/Models/Buildings/House/YELLOW/")}
+
         farm = {"BLUE": pygame.image.load("Resources/assets/Models/Buildings/Farm/farmBLUE.png").convert_alpha(),
                 "RED": pygame.image.load("Resources/assets/Models/Buildings/Farm/farmRED.png").convert_alpha(),
                 "GREEN": pygame.image.load("Resources/assets/Models/Buildings/Farm/farmGREEN.png").convert_alpha(),
                 "YELLOW": pygame.image.load("Resources/assets/Models/Buildings/Farm/farmYELLOW.png").convert_alpha()}
 
+        barracks = {"BLUE": load_images_better("Resources/assets/Models/Buildings/Barracks/BLUE/"),
+                 "RED": load_images_better("Resources/assets/Models/Buildings/Barracks/RED/"),
+                 "GREEN": load_images_better("Resources/assets/Models/Buildings/Barracks/GREEN/"),
+                 "YELLOW": load_images_better("Resources/assets/Models/Buildings/Barracks/YELLOW/")}
+
         images = {
             "TownCenter": town_center,
             "House": house,
+            "Barracks": barracks,
             "Farm": farm
         }
 
@@ -757,6 +774,7 @@ class Hud:
         house = {"animation": house_death_animation,
                  "group": house_death_animation_group
                  }
+
 
         # TOWN CENTER
         town_center_death_sprites_list = {"BLUE": {}, "RED": {}, "GREEN": {}, "YELLOW": {}}

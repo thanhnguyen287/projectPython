@@ -33,8 +33,8 @@ class Game:
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
 
         # IA
-        self.AI_1 = AI(playerTwo, self.map.map)
-        self.AI_2 = AI(playerOne, self.map.map)
+        #self.AI_1 = AI(playerTwo, self.map.map)
+        #self.AI_2 = AI(playerOne, self.map.map)
 
         # chat
         self.chat_color = (40, 40, 40, 150)
@@ -186,6 +186,15 @@ class Game:
         self.map.update(self.camera, self.screen)
         for an_entity in self.entities:
             an_entity.update()
+
+        for p in player_list:
+            if p.towncenter is None:
+                player_list.remove(p)
+                #p.defeat()
+
+        if len(player_list) == 1:
+            #player_list[0].victory()
+            pass
 
 
     # GAME DISPLAY

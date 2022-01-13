@@ -210,6 +210,7 @@ class VillagerAttackAnimation(pygame.sprite.Sprite):
     #######################################################################################################
     def play(self, pos=(0, 0)):
         self.angle = self.unit.angle
+        if self.angle == 360: self.angle = 0
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos[0], pos[1]]
         # we determine which sprites list to use with color and age arguments

@@ -1,4 +1,4 @@
-#import copy
+import copy
 import csv
 import random
 import noise
@@ -9,7 +9,7 @@ from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
 from player import playerOne, playerTwo, player_list, MAIN_PLAYER
-from units import Villager, Unit, Farm, TownCenter, House, Building
+from units import Villager, Unit, Farm, TownCenter, House, Building, Barracks
 
 
 class Map:
@@ -124,7 +124,8 @@ class Map:
 
                     # we store the future building information inside building_to_create
                     if self.hud.selected_tile["name"] == "Farm" or self.hud.selected_tile["name"] == "House" or \
-                            self.hud.selected_tile["name"] == "TownCenter":
+                            self.hud.selected_tile["name"] == "TownCenter" or \
+                            self.hud.selected_tile["name"] == "Barracks":
                         working_villager.go_to_build(grid_pos, self.hud.selected_tile["name"])
                     self.hud.selected_tile = None
 
@@ -140,9 +141,16 @@ class Map:
                                                       self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(
                                                   self.buildings[grid_pos[0] - 1][grid_pos[1]]) == TownCenter)
 
+                barrack_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(
+                    self.buildings[grid_pos[0]][grid_pos[1] + 1]) == Barracks) \
+                                              or (self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(
+                    self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == Barracks) or (
+                                                      self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(
+                                                  self.buildings[grid_pos[0] - 1][grid_pos[1]]) == Barracks)
+
                 if mouse_action[0] and not self.is_there_collision(
                         grid_pos) and not self.hud.bottom_hud_rect.collidepoint(
-                    mouse_pos) and not town_center_check_condition:
+                    mouse_pos) and not town_center_check_condition and not barrack_check_condition:
                     self.examined_tile = None
                     self.hud.examined_tile = None
                     self.hud.bottom_left_menu = None
@@ -171,17 +179,19 @@ class Map:
                         else:
                             if grid_pos[1] + 1 < self.grid_length_y:
                                 building = self.buildings[grid_pos[0]][grid_pos[1] + 1]
-                            if building and type(building) == TownCenter:
+                            if building and type(building) == TownCenter or type(building) == Barracks:
                                 self.hud.examined_tile = building
                                 self.examined_tile = (grid_pos[0], grid_pos[1] + 1)
                                 self.hud.bottom_left_menu = self.hud.town_hall_menu
-                            elif self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(
-                                    self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter:
+                            elif self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and (type(
+                                    self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter
+                                    or type(self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == Barracks):
                                 self.hud.examined_tile = self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]
                                 self.examined_tile = (grid_pos[0] - 1, grid_pos[1] + 1)
                                 self.hud.bottom_left_menu = self.hud.town_hall_menu
-                            elif self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(
-                                    self.buildings[grid_pos[0] - 1][grid_pos[1]]) == TownCenter:
+                            elif self.buildings[grid_pos[0] - 1][grid_pos[1]] and (type(
+                                    self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter
+                                    or type(self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == Barracks):
                                 self.hud.examined_tile = self.buildings[grid_pos[0] - 1][grid_pos[1]]
                                 self.examined_tile = (grid_pos[0] - 1, grid_pos[1])
                                 self.hud.bottom_left_menu = self.hud.town_hall_menu
@@ -220,7 +230,7 @@ class Map:
                 elif self.examined_tile is not None:
                     if not building.is_being_built:
                         if (building.pos[0] == self.examined_tile[0]) and (building.pos[1] == self.examined_tile[1]):
-                            if type(building) != TownCenter:
+                            if type(building) != TownCenter and type(building) != Barracks:
                                 self.highlight_tile(building.pos[0], building.pos[1], screen, "WHITE",
                                                     camera.scroll)
                             else:
@@ -275,12 +285,14 @@ class Map:
             "Resources/assets/Models/Buildings/Town_Center/BLUE/town_center_x1.png").convert_alpha()
         house = pygame.image.load("Resources/assets/Models/Buildings/House/BLUE/house_1BLUE.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farmBLUE.png").convert_alpha()
+        barracks = None
         villager = None
 
         images = {
             "TownCenter": town_center,
             "House": house,
             "Farm": farm,
+            "Barrcacks": barracks,
             "tree": tree,
             "rock": rock,
             "block": block,
@@ -301,7 +313,7 @@ class Map:
         ]
         # polygon
         iso_poly = [decarte_to_iso(x, y) for x, y in rect]
-        #iso_poly_minimap = copy.deepcopy(iso_poly)
+        iso_poly_minimap = copy.deepcopy(iso_poly)
         minx = min([x for x, y in iso_poly])
         miny = min([y for x, y in iso_poly])
         r = random.randint(1, 100)
@@ -340,7 +352,7 @@ class Map:
             "max_health": 10,
             "health": 10,
             "variation": variation if tile != "" else 0,
-            #"iso_poly_minimap": iso_poly_minimap
+            "iso_poly_minimap": iso_poly_minimap
         }
         return out
 
@@ -620,6 +632,11 @@ class Map:
             entity.owner.max_population -= 10
             self.hud.death_animations["Town Center"]["animation"].play(death_pos, color=entity.owner.color,
                                                                        age=entity.owner.age)
+        elif type(entity) == Barracks:
+
+            self.hud.death_animations["Barracks"]["animation"].play(death_pos, color=entity.owner.color,
+                                                                       age=entity.owner.age)
+
         elif type(entity) == Villager:
             entity.owner.current_population -= 1
             #print("death anim", self.hud.death_animations)
@@ -832,7 +849,7 @@ class Map:
 
         # if we cannot place our building on the tile because there's already smth, we display the tile in red, else, in green
         # For towncenter, we have to display a 2x2 green/Red case, else we only need to highlight a 1x1 case
-        if self.temp_tile["name"] == "TownCenter":
+        if self.temp_tile["name"] == "TownCenter" or self.temp_tile["name"] == "Barracks":
             # collision matrix : 0 if collision, else 1, we check the 4 cases of the town center
             if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or \
                     self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or \
@@ -876,9 +893,17 @@ class Map:
                     render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y + offset[1])
                             )
 
+                if isinstance(building, Barracks):
+                    offset = (8, 24)
+                screen.blit(sprite_to_display, (
+                    render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
+                    render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y + offset[1])
+                            )
+
+
             else:
                 if building.construction_progress == 0:
-                    if type(building) == TownCenter:
+                    if type(building) == TownCenter or type(building) == Barracks:
                         screen.blit(building_construction_1_2x2, (
                             render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
                             render_pos[1] - (building_construction_1_2x2.get_height() - TILE_SIZE) + scroll.y)
@@ -890,7 +915,7 @@ class Map:
                                     )
 
                 elif building.construction_progress == 25:
-                    if type(building) == TownCenter:
+                    if type(building) == TownCenter or type(building) == Barracks:
                         screen.blit(building_construction_2_2x2, (
                             render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
                             render_pos[1] - (building_construction_2_2x2.get_height() - TILE_SIZE) + scroll.y)
@@ -901,7 +926,7 @@ class Map:
                             render_pos[1] - (building_construction_2.get_height() - TILE_SIZE) + scroll.y)
                                     )
                 elif building.construction_progress == 50:
-                    if type(building) == TownCenter:
+                    if type(building) == TownCenter or type(building) == Barracks:
                         screen.blit(building_construction_3_2x2, (
                             render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
                             render_pos[1] - (building_construction_3_2x2.get_height() - TILE_SIZE) + scroll.y)
@@ -912,7 +937,7 @@ class Map:
                             render_pos[1] - (building_construction_3.get_height() - TILE_SIZE) + scroll.y)
                                     )
                 elif building.construction_progress == 75:
-                    if type(building) == TownCenter:
+                    if type(building) == TownCenter or type(building) == Barracks:
                         screen.blit(building_construction_4_2x2, (
                             render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
                             render_pos[1] - (building_construction_4_2x2.get_height() - TILE_SIZE) + scroll.y)

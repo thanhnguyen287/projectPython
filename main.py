@@ -3,6 +3,8 @@ from settings import *
 #from .settings import WIDTH
 #from .settings import HEIGHT
 
+# to force push : git push -f origin branch_name (our branch name is name)
+
 #intialize pygame
 pygame.init()
 pygame.mixer.init()
