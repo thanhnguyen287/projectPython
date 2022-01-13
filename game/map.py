@@ -320,20 +320,21 @@ class Map:
         variation = 0
         if (perlin >= 15) or (perlin <= -35):
             tile = "tree"
-            variation = random.randint(1, 4)
+            variation = random.randint(0, 9)
+
         else:
             if r <= 1:
                 tile = "rock"
-                variation = random.randint(1, 7)
+                variation = random.randint(0, 6)
             elif r <= 2:
                 tile = "tree"
-                variation = random.randint(1, 4)
+                variation = random.randint(0, 9)
             elif r <= 3:
                 tile = "gold"
-                variation = random.randint(1, 7)
+                variation = random.randint(0, 6)
             elif r == 4:
                 tile = "berrybush"
-                variation = random.randint(1, 3)
+                variation = random.randint(0, 2)
 
             else:
                 tile = ""
@@ -637,7 +638,6 @@ class Map:
 
         elif type(entity) == Villager:
             entity.owner.current_population -= 1
-            #print("death anim", self.hud.death_animations)
             self.hud.death_animations["Villager"]["animation"].play(death_pos, color=entity.owner.color,
                                                                     angle=entity.angle)
 
@@ -735,10 +735,14 @@ class Map:
 
         # if the tile isnt empty and inst destroyed, we display it. All resources have slightly different models to add variety
         if tile_type != "" and tile_type != "building" and tile_type != "unit":
-            screen.blit(self.hud.resources_sprites[tile_type][
-                            str(self.map[resource_tile["grid"][0]][resource_tile["grid"][1]]["variation"])], (
-                            render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                            render_pos[1] - (self.tiles[tile_type].get_height() - TILE_SIZE) + camera.scroll.y)
+            variation = self.map[resource_tile["grid"][0]][resource_tile["grid"][1]]["variation"]
+            #offset is only used for trees
+            offset = self.hud.resources_sprites_offsets[variation]
+            if tile_type != "tree":
+                offset = (0,0)
+            screen.blit(self.hud.resources_sprites[tile_type][variation], (
+                            render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + offset[0],
+                            render_pos[1] - (self.tiles[tile_type].get_height() - TILE_SIZE) + camera.scroll.y + offset[1])
                         )
 
             # here we display the health bar of the ressources

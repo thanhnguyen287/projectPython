@@ -53,6 +53,7 @@ class Hud:
 
         # resources sprites
         self.resources_sprites = self.load_resources_images()
+        self.resources_sprites_offsets = [(-15, -5),(-20,-5),(-20,-5),(-28,-15),(-70, -115),(-60,-45),(-65,-40),(-100, -145),(-70, -110), (-40,-70)]
         self.house_death_animation = None
         self.house_death_animation_group = None
         self.temp_bool = True
@@ -207,10 +208,11 @@ class Hud:
                     self.death_animations[entity]["group"].draw(screen)
                     self.death_animations[entity]["animation"].update()
 
-        for entity in self.villager_attack_animations:
-            if self.villager_attack_animations[entity]["animation"].to_be_played:
-                self.villager_attack_animations[entity]["group"].draw(screen)
-                self.villager_attack_animations[entity]["animation"].update()
+        for player in player_list:
+            for unit in player.unit_list:
+                if unit.attack_animation.to_be_played:
+                    unit.attack_animation_group.draw(screen)
+                    self.attack_animation.update()
 
         # resources bar
         the_player.update_resources_bar(screen)
@@ -715,44 +717,14 @@ class Hud:
 
     def load_resources_images(self):
 
-        rock_1 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/1.png")).convert_alpha()
-        rock_2 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/2.png")).convert_alpha()
-        rock_3 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/3.png")).convert_alpha()
-        rock_4 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/4.png")).convert_alpha()
-        rock_5 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/5.png")).convert_alpha()
-        rock_6 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/6.png")).convert_alpha()
-        rock_7 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Stones/7.png")).convert_alpha()
-
-        rock_sprites = {"1": rock_1, "2": rock_2, "3": rock_3, "4": rock_4, "5": rock_5, "6": rock_6, "7": rock_7}
-
-        gold_1 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/1.png")).convert_alpha()
-        gold_2 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/2.png")).convert_alpha()
-        gold_3 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/3.png")).convert_alpha()
-        gold_4 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/4.png")).convert_alpha()
-        gold_5 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/5.png")).convert_alpha()
-        gold_6 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/6.png")).convert_alpha()
-        gold_7 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Gold/7.png")).convert_alpha()
-
-        gold_sprites = {"1": gold_1, "2": gold_2, "3": gold_3, "4": gold_4, "5": gold_5, "6": gold_6, "7": gold_7}
-
-        berry_bush_1 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/1.png")).convert_alpha()
-        berry_bush_2 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/2.png")).convert_alpha()
-        berry_bush_3 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Berrybush/3.png")).convert_alpha()
-
-        berry_bush_sprites = {"1": berry_bush_1, "2": berry_bush_2, "3": berry_bush_3}
-
-        tree_1 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Trees/1.png")).convert_alpha()
-        tree_2 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Trees/2.png")).convert_alpha()
-        tree_3 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Trees/3.png")).convert_alpha()
-        tree_4 = pygame.image.load(os.path.join("Resources/assets/Models/Map/Trees/4.png")).convert_alpha()
-
-        tree_sprites = {"1": tree_1, "2": tree_2, "3": tree_3, "4": tree_4}
-
-        #grass
+        rock_sprites = load_images_better("Resources/assets/Models/Map/Stones")
+        gold_sprites = load_images_better("Resources/assets/Models/Map/Gold")
+        berry_bush_sprites = load_images_better("Resources/assets/Models/Map/Berrybush")
+        tree_sprites = load_images_better("Resources/assets/Models/Map/Trees")
         grass_sprites = load_images_better("resources/assets/Models/Map/grass")
 
         resources_sprites = {"rock": rock_sprites, "gold": gold_sprites, "berrybush": berry_bush_sprites,
-                             "tree": tree_sprites, "grass":grass_sprites}
+                             "tree": tree_sprites, "grass": grass_sprites}
 
         return resources_sprites
 

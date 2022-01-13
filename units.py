@@ -779,7 +779,6 @@ class Villager(Unit):
         pos_y = self.building_to_create["pos"][1]
         self.map.map[pos_x][pos_y]["tile"] = "building"
         self.is_building = False
-        self.building_to_create = None
 
     def go_to_ressource(self, pos):
         # if the ressource is near us, we directly gather it
