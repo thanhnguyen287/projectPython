@@ -212,7 +212,7 @@ class Hud:
             for unit in player.unit_list:
                 if unit.attack_animation.to_be_played:
                     unit.attack_animation_group.draw(screen)
-                    self.attack_animation.update()
+                    unit.attack_animation.update()
 
         # resources bar
         the_player.update_resources_bar(screen)
