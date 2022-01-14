@@ -735,7 +735,7 @@ class Villager(Unit):
             self.move_to(self.map.map[villager_dest[0]][villager_dest[1]])
             self.is_moving_to_build = True
 
-            self.building_to_create = {"name": name, "pos": pos}
+            self.building_to_create = {"name": name, "pos": pos, "has_construction_started": False}
 
     def build(self):
         self.is_moving_to_build = False
@@ -780,6 +780,7 @@ class Villager(Unit):
         pos_x = self.building_to_create["pos"][0]
         pos_y = self.building_to_create["pos"][1]
         self.map.map[pos_x][pos_y]["tile"] = "building"
+        self.building_to_create["has_construction_started"] = True
 
     def go_to_ressource(self, pos):
         # if the ressource is near us, we directly gather it

@@ -239,8 +239,7 @@ class Map:
             for building in player.building_list:
                 if building.current_health <= 0:
                     self.remove_entity(building, camera.scroll)
-                if building.current_health < building.max_health:
-                    self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
+
                 # if building is selected, we highlight its tile
                 if self.examined_tile is not None:
                     if not building.is_being_built:
@@ -255,6 +254,8 @@ class Map:
                                 self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
                 self.display_building(screen, building, building.owner.color, camera.scroll,
                                       self.grid_to_renderpos(building.pos[0], building.pos[1]), player)
+                if building.current_health < building.max_health:
+                    self.hud.display_life_bar(screen, building, self, for_hud=False, camera=camera)
 
             # units display. If units selected, we highlight the tile. If units not full health, we display its health bar
             for unit in player.unit_list:
@@ -662,7 +663,6 @@ class Map:
             entity.owner.current_population -= 1
             self.hud.death_animations["Villager"]["animation"].play(death_pos, color=entity.owner.color,
                                                                     angle=entity.angle)
-
     # remove resources from tile to get an empty tile
     def clear_tile(self, grid_x, grid_y):
         self.map[grid_x][grid_y]["tile"] = ""
@@ -978,21 +978,22 @@ class Map:
 
         # we have to display hypothetical building sprite to show the villager wants to build there
         else:
-            if building["name"] != "Farm":
-                sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color][the_player.age - 1]
-            else:
-                sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color]
+            if not building["has_construction_started"]:
+                if building["name"] != "Farm":
+                    sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color][the_player.age - 1]
+                else:
+                    sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color]
 
-            if is_build_possibility_display:
-                sprite_to_display = sprite_to_display.copy()
-                sprite_to_display.set_alpha(100)
+                if is_build_possibility_display:
+                    sprite_to_display = sprite_to_display.copy()
+                    sprite_to_display.set_alpha(100)
 
-            screen.blit(sprite_to_display,
-                        (  # we obviously have to reapply the offset + camera scroll
-                            render_pos[0] + 6400 / 2 + scroll.x,
-                            render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y
-                        )
-                        )
+                screen.blit(sprite_to_display,
+                            (  # we obviously have to reapply the offset + camera scroll
+                                render_pos[0] + 6400 / 2 + scroll.x,
+                                render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y
+                            )
+                            )
 
     # first try with not 1 image but animation (not only 1 image)
     # self.hud.villager_sprites[0] : corresponding to angle 135,+ 90 every time you add 1 to index
