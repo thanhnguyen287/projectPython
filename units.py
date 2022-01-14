@@ -6,7 +6,7 @@ import pygame
 from math import ceil
 from random import randint
 from game.utils import tile_founding, GENERAL_UNIT_LIST, GENERAL_BUILDING_LIST, UNIT_TYPES, BUILDING_TYPES
-from game.animation import BuildingDeathAnimation, VillagerAttackAnimation, VillagerMiningAnimation
+from game.animation import BuildingDeathAnimation, VillagerAttackAnimation, VillagerMiningAnimation, IdleDragonAnimation
 
 
 class Building:
@@ -88,6 +88,12 @@ class Farm(Building):
                 self.construction_progress = 50
             elif self.now - self.resource_manager_cooldown > Farm.construction_time * 250:
                 self.construction_progress = 25
+
+        else:
+            #every 5 seconds, we get 10 food
+            if self.now - self.resource_manager_cooldown > 5000:
+                self.resource_manager_cooldown = self.now
+                self.owner.update_resource("FOOD", 10)
 
 
 class TownCenter(Building):
@@ -380,6 +386,7 @@ class House(Building):
             elif progress_time_pourcent > 25:
                 self.construction_progress = 25
 
+
 class Barracks(Building):
     description = " Used to train military units."
     construction_tooltip = " Build a Barrack"
@@ -566,7 +573,6 @@ class Unit:
                 self.searching_for_path = False
 
 
-
 class Villager(Unit):
 
     # Training : 50 FOOD, 20s
@@ -635,8 +641,6 @@ class Villager(Unit):
         self.mining_animation = VillagerMiningAnimation(self, map.hud.mining_sprites_villager[
             player_owner_of_unit.color])
 
-        # buildings death animation
-
     def go_to_townhall(self):
         if not self.searching_for_path:
             pos_list = tile_founding(10, 1, 1, self.map.map, self.owner, "")
@@ -683,7 +687,6 @@ class Villager(Unit):
                     if u.pos == pos:
                         self.target = u
                         break
-
 
     def attack(self):
         if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
@@ -900,6 +903,7 @@ class Villager(Unit):
             print("Current pos : ", self.pos)
             print("Starting pos : ", self.start)
 
+
 class Bowman(Unit):
 
     def __init__(self, pos, player_owner_of_unit, map):
@@ -926,29 +930,290 @@ class Bowman(Unit):
 
 
 class Clubman(Unit):
+
+    # Training : 50 food, 100gold, 5s
+    description = "  The first and most basic infantry unit. BAGARREEE"
+    construction_tooltip = " Train a Clubman"
+    name = "Clubman"
+    attack_speed = 500
+
+    construction_cost = [0, 100, 50, 0]
+    construction_time = 26
+    population_produced = 1
+
     def __init__(self, pos, player_owner_of_unit, map, angle=225):
-        super().__init__(pos, player_owner_of_unit, map, angle)
 
         #DISPLAY
         self.name = "Clubman"
 
         # DATA
-        self.max_health = 40
+        self.max_health = 75
         self.current_health = self.max_health
-        self.attack = 3
-        self.attack_speed = 1.5
+        self.attack_dmg = 10
+        self.attack_speed = 1500
         self.movement_speed = 1.2
         # unit type : melee
         self.range = 0
         #Training : 50 FOOD, 26s
-        self.training_cost = [0, 50, 0, 0]
-        self.training_time = 26
+        self.training_cost = [0, 100, 50, 0]
+
+
+        #Training :  100 food and 50 gold, 2s
+        self.construction_cost = [0, 100, 50, 0]
+        self.construction_time = 26
         self.population_produced = 1
-        self.description = "Basic melee unit."
-        self.construction_tooltip = " Train a Clubman"
+        self.now = 0
+        super().__init__(pos, player_owner_of_unit, map, angle)
 
         # attack animation
         self.attack_animation_group = pygame.sprite.Group()
         self.attack_animation = VillagerAttackAnimation(self, map.hud.villager_attack_animations["Clubman"]["sprites"][
             player_owner_of_unit.color])
 
+        self.is_on_tile = True
+        # used to gather ressources
+        self.display_pos = pos
+
+        #to attack
+        self.is_moving_to_attack = False
+        self.target = None
+        self.strike = 0
+
+        self.is_attacking = False
+
+    def go_to_attack(self, pos):
+        if self.map.get_empty_adjacent_tiles(pos):
+            unit_dest = self.map.get_empty_adjacent_tiles(pos)[0]
+            self.move_to(self.map.map[unit_dest[0]][unit_dest[1]])
+            self.is_moving_to_attack = True
+
+            if self.map.map[pos[0]][pos[1]]["tile"] == "building":
+                for b in GENERAL_BUILDING_LIST:
+                    if b.pos == pos:
+                        self.target = b
+                        break
+            else:
+                for u in GENERAL_UNIT_LIST:
+                    if u.pos == pos:
+                        self.target = u
+                        break
+
+    def attack(self):
+        if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
+
+            self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
+
+            if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
+
+                if self.target.current_health >= 0:
+                    #if the target is a building, our damage are divided by 2
+                    if type(self.target) in BUILDING_TYPES:
+                        dmg = int((self.attack_dmg/2) - self.target.armor)
+                    #else its normal damage
+                    else:
+                        dmg = int(self.attack_dmg - self.target.armor)
+                    #if the damage is 0 or less, it is still 1
+                    if dmg <= 0: dmg = 1
+                    self.target.current_health -= dmg
+                    self.attack_cooldown = self.now
+                    self.gathered_ressource_stack += 1
+                    self.strike += 1
+
+                # else the unit is dead
+                else:
+                    tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
+                    tile["tile"] = ""
+                    if type(self.target) == TownCenter:
+                        self.target.owner.towncenter = None
+                    tile["collision"] = False
+                    self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
+                    self.target = None
+                    self.is_attacking = False
+                    self.attack_animation.to_be_played = False
+                    self.strike = 0
+
+            if self.target is not None and type(self.target) == Villager and \
+                    not self.target.is_attacking and self.strike > 1:
+                self.target.target = self
+                self.target.is_attacking = True
+                self.target.attack()
+        else:
+            ind = GENERAL_UNIT_LIST.index(self.target)
+            pos = GENERAL_UNIT_LIST[ind].pos
+            self.go_to_attack(pos)
+
+    def update(self):
+        self.now = pygame.time.get_ticks()
+        if self.now - self.move_timer > 400:
+            if self.searching_for_path:
+                # movement
+                # for debug, because the first tile of our path is the pos of unit, not the first tile where we must go
+                if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
+                    self.path_index += 1
+                #print("debug path index, path)", self.path_index, len(self.path))
+                if len(self.path) != self.path_index:
+                    new_pos = self.path[self.path_index]
+                    #update position in the world
+                    self.change_tile(new_pos)
+
+                self.path_index += 1
+                if self.path_index == len(self.path):
+                    self.searching_for_path = False
+                    self.is_on_tile = True
+                    if self.is_moving_to_attack:
+                        self.is_attacking = True
+                        self.is_moving_to_attack = False
+            else:
+                ...
+
+            #always at the end to reset the timer
+            self.move_timer = self.now
+
+        if self.is_attacking:
+            self.attack()
+
+
+class Dragon(Unit):
+
+    # Training : 50 FOOD, 20s
+    description = " Big. Deadly. Breath fire. What else ? "
+    construction_tooltip = " Train a Dragon"
+    name = "Dragon"
+    attack_speed = 500
+
+    construction_cost = [0, 10, 25, 0]
+    construction_time = 5
+    population_produced = 1
+
+    def __init__(self, pos, player_owner_of_unit, map, angle=180):
+
+        self.name = "Dragon"
+        # DISPLAY
+        # DATA
+        self.max_health = 1000
+        self.current_health = self.max_health
+        self.attack_dmg = 150
+        self.attack_speed = 1500
+        self.movement_speed = 1.1
+        # unit type : melee
+        self.is_on_tile = True
+        self.range = 0
+        # used to gather ressources
+        # between 0 and 360, 0 being top, 90 right, etc.... Only 0, 45, 90, 135, etc (up to 360 ofc) supported for now
+
+        self.display_pos = pos
+
+        #to attack
+        self.is_moving_to_attack = False
+        self.target = None
+        self.strike = 0
+
+        self.is_attacking = False
+
+
+        #Training : 25 food and 10 gold, 2s
+        self.construction_cost = [0, 25, 10, 0]
+        self.construction_time = 5
+        self.population_produced = 1
+        self.now = 0
+
+        super().__init__(pos, player_owner_of_unit, map, angle)
+        self.owner.unit_occupied.append(0)
+        #attack animation - None for now
+       # self.attack_animation_group = pygame.sprite.Group()
+        #self.attack_animation = VillagerAttackAnimation(self, map.hud.dragon_sprites[["Villager"]["sprites"][
+        #    player_owner_of_unit.color])
+
+        #idle animation
+        self.idle_animation_group = pygame.sprite.Group()
+        self.idle_animation = IdleDragonAnimation(self, map.hud.dragon_sprites["idle"])
+
+    def go_to_attack(self, pos):
+        if self.map.get_empty_adjacent_tiles(pos):
+            unit_dest = self.map.get_empty_adjacent_tiles(pos)[0]
+            self.move_to(self.map.map[unit_dest[0]][unit_dest[1]])
+            self.is_moving_to_attack = True
+
+            if self.map.map[pos[0]][pos[1]]["tile"] == "building":
+                for b in GENERAL_BUILDING_LIST:
+                    if b.pos == pos:
+                        self.target = b
+                        break
+            else:
+                for u in GENERAL_UNIT_LIST:
+                    if u.pos == pos:
+                        self.target = u
+                        break
+
+    def attack(self):
+        if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
+
+            self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
+
+            if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
+
+                if self.target.current_health >= 0:
+                    #if the target is a building, our damage are divided by 2
+                    if type(self.target) in BUILDING_TYPES:
+                        dmg = int((self.attack_dmg/2) - self.target.armor)
+                    #else its normal damage
+                    else:
+                        dmg = int(self.attack_dmg - self.target.armor)
+                    #if the damage is 0 or less, it is still 1
+                    if dmg <= 0: dmg = 1
+                    self.target.current_health -= dmg
+                    self.attack_cooldown = self.now
+                    self.gathered_ressource_stack += 1
+                    self.strike += 1
+
+                # else the unit is dead
+                else:
+                    tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
+                    tile["tile"] = ""
+                    if type(self.target) == TownCenter:
+                        self.target.owner.towncenter = None
+                    tile["collision"] = False
+                    self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
+                    self.target = None
+                    self.is_attacking = False
+                    self.attack_animation.to_be_played = False
+                    self.strike = 0
+
+            if self.target is not None and type(self.target) == Villager and \
+                    not self.target.is_attacking and self.strike > 1:
+                self.target.target = self
+                self.target.is_attacking = True
+                self.target.attack()
+        else:
+            ind = GENERAL_UNIT_LIST.index(self.target)
+            pos = GENERAL_UNIT_LIST[ind].pos
+            self.go_to_attack(pos)
+
+    def update(self):
+        self.now = pygame.time.get_ticks()
+        if self.now - self.move_timer > 400:
+            if self.searching_for_path:
+
+                # movement
+                # for debug, because the first tile of our path is the pos of unit, not the first tile where we must go
+                if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
+                    self.path_index += 1
+                #print("debug path index, path)", self.path_index, len(self.path))
+                if len(self.path) != self.path_index:
+                    new_pos = self.path[self.path_index]
+                    #update position in the world
+                    self.change_tile(new_pos)
+
+                self.path_index += 1
+                if self.path_index == len(self.path):
+                    self.searching_for_path = False
+                    self.is_on_tile = True
+                    if self.is_moving_to_attack:
+                        self.is_attacking = True
+                        self.is_moving_to_attack = False
+
+            #always at the end to reset the timer
+            self.move_timer = self.now
+
+        if self.is_attacking:
+            self.attack()

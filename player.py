@@ -58,7 +58,7 @@ class Player:
     def victory(self):
         print(self.name, " has won !!!")
 
-    def update_resource(self, resource_type: str, amount):
+    def update_resource(self, resource_type: str, amount:int):
 
         if resource_type == "WOOD":
             self.resources[0] += amount

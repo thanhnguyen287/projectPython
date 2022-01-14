@@ -10,7 +10,6 @@ MAP_SIZE_X = 50
 MAP_SIZE_Y = 50
 
 ENABLE_HEALTH_BARS = False
-
 pygame.font.init()
 myfont = pygame.font.SysFont("monospace", 14)
 chatFont = pygame.font.SysFont("monospace", 25)
@@ -90,7 +89,6 @@ building_construction_1_2x2 = pygame.image.load("resources/assets/Models/Buildin
 building_construction_2_2x2 = pygame.image.load("resources/assets/Models/Buildings/b_all_construction_2x2_x2_2.png")
 building_construction_3_2x2 = pygame.image.load("resources/assets/Models/Buildings/b_all_construction_2x2_x2_3.png")
 building_construction_4_2x2 = pygame.image.load("resources/assets/Models/Buildings/b_all_construction_2x2_x2_4.png")
-
 
 
 standard_cursor = pygame.image.load("resources/assets/standard_cursor.png")

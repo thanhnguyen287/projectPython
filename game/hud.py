@@ -3,7 +3,7 @@ import pygame
 from math import floor
 from .utils import draw_text, scale_image, get_color_code, TEST_MODE
 from player import playerOne, playerTwo, player_list, MAIN_PLAYER
-from units import Villager, TownCenter, House, Farm, Building, Barracks
+from units import Villager, TownCenter, House, Farm, Building, Barracks, Clubman, Dragon
 # from buildings import TownCenter, House, Farm, Building
 from .ActionMenu import *
 from tech import Age_II, Age_III, Age_IV
@@ -48,7 +48,6 @@ class Hud:
         self.is_cancel_button_present = False
 
         # buildings sprites
-
         self.first_age_building_sprites = self.load_first_age_building_images()
 
         # resources sprites
@@ -67,6 +66,10 @@ class Hud:
     #        self.villager_walk_animations = self.create_all_walk_animations()
         self.all_buildings_death_animations = self.create_all_building_death_animations()
         self.mining_sprites_villager = self.load_mining_sprites_villager()
+        self.tech_tree_images = self.load_tech_tree()
+
+        #dragon
+        self.dragon_sprites = self.load_dragon_sprites()
 
     def create_train_menu_town_hall(self):
         render_pos = [25, self.height - action_menu.get_height() + 40]
@@ -205,20 +208,23 @@ class Hud:
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         # entity is string corresponding to class unit/building name
         for entity in self.death_animations:
-                if self.death_animations[entity]["animation"].to_be_played:
+                if not isinstance(entity, Dragon) and self.death_animations[entity]["animation"].to_be_played:
                     self.death_animations[entity]["group"].draw(screen)
                     self.death_animations[entity]["animation"].update()
 
         for player in player_list:
             for unit in player.unit_list:
-                if unit.attack_animation.to_be_played:
+                if not isinstance(unit, Dragon) and unit.attack_animation.to_be_played:
                     unit.attack_animation_group.draw(screen)
                     unit.attack_animation.update()
+                if type(unit) == Dragon and unit.idle_animation.to_be_played:
+                    unit.idle_animation_group.draw(screen)
+                    unit.idle_animation.update()
 
         # resources bar
         the_player.update_resources_bar(screen)
         # bottom menu
-
+        #self.display_tech_tree(screen)
         if self.examined_tile is not None:
             # Draw minimap
             screen.blit(minimap_panel,
@@ -349,9 +355,11 @@ class Hud:
                 display_pos_x = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[
                                     0] + map.grass_tiles.get_width() / 2 + camera.scroll.x + 10
                 if type(entity) == Villager:
-                    display_pos_y = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[1] + camera.scroll.y - 40
+                    display_pos_y = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[1] + camera.scroll.y - 43
                 else:
-                    display_pos_y = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[1] + camera.scroll.y
+                    display_pos_y = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[1] + camera.scroll.y - 56
+                    display_pos_x = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[
+                                        0] + map.grass_tiles.get_width() / 2 + camera.scroll.x + 10
 
                 hp_displayed = (entity.current_health / entity.max_health * health_bar_length)
                 # from 1 to 100% of max health, used to know which color we use for the health bar
@@ -427,7 +435,14 @@ class Hud:
                     self.examined_tile.owner.color].copy()
         # if unit, display unit with 270 degree (index : 4)
         else:
-            img = self.villager_sprites[self.examined_tile.owner.color][4].copy()
+            if isinstance(self.examined_tile, Villager):
+                img = self.villager_sprites[self.examined_tile.owner.color][4].copy()
+                img_scaled = scale_image(img, h * 0.20)
+                screen.blit(img_scaled, (action_menu.get_width() + 50, self.height - selection_panel.get_height() + 70))
+            elif isinstance(self.examined_tile, Clubman):
+                img = self.clubman_sprites[self.examined_tile.owner.color][4].copy()
+                img_scaled = scale_image(img, h * 0.40)
+                screen.blit(img_scaled, (action_menu.get_width() + 40, self.height - selection_panel.get_height() + 70))
 
         if type(self.examined_tile) == Farm:
             img_scaled = scale_image(img, h * 0.60)
@@ -444,11 +459,6 @@ class Hud:
         elif type(self.examined_tile) == Barracks:
             img_scaled = scale_image(img, h * 0.60)
             screen.blit(img_scaled, (action_menu.get_width() + 20, self.height - selection_panel.get_height() + 75))
-
-        # villager
-        else:
-            img_scaled = scale_image(img, h * 0.20)
-            screen.blit(img_scaled, (action_menu.get_width() + 50, self.height - selection_panel.get_height() + 70))
 
         # for now, we display the picture of the object and its name
         # name
@@ -899,9 +909,17 @@ class Hud:
                }
         return dic
 
+    def load_dragon_sprites(self):
+        dragon_sprites_dic = {"idle": {}, "death": []}
+        # loop for the 8 angles. folder * 45 because angles are 0, 45, 90, 135, etc... up to 315 for max.
+        for folder in range(0, 3):
+            dragon_sprites_dic["idle"][str(int(folder * 90))] = load_images_better("resources/assets/Models/Units/Dragon/idle/" + str(int(folder * 90)))
+        dragon_sprites_dic["death"] = load_images_better("resources/assets/Models/Units/Dragon/death")
+
+        return dragon_sprites_dic
+
     # work in progress, not finished
     #def create_all_walking_animations(self):
-
 
     def create_all_building_death_animations(self):
         # HOUSE - RED, BLUE, GREEN and YELLOW available, need to specify the current age too.
@@ -941,3 +959,17 @@ class Hud:
         dic = {"House": house_death_sprites_list,
                "Town Center": town_center_death_sprites_list}
         return dic
+
+    def load_tech_tree(self):
+        return load_images_better("resources/assets/tech_tree")
+
+    def display_tech_tree(self, screen):
+        tech_tree_width = self.tech_tree_images[0].get_width() + self.tech_tree_images[1].get_width() + self.tech_tree_images[2].get_width()
+        tech_tree_height = self.tech_tree_images[0].get_height()
+        init_pos = ((self.width - tech_tree_width) // 2, (self.height - tech_tree_height ) // 2)
+        screen.blit(self.tech_tree_images[0], init_pos)
+        screen.blit(self.tech_tree_images[1], (init_pos[0] + self.tech_tree_images[0].get_width(), init_pos[1]))
+        screen.blit(self.tech_tree_images[2], (init_pos[0] + self.tech_tree_images[0].get_width() + self.tech_tree_images[1].get_width(), init_pos[1]))
+
+
+

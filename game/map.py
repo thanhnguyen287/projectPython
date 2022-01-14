@@ -9,7 +9,7 @@ from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
 from player import playerOne, playerTwo, player_list, MAIN_PLAYER
-from units import Villager, Unit, Farm, TownCenter, House, Building, Barracks, Clubman
+from units import Villager, Unit, Farm, TownCenter, House, Building, Barracks, Clubman, Dragon
 
 
 class Map:
@@ -53,6 +53,7 @@ class Map:
             self.place_starting_units(p)
 
         self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
+        #self.map[10][10] = Dragon((10,10), MAIN_PLAYER, self)
 
     def create_map(self):
         map = []
@@ -805,7 +806,7 @@ class Map:
                 target = unit.target
 
             # if we attack a ressource, we go gather it
-            if unit.targeted_ressource is not None:
+            if type(unit) == Villager and unit.targeted_ressource is not None:
                 target = unit.map.map[unit.targeted_ressource[0]][unit.targeted_ressource[1]]
 
             # if the unit is attacking, we highlight the tile she is attacking in DARK RED
@@ -814,25 +815,24 @@ class Map:
                 self.highlight_tile(target.pos[0], target.pos[1], screen, "DARK_RED", camera.scroll)
 
             # if the unit is going to gather we highlight the tile she is going to gather in GREEN
-            elif target is not None and (unit.is_gathering or unit.is_moving_to_gather):
+            elif target is not None and ((type(unit) == Villager and unit.is_gathering) or unit.is_moving_to_gather):
                 ...
                 self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
 
-            if unit.searching_for_path and not unit.is_moving_to_gather and not unit.is_moving_to_build and \
-                    not unit.is_moving_to_gather:
+            if unit.searching_for_path and not (type(unit) == Villager and unit.is_moving_to_gather and not unit.is_moving_to_build):
                 screen.blit(scale_image(move_icon, w=40), (
                     render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
                     render_pos[1] - (
                             self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 80)
                             )
-            elif unit.is_attacking or unit.is_gathering or unit.is_moving_to_gather:
+            elif unit.is_attacking or (type(unit) == Villager and (unit.is_gathering or unit.is_moving_to_gather)):
                 screen.blit(scale_image(attack_icon, w=40), (
                     render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
                     render_pos[1] - (
                             self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 80)
                             )
 
-            elif unit.is_building or unit.is_moving_to_build:
+            elif type(unit) == Villager and (unit.is_building or unit.is_moving_to_build):
                 screen.blit(scale_image(build_icon, w=40), (
                     render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
                     render_pos[1] - (
@@ -841,7 +841,7 @@ class Map:
 
             if type(unit) == Villager:
                 # draw future buildings
-                if unit.building_to_create is not None:
+                if unit.building_to_create is not None and not unit.building_to_create["has_construction_started"]:
                     future_building = unit.building_to_create
                     future_building_render_pos = self.grid_to_renderpos(future_building["pos"][0],
                                                                         future_building["pos"][1])
@@ -850,16 +850,18 @@ class Map:
                                               future_building_render_pos, p,
                                               is_hypothetical_building=True, is_build_possibility_display=True)
             # display unit model
-            if type(unit) != Villager:
+            if type(unit) == Villager:
+                self.display_villager(unit, screen, camera, render_pos)
+            elif type(unit) == Clubman:
+                self.display_clubman(unit, screen, camera, render_pos)
+            elif type(unit) == Dragon:
+                self.display_dragon(unit, screen, camera, render_pos)
+            else:
                 screen.blit(unit.sprite, (
                     render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
                     render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
                             )
-            else:
-                if type(unit) == Clubman:
-                    self.display_clubman(unit, screen, camera, render_pos)
-                else:
-                    self.display_villager(unit, screen, camera, render_pos)
+
             if unit.searching_for_path:
                 # creates a flag to display where the unit is going
                 screen.blit(destination_flag, (
@@ -1096,6 +1098,34 @@ class Map:
                                      unit.sprite_index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
                         )
 
+
+    def display_dragon(self, unit, screen, camera, render_pos):
+        """
+        We have to calculate the angle between the villager's target and him
+        """
+        if unit.angle == 180:
+            unit.sprite_index = 1
+        elif unit.angle == 0:
+            unit.sprite_index = 3
+        elif unit.angle == 90:
+            unit.sprite_index = 5
+        elif unit.angle == 270:
+            unit.sprite_index = 4
+
+       # if unit.is_attacking:
+          #  animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
+          #  animation_pos = (
+            #    animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
+            #    animation_pos[1] - (
+            #            self.hud.clubman_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+         #   unit.attack_animation.play(animation_pos)
+
+        #normal idle animation dragon
+
+        animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
+        animation_pos = (animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,animation_pos[1] - (
+            self.hud.dragon_sprites["idle"]["0"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+        unit.idle_animation.play(animation_pos)
 
     # returns the angle between the origin tile and the destination tile. Angle goes from 0 to 360, 0 top, 90 right, etc...
     def get_angle_between(self, origin_tile_pos: [int, int], end_tile_pos: [int, int], unit):
