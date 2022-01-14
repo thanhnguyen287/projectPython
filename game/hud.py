@@ -356,10 +356,12 @@ class Hud:
                                     0] + map.grass_tiles.get_width() / 2 + camera.scroll.x + 10
                 if type(entity) == Villager:
                     display_pos_y = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[1] + camera.scroll.y - 43
-                else:
+                elif type(entity) == Clubman:
                     display_pos_y = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[1] + camera.scroll.y - 56
                     display_pos_x = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[
                                         0] + map.grass_tiles.get_width() / 2 + camera.scroll.x + 10
+                else:
+                    display_pos_y = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[1] + camera.scroll.y
 
                 hp_displayed = (entity.current_health / entity.max_health * health_bar_length)
                 # from 1 to 100% of max health, used to know which color we use for the health bar
