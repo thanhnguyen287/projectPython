@@ -63,7 +63,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            self.AI_1.run()
+            #self.AI_1.run()
             self.AI_2.run()
 
     def events(self):
@@ -118,35 +118,48 @@ class Game:
 
             # USER PRESSED A MOUSEBUTTON
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                # the player left click to train a villager or build a building
-                if event.button == 1 and self.hud.bottom_left_menu is not None:
 
-                    #to have informations about the villager
-                    if self.map.hud.examined_tile is not None and self.map.hud.examined_tile.name == "Villager":
-                        villager_pos = self.map.hud.examined_tile.pos
-                        this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
+                # if we left click on the action panel and a building/unit is selected
+                if event.button == 1 and self.hud.bottom_left_menu is not None and self.map.hud.examined_tile is not None:
+                    entity = self.map.hud.examined_tile
+                    # if the examined entity belongs to us (or we are in debug mode)
+                    #if entity.owner == MAIN_PLAYER or TEST_MODE:
+                    if True:
+                        # for every button in action panel
+                        for button in self.hud.bottom_left_menu:
+                            #if the button is pressed
+                            if button["rect"].collidepoint(mouse_pos):
+                                #STOP BUTTON
+                                if button["name"] == "STOP":
+                                    entity.owner.refund_entity_cost(entity.unit_type_currently_trained)
+                                    entity.queue -= 1
+                                    # no more units to create
+                                    if entity.queue == 0:
+                                        entity.is_working = False
+                                        entity.unit_type_currently_trained = None
+                                else:
+                                    # we only do the actions corresponding to the button if player has enough resources/requirements are met
+                                    if button["affordable"]:
+                                        # if it was villager button, we train one
+                                        if button["name"] == "Villager" and not self.hud.examined_tile.is_being_built:
+                                            entity.train(Villager)
+                                        elif button["name"] == "Clubman" and not self.hud.examined_tile.is_being_built:
+                                            entity.train(Clubman)
+                                        # if it was an advancement research, we... research it. Makes sense right ?
+                                        elif button["name"] == "Advance to Feudal Age" or button[
+                                            "name"] == "Advance to Castle Age" or button[
+                                            "name"] == "Advance to Imperial Age":
+                                            entity.research_tech(button["name"])
+                                        # else it is a building
+                                        else:
+                                            self.hud.selected_tile = button
+
+                    #to have informations about the villager if he is selected
+                    if type(entity) == Villager:
+                        this_villager = self.map.units[entity.pos[0]][entity.pos[1]]
                         #("Info about villager, print is in game, events")
                         this_villager.print_state()
-                        if this_villager.owner == MAIN_PLAYER or TEST_MODE:
-                            for button in self.hud.bottom_left_menu:
-                                if button["rect"].collidepoint(mouse_pos):
-                                    if button["name"] == "STOP":
-                                        unit_type_trained = self.hud.examined_tile.unit_type_currently_trained
-                                        self.hud.examined_tile.owner.refund_entity_cost(unit_type_trained)
-                                        self.hud.examined_tile.queue -= 1
-                                        #no more units to create
-                                        if self.hud.examined_tile.queue == 0:
-                                            self.hud.examined_tile.is_working = False
-                                            self.hud.examined_tile.unit_type_currently_trained = None
-                                    else:
-                                        if button["affordable"]:
-                                            if button["name"] == "Villager" and not self.hud.examined_tile.is_being_built:
-                                                self.hud.examined_tile.train(Villager)
 
-                                            elif button["name"] == "Advance to Feudal Age" or button["name"] == "Advance to Castle Age" or button["name"] == "Advance to Imperial Age":
-                                                self.hud.examined_tile.research_tech(button["name"])
-                                            else:
-                                                self.hud.selected_tile = button
                 #BOOM WHEN RIGHT CLICKING
                 elif event.button == 3:  # RIGHT CLICK
                     # right click, gathering and moving units (fighting in future)

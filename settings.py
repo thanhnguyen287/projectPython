@@ -52,6 +52,11 @@ age_4 = pygame.image.load("resources/assets/age_4.png")
 advance_to_second_age_icon = pygame.image.load("resources/assets/advance_2_age.png")
 advance_to_third_age_icon = pygame.image.load("resources/assets/advance_3_age.png")
 advance_to_fourth_age_icon = pygame.image.load("resources/assets/advance_4_age.png")
+sword_tech_icon = pygame.image.load("resources/assets/icons/tech/dmg_tech.png")
+arrow_tech_icon = pygame.image.load("resources/assets/icons/tech/arrow_tech.png")
+horseshoe_tech_icon = pygame.image.load("resources/assets/icons/tech/horse_tech.png")
+cow_tech = pygame.image.load("resources/assets/icons/tech/cow_tech.png")
+
 
 #icons
 farm_icon_hd = pygame.image.load("resources/assets/icons./FarmDE.png")

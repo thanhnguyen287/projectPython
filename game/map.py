@@ -9,7 +9,7 @@ from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
 from player import playerOne, playerTwo, player_list, MAIN_PLAYER
-from units import Villager, Unit, Farm, TownCenter, House, Building, Barracks, Clubman, Dragon
+from units import Villager, Unit, Farm, TownCenter, House, Building, Barracks, Clubman, Dragon, Tower, Wall, Market
 
 
 class Map:
@@ -93,13 +93,20 @@ class Map:
                 and ((self.hud.examined_tile.owner == MAIN_PLAYER)
                      or TEST_MODE):
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
-            # if we can't place the building on the tile, there's no need to do the following
 
+            # we change action_panel depending on the selected entity
             if self.can_place_tile(grid_pos):
                 if self.hud.examined_tile.name == "Villager":
-                    self.hud.bottom_left_menu = self.hud.villager_menu
+                    self.hud.bottom_left_menu = self.hud.villager_panel
                 elif self.hud.examined_tile.name == "Town Center":
-                    self.hud.bottom_left_menu = self.hud.town_hall_menu
+                    self.hud.bottom_left_menu = self.hud.town_hall_panel
+                elif self.hud.examined_tile.name == "Barracks":
+                    self.hud.bottom_left_menu = self.hud.barracks_panel
+                elif self.hud.examined_tile.name == "Market":
+                    self.hud.bottom_left_menu = self.hud.market_panel
+
+                else:
+                    self.hud.bottom_left_menu = None
 
                 image = self.hud.selected_tile["image"].copy()
                 name = self.hud.selected_tile["name"]
@@ -128,35 +135,26 @@ class Map:
                     # we store the future building information inside building_to_create
                     if self.hud.selected_tile["name"] == "Farm" or self.hud.selected_tile["name"] == "House" or \
                             self.hud.selected_tile["name"] == "TownCenter" or \
-                            self.hud.selected_tile["name"] == "Barracks":
+                            self.hud.selected_tile["name"] == "Barracks" or self.hud.selected_tile["name"] == "Tower" or self.hud.selected_tile["name"] == "Wall"or self.hud.selected_tile["name"] == "Market":
                         working_villager.go_to_build(grid_pos, self.hud.selected_tile["name"])
                     self.hud.selected_tile = None
 
-        # the player hasn't selected something to build, he will interact with what's on the map
+        # the player hasn't selected something to build, we check if he selected a building/unit
         else:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             if 0 < grid_pos[0] < self.grid_length_x - 1 and 0 < grid_pos[1] < self.grid_length_y - 1:
-                # we deselect the object examined when left-clicking if not on hud
-                town_center_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(
-                    self.buildings[grid_pos[0]][grid_pos[1] + 1]) == TownCenter) \
-                                              or (self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(
-                    self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter) or (
-                                                      self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(
-                                                  self.buildings[grid_pos[0] - 1][grid_pos[1]]) == TownCenter)
 
-                barrack_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(
-                    self.buildings[grid_pos[0]][grid_pos[1] + 1]) == Barracks) \
-                                              or (self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(
-                    self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == Barracks) or (
-                                                      self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(
-                                                  self.buildings[grid_pos[0] - 1][grid_pos[1]]) == Barracks)
+                town_center_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(self.buildings[grid_pos[0]][grid_pos[1] + 1]) == TownCenter) or (self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter) or (self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(self.buildings[grid_pos[0] - 1][grid_pos[1]]) == TownCenter)
 
-                if mouse_action[0] and not self.is_there_collision(
-                        grid_pos) and not self.hud.bottom_hud_rect.collidepoint(
+                barrack_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(self.buildings[grid_pos[0]][grid_pos[1] + 1]) == Barracks) or (self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == Barracks) or (self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(self.buildings[grid_pos[0] - 1][grid_pos[1]]) == Barracks)
+
+                #if we left clicked on nothing
+                if mouse_action[0] and not self.is_there_collision(grid_pos) and not self.hud.bottom_hud_rect.collidepoint(
                     mouse_pos) and not town_center_check_condition and not barrack_check_condition:
                     self.examined_tile = None
                     self.hud.examined_tile = None
                     self.hud.bottom_left_menu = None
+
             # if on the map and left click and the tile isn't empty, we display the bottom hud menu (different depending of the unit/building)
             if self.can_place_tile(grid_pos):
                 if grid_pos[0] < self.grid_length_x and grid_pos[1] < self.grid_length_y:
@@ -168,50 +166,24 @@ class Map:
                             self.hud.examined_tile = building
 
                             if type(building) == TownCenter:
-                                self.hud.bottom_left_menu = self.hud.town_hall_menu
+                                self.hud.bottom_left_menu = self.hud.town_hall_panel
+                            elif type(building) == Barracks:
+                                self.hud.bottom_left_menu = self.hud.barracks_panel
+                            elif type(self.hud.examined_tile) == Market:
+                                self.hud.bottom_left_menu = self.hud.market_panel
+
                             else:
                                 self.hud.bottom_left_menu = None
 
                         elif unit is not None and (unit.owner == MAIN_PLAYER or TEST_MODE):
                             self.hud.examined_tile = unit
                             if type(unit) == Villager:
-                                self.hud.bottom_left_menu = self.hud.villager_menu
+                                self.hud.bottom_left_menu = self.hud.villager_panel
                             else:
                                 self.hud.bottom_left_menu = None
-
+                        # there is no unit nor building on this tile, but we check if it belongs to a 2x2 building
                         else:
-                            if grid_pos[1] + 1 < self.grid_length_y:
-                                building = self.buildings[grid_pos[0]][grid_pos[1] + 1]
-                            if building and type(building) == TownCenter or type(building) == Barracks:
-                                self.examined_tile = (grid_pos[0], grid_pos[1] + 1)
-
-                                # if the owner is the MAIN_PLAYER (us)
-                                if building.owner == MAIN_PLAYER or TEST_MODE:
-                                    self.hud.examined_tile = building
-                                    self.hud.bottom_left_menu = self.hud.town_hall_menu
-
-                            elif self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and (type(
-                                    self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter
-                                    or type(self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == Barracks):
-                                self.examined_tile = (grid_pos[0] - 1, grid_pos[1] + 1)
-
-                                # if the owner is the MAIN_PLAYER (us)
-                                if self.buildings[grid_pos[0] - 1][grid_pos[1] + 1].owner == MAIN_PLAYER or TEST_MODE:
-                                    self.hud.examined_tile = self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]
-                                    self.hud.bottom_left_menu = self.hud.town_hall_menu
-
-                            elif self.buildings[grid_pos[0] - 1][grid_pos[1]] and (type(
-                                    self.buildings[grid_pos[0] - 1][grid_pos[1]]) == TownCenter
-                                    or type(self.buildings[grid_pos[0] - 1][grid_pos[1]]) == Barracks):
-                                self.examined_tile = (grid_pos[0] - 1, grid_pos[1])
-
-                                # if the owner is the MAIN_PLAYER (us)
-                                if self.buildings[grid_pos[0] - 1][grid_pos[1]].owner == MAIN_PLAYER or TEST_MODE:
-                                    self.hud.examined_tile = self.buildings[grid_pos[0] - 1][grid_pos[1]]
-                                    self.hud.bottom_left_menu = self.hud.town_hall_menu
-
-
-
+                            self.check_selection_2x2_buildings(grid_pos)
                 else:
                     pass
 
@@ -245,7 +217,7 @@ class Map:
                 if self.examined_tile is not None:
                     if not building.is_being_built:
                         if (building.pos[0] == self.examined_tile[0]) and (building.pos[1] == self.examined_tile[1]):
-                            if type(building) != TownCenter and type(building) != Barracks:
+                            if type(building) != TownCenter and type(building) != Barracks and type(building) != Market:
                                 self.highlight_tile(building.pos[0], building.pos[1], screen, "WHITE",
                                                     camera.scroll)
                             else:
@@ -300,6 +272,7 @@ class Map:
             "Resources/assets/Models/Buildings/Town_Center/BLUE/town_center_x1.png").convert_alpha()
         house = pygame.image.load("Resources/assets/Models/Buildings/House/BLUE/house_1BLUE.png").convert_alpha()
         farm = pygame.image.load("Resources/assets/Models/Buildings/Farm/farmBLUE.png").convert_alpha()
+
         barracks = None
         villager = None
 
@@ -878,7 +851,7 @@ class Map:
 
         # if we cannot place our building on the tile because there's already smth, we display the tile in red, else, in green
         # For towncenter, we have to display a 2x2 green/Red case, else we only need to highlight a 1x1 case
-        if self.temp_tile["name"] == "TownCenter" or self.temp_tile["name"] == "Barracks":
+        if self.temp_tile["name"] == "TownCenter" or self.temp_tile["name"] == "Barracks" or self.temp_tile["name"] == "Market":
             # collision matrix : 0 if collision, else 1, we check the 4 cases of the town center
             if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or \
                     self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or \
@@ -913,14 +886,18 @@ class Map:
                             building.owner.age - 1]
                 # farm has the same model the 4 ages, hence we directly have the image and not a list of 4 images, 1 for every age
                 else:
-                    sprite_to_display = self.hud.first_age_building_sprites[building.__class__.__name__][
-                        building.owner.color]
+                    sprite_to_display = self.hud.first_age_building_sprites[building.__class__.__name__][building.owner.color]
 
                 #change the offset to optimise the pos display for every entity
                 if isinstance(building, TownCenter):
                     offset = (10, 13)
                 elif isinstance(building, Barracks):
                     offset = (8, 24)
+                elif isinstance(building, Tower):
+                    offset = (-60, 0)
+                elif isinstance(building, Market):
+                    offset = (20, 20)
+
 
                 #general display
                 screen.blit(sprite_to_display, (
@@ -928,15 +905,15 @@ class Map:
                     render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y + offset[1])
                             )
 
-
-
             #building construction progress
             else:
+                #need to add a little offset for 2x2 constructoin buildings to display it at the right place
+                offset = (0,30)
                 if building.construction_progress == 0:
-                    if type(building) == TownCenter or type(building) == Barracks:
+                    if type(building) == TownCenter or type(building) == Barracks or type(building) == Market:
                         screen.blit(building_construction_1_2x2, (
-                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                            render_pos[1] - (building_construction_1_2x2.get_height() - TILE_SIZE) + scroll.y)
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
+                            render_pos[1] - (building_construction_1_2x2.get_height() - TILE_SIZE) + scroll.y + offset[1])
                                     )
                     else:
                         screen.blit(building_construction_1, (
@@ -945,10 +922,10 @@ class Map:
                                     )
 
                 elif building.construction_progress == 25:
-                    if type(building) == TownCenter or type(building) == Barracks:
+                    if type(building) == TownCenter or type(building) == Barracks or type(building) == Market:
                         screen.blit(building_construction_2_2x2, (
-                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                            render_pos[1] - (building_construction_2_2x2.get_height() - TILE_SIZE) + scroll.y)
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
+                            render_pos[1] - (building_construction_2_2x2.get_height() - TILE_SIZE) + scroll.y + offset[1])
                                     )
                     else:
                         screen.blit(building_construction_2, (
@@ -956,10 +933,10 @@ class Map:
                             render_pos[1] - (building_construction_2.get_height() - TILE_SIZE) + scroll.y)
                                     )
                 elif building.construction_progress == 50:
-                    if type(building) == TownCenter or type(building) == Barracks:
+                    if type(building) == TownCenter or type(building) == Barracks or type(building) == Market:
                         screen.blit(building_construction_3_2x2, (
-                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                            render_pos[1] - (building_construction_3_2x2.get_height() - TILE_SIZE) + scroll.y)
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
+                            render_pos[1] - (building_construction_3_2x2.get_height() - TILE_SIZE) + scroll.y + offset[1])
                                     )
                     else:
                         screen.blit(building_construction_3, (
@@ -967,10 +944,10 @@ class Map:
                             render_pos[1] - (building_construction_3.get_height() - TILE_SIZE) + scroll.y)
                                     )
                 elif building.construction_progress == 75:
-                    if type(building) == TownCenter or type(building) == Barracks:
+                    if type(building) == TownCenter or type(building) == Barracks or type(building) == Market:
                         screen.blit(building_construction_4_2x2, (
-                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x,
-                            render_pos[1] - (building_construction_4_2x2.get_height() - TILE_SIZE) + scroll.y)
+                            render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
+                            render_pos[1] - (building_construction_4_2x2.get_height() - TILE_SIZE) + scroll.y + offset[1])
                                     )
                     else:
                         screen.blit(building_construction_4, (
@@ -980,7 +957,17 @@ class Map:
 
         # we have to display hypothetical building sprite to show the villager wants to build there
         else:
-            if not building["has_construction_started"]:
+            if 1:
+                # add a condition with your building and the new offset to display the building at the correct area
+                offset = (0, 0)
+                if building["name"] == "Tower":
+                    offset = (-60, 0)
+                elif building["name"] == "Barracks":
+                    offset = (0, 20)
+                elif building["name"] == "Market":
+                    offset = (20, 20)
+
+            #if not building["has_construction_started"]:
                 if building["name"] != "Farm":
                     sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color][the_player.age - 1]
                 else:
@@ -992,8 +979,8 @@ class Map:
 
                 screen.blit(sprite_to_display,
                             (  # we obviously have to reapply the offset + camera scroll
-                                render_pos[0] + 6400 / 2 + scroll.x,
-                                render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y
+                                render_pos[0] + 6400 / 2 + scroll.x + offset[0],
+                                render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y + offset[1]
                             )
                             )
 
@@ -1186,3 +1173,54 @@ class Map:
                 if 360 < reader.line_num <= 390:
                     anchor_dic[reader.line_num] = (int(row[0]), int(row[1]))
         return anchor_dic
+
+    #check nearby tiles of checked_tile to determine if we clicked on the ground or on a 2x2 building
+    def check_selection_2x2_buildings(self, checked_tile: (int, int)):
+        if checked_tile[1] + 1 < self.grid_length_y:
+            building = self.buildings[checked_tile[0]][checked_tile[1] + 1]
+        if building and type(building) == TownCenter or type(building) == Barracks or type(building) == Market:
+            self.examined_tile = (checked_tile[0], checked_tile[1] + 1)
+
+            # if the owner is the MAIN_PLAYER (us)
+            if building.owner == MAIN_PLAYER or TEST_MODE:
+                self.hud.examined_tile = building
+                if type(self.hud.examined_tile) == TownCenter:
+                    self.hud.bottom_left_menu = self.hud.town_hall_panel
+                elif type(self.hud.examined_tile) == Barracks:
+                    self.hud.bottom_left_menu = self.hud.barracks_panel
+                elif type(self.hud.examined_tile) == Market:
+                    self.hud.bottom_left_menu = self.hud.market_panel
+
+        elif self.buildings[checked_tile[0] - 1][checked_tile[1] + 1] and (type(
+                self.buildings[checked_tile[0] - 1][checked_tile[1] + 1]) == TownCenter
+                                                                   or type(
+                    self.buildings[checked_tile[0] - 1][checked_tile[1] + 1]) == Barracks) or type(
+                    self.buildings[checked_tile[0] - 1][checked_tile[1] + 1]) == Market:
+            self.examined_tile = (checked_tile[0] - 1, checked_tile[1] + 1)
+
+            # if the owner is the MAIN_PLAYER (us)
+            if self.buildings[checked_tile[0] - 1][checked_tile[1] + 1].owner == MAIN_PLAYER or TEST_MODE:
+                self.hud.examined_tile = self.buildings[checked_tile[0] - 1][checked_tile[1] + 1]
+                if type(self.hud.examined_tile) == TownCenter:
+                    self.hud.bottom_left_menu = self.hud.town_hall_panel
+                elif type(self.hud.examined_tile) == Barracks:
+                    self.hud.bottom_left_menu = self.hud.barracks_panel
+                elif type(self.hud.examined_tile) == Market:
+                    self.hud.bottom_left_menu = self.hud.market_panel
+
+        elif self.buildings[checked_tile[0] - 1][checked_tile[1]] and (type(
+                self.buildings[checked_tile[0] - 1][checked_tile[1]]) == TownCenter
+                                                               or type(
+                    self.buildings[checked_tile[0] - 1][checked_tile[1]]) == Barracks) or type(
+                    self.buildings[checked_tile[0] - 1][checked_tile[1]]) == Market:
+            self.examined_tile = (checked_tile[0] - 1, checked_tile[1])
+
+            # if the owner is the MAIN_PLAYER (us)
+            if self.buildings[checked_tile[0] - 1][checked_tile[1]].owner == MAIN_PLAYER or TEST_MODE:
+                self.hud.examined_tile = self.buildings[checked_tile[0] - 1][checked_tile[1]]
+                if type(self.hud.examined_tile) == TownCenter:
+                    self.hud.bottom_left_menu = self.hud.town_hall_panel
+                elif type(self.hud.examined_tile) == Barracks:
+                    self.hud.bottom_left_menu = self.hud.barracks_panel
+                elif type(self.hud.examined_tile) == Market:
+                    self.hud.bottom_left_menu = self.hud.market_panel

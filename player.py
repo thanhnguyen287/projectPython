@@ -1,5 +1,5 @@
 from settings import *
-from units import House, TownCenter,Farm, Barracks, Villager, Clubman, Bowman
+from units import House, TownCenter, Farm, Barracks, Villager, Clubman, Bowman, Tower, Wall, Market
 from game.utils import draw_text
 from time import sleep
 
@@ -33,11 +33,21 @@ class Player:
             "House": {"wood": 300, "food": 0, "gold": 0, "stone": 50},
             "TownCenter": {"wood": 1000, "food": 0, "gold": 0, "stone": 100},
             "Barracks": {"wood": 500, "food": 0, "gold": 0, "stone": 200},
+            "Tower": {"wood": 100, "food": 0, "gold": 0, "stone": 75},
+            "Wall": {"wood": 0, "food": 0, "gold": 0, "stone": 50},
+            "Market": {"wood": 300, "food": 0, "gold": 0, "stone": 50},
 
             "Villager": {"wood": 0, "food": 10, "gold": 25, "stone": 0},
+            "Clubman": {"wood": 0, "food": 100, "gold": 50, "stone": 0},
+
             "Advance to Feudal Age": {"wood": 0, "food": 500, "gold": 0, "stone": 0},
             "Advance to Castle Age": {"wood": 0, "food": 800, "gold": 200, "stone": 0},
-            "Advance to Imperial Age": {"wood": 0, "food": 1000, "gold": 800, "stone": 0}
+            "Advance to Imperial Age": {"wood": 0, "food": 1000, "gold": 800, "stone": 0},
+
+            "Research Iron Swords": {"wood": 500, "food": 0, "gold": 250, "stone": 300},
+            "Research Iron Arrows": {"wood": 500, "food": 0, "gold": 250, "stone": 300},
+            "Research Iron Horseshoes": {"wood": 500, "food": 0, "gold": 250, "stone": 300},
+            "Research Super Cows": {"wood": 0, "food": 750, "gold": 250, "stone": 0}
 
         }
 
@@ -46,8 +56,11 @@ class Player:
             "House": 0,
             "TownCenter": 0,
             "Barracks": 0,
-
-            "Villager": 1
+            "Tower": 0,
+            "Wall": 0,
+            "Market": 0,
+            "Villager": 1,
+            "Clubman": 1
 
         }
 
@@ -81,7 +94,7 @@ class Player:
                 affordable = False
             i += 1
 
-        if entity != "Advance to Feudal Age" and entity != "Advance to Castle Age" and entity != "Advance to Imperial Age" and self.current_population + self.entity_population_cost[entity] > self.max_population:
+        if entity != "Advance to Feudal Age" and entity != "Research Iron Swords" and entity != "Research Iron Arrows" and entity != "Research Iron Horseshoes" and entity != "Research Super Cows" and entity != "Advance to Castle Age" and entity != "Advance to Imperial Age" and self.current_population + self.entity_population_cost[entity] > self.max_population:
             affordable = False
         return affordable
 
@@ -169,3 +182,9 @@ def str_to_entity_class(name: str):
         return Clubman
     elif name == "Bowman":
         return Bowman
+    elif name == "Tower":
+        return Tower
+    elif name == "Wall":
+        return Wall
+    elif name == "Market":
+        return Market

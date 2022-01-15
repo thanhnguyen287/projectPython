@@ -3,10 +3,10 @@ import pygame
 from math import floor
 from .utils import draw_text, scale_image, get_color_code, TEST_MODE
 from player import playerOne, playerTwo, player_list, MAIN_PLAYER
-from units import Villager, TownCenter, House, Farm, Building, Barracks, Clubman, Dragon
+from units import Villager, TownCenter, House, Farm, Building, Barracks, Clubman, Dragon, Tower, Wall, Market
 # from buildings import TownCenter, House, Farm, Building
 from .ActionMenu import *
-from tech import Age_II, Age_III, Age_IV
+from tech import Age_II, Age_III, Age_IV, horseshoe_tech, arrow_tech, iron_sword_tech, food_production_tech
 from .animation import load_images_better, Animation, BuildingAnimation
 
 
@@ -37,9 +37,16 @@ class Hud:
         self.trained_unit_icon_surface = pygame.Surface(self.icon_size, pygame.SRCALPHA)
         self.trained_unit_icon_rect = self.tooltip_surface.get_rect(topleft=self.trained_unit_icon_pos)
 
+
+        #tech sprites
+        self.tech_sprites = self.load_tech_icons()
+
+        #action_panel for all units/buildings
         self.images = self.load_buildings_icons()
-        self.town_hall_menu = self.create_train_menu_town_hall()
-        self.villager_menu = self.create_build_hud()
+        self.town_hall_panel = self.create_train_menu_town_hall()
+        self.villager_panel = self.create_villager_action_panel()
+        self.barracks_panel = self.create_action_menu_barracks()
+        self.market_panel = self.create_market_action_panel()
 
         self.selected_tile = None
         self.examined_tile = None
@@ -63,7 +70,7 @@ class Hud:
         self.clubman_sprites = self.load_clubman_idle_fixed_sprites()
         self.villager_attack_animations = self.create_all_attack_animations()
 
-    #        self.villager_walk_animations = self.create_all_walk_animations()
+        #self.villager_walk_animations = self.create_all_walk_animations()
         self.all_buildings_death_animations = self.create_all_building_death_animations()
         self.mining_sprites_villager = self.load_mining_sprites_villager()
         self.tech_tree_images = self.load_tech_tree()
@@ -71,6 +78,7 @@ class Hud:
         #dragon
         self.dragon_sprites = self.load_dragon_sprites()
 
+    #town_hall has 2 buttons in its action panel : train Villager and Advance to Second Age
     def create_train_menu_town_hall(self):
         render_pos = [25, self.height - action_menu.get_height() + 40]
         object_width = 50
@@ -84,18 +92,15 @@ class Hud:
             pos = render_pos.copy()
 
             if image_name == "Villager":
-                image_scale = villager_icon
-                rect = image_scale.get_rect(topleft=pos)
-
-        tiles.append(
-            {
-                "name": image_name,
-                "icon": image_scale,
-                "image": self.images[image_name],
-                "rect": rect,
-                "affordable": True
-            }
-        )
+                tiles.append(
+                    {
+                        "name": image_name,
+                        "icon": image,
+                        "image": self.images[image_name],
+                        "rect": image.get_rect(topleft=pos),
+                        "affordable": True
+                    }
+                )
         # advancing age
         render_pos = [25, self.height - action_menu.get_height() + 125]
         tiles.append(
@@ -109,13 +114,76 @@ class Hud:
         )
         return tiles
 
-    def create_build_hud(self):
+    def create_action_menu_barracks(self):
+        render_pos = [25, self.height - action_menu.get_height() + 40]
+        object_width = 50
+
+        tiles = []
+        image_scale = None
+        image_name = None
+        rect = None
+
+        for image_name, image in self.images.items():
+            pos = render_pos.copy()
+
+            if image_name == "Clubman":
+                rect = image.get_rect(topleft=pos)
+
+                tiles.append(
+                    {
+                        "name": image_name,
+                        "icon": image,
+                        "image": self.images[image_name],
+                        "rect": rect,
+                        "affordable": True
+                    }
+                )
+        return tiles
+
+    def create_market_action_panel(self):
+        render_pos = [25, self.height - action_menu.get_height() + 40]
+        object_width = 50
+
+        tiles = []
+        image_scale = None
+        image_name = None
+        rect = None
+
+        for image_name, image in self.tech_sprites.items():
+            if image_name == "Swords" or image_name == "Arrows" or image_name == "Cow" or image_name == "Horseshoe":
+                pos = render_pos.copy()
+                name = image_name
+                if image_name == "Swords":
+                    name = "Research Iron Swords"
+                elif image_name == "Arrows":
+                    name = "Research Iron Arrows"
+                elif image_name == "Cow":
+                    name = "Research Super Cows"
+                elif image_name == "Horseshoe":
+                    name = "Research Iron Horseshoes"
+
+                tiles.append(
+                    {
+                        "name": name,
+                        "icon": image,
+                        "image": image,
+                        "rect": image.get_rect(topleft=render_pos),
+                        "affordable": True
+                    }
+                )
+                render_pos[0] += image.get_width() + 5
+        print (tiles)
+        return tiles
+
+    def create_villager_action_panel(self):
 
         render_pos = [0 + 25, self.height * 0.8 + 10]
 
         tiles = []
+        compteur = 0
         for image_name, image in self.images.items():
-            if image_name != "Villager":
+            if image_name != "Villager" and image_name != "Clubman":
+                compteur += 1
                 pos = render_pos.copy()
                 rect = image.get_rect(topleft=pos)
 
@@ -128,10 +196,18 @@ class Hud:
                         "affordable": True
                     }
                 )
+                # if more than 5 icons, we go to the line below in action panel
+                if compteur > 5:
+                    #position reseted to line below
+                    render_pos = [0 + 25 - image.get_width() - 5, self.height * 0.8 + 65]
+                    compteur = 0
+                render_pos[0] += image.get_width() + 5
 
-                render_pos[0] += image.get_width() + 5  # modifier le 20 pour que ça marche pour tout ecran
+
 
         return tiles
+
+
 
     def update(self, screen, the_player=MAIN_PLAYER):
 
@@ -202,8 +278,6 @@ class Hud:
                         })
                     self.is_cancel_button_present = True
 
-        # display
-
     def draw(self, screen, map, camera, the_player=MAIN_PLAYER):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
         # entity is string corresponding to class unit/building name
@@ -235,9 +309,10 @@ class Hud:
 
             self.display_entity_description(screen, map)
 
+            entity_class = type(self.examined_tile)
             # if the town center is creating villager, we display the corresponding progression bar
-            if type(self.examined_tile) == TownCenter and self.examined_tile.is_working:
-                self.display_progress_bar(screen, Villager, self.examined_tile)
+            if (entity_class == TownCenter or entity_class == Barracks) and self.examined_tile.is_working:
+                self.display_progress_bar(screen, self.examined_tile.unit_type_currently_trained, self.examined_tile)
             # we display progression bar if a building is currently being built
             elif issubclass(type(self.examined_tile), Building) and self.examined_tile.is_being_built:
                 self.display_progress_bar(screen, "Non_meaningful arg 1", "Non_meaningful arg 2", self.examined_tile)
@@ -253,10 +328,11 @@ class Hud:
                             icon.set_alpha(100)
                         screen.blit(icon, tile["rect"].topleft)
                         if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP":
+                            print("hud draw tile", tile)
                             self.display_construction_tooltip(screen, tile["name"])
                         if tile["rect"].collidepoint(mouse_pos) and (
                                 tile["name"] == "STOP" and tile["name"] != "Advance to Feudal Age" and tile[
-                            "name"] != "Advance to Castle Age" and tile["name"] != "Advance to Imperial Age"):
+                            "name"] != "Advance to Castle Age" and tile["name"] != "Advance to Imperial Age" and tile["name"] != "Research Iron Swords" and tile["name"] != "Research Iron Arrows" and tile["name"] != "Research Iron Horseshoes" and tile["name"] != "Research Super Cows"):
                             self.display_construction_tooltip(screen, tile)
 
     def load_buildings_icons(self):
@@ -265,15 +341,55 @@ class Hud:
         house = pygame.image.load("Resources/assets/icons/houseDE.png").convert_alpha()
         farm = pygame.image.load("resources/assets/icons/farmDE.png").convert_alpha()
         barracks = pygame.image.load("resources/assets/icons/barracks_icon.png").convert_alpha()
-        # villager = pygame.image.load("resources/assets/icons/villagerde.bmp").convert_alpha()
+        market = pygame.image.load("resources/assets/icons/market_icon.png").convert_alpha()
 
-        villager = None
+
+        tower_1 = pygame.image.load("resources/assets/icons/tower_1_icon.png").convert_alpha()
+        #tower_2 = pygame.image.load("resources/assets/icons/tower_2_icon.png").convert_alpha()
+        #tower_4 = pygame.image.load("resources/assets/icons/tower_4_icon.png").convert_alpha()
+
+        wall_1 = pygame.image.load("resources/assets/icons/weak_wall_icon.png").convert_alpha()
+        #wall_2 = pygame.image.load("resources/assets/icons/med_wall_icon.png").convert_alpha()
+        #wall_4 = pygame.image.load("resources/assets/icons/strong_wall_icon.png").convert_alpha()
+
+        villager = pygame.image.load("resources/assets/icons/villagerde.bmp").convert_alpha()
+        clubman = pygame.image.load("resources/assets/icons/Clubman_icon.png").convert_alpha()
+
         images = {
             "TownCenter": town_center,
             "House": house,
             "Farm": farm,
             "Barracks": barracks,
-            "Villager": villager
+            "Market": market,
+
+            "Villager": villager,
+            "Clubman": clubman,
+            "Tower": tower_1,
+            #"Tower_2": tower_2,
+            #"Tower_4": tower_4,
+            "Wall": wall_1,
+            #"Wall_2": wall_2,
+            #"Wall_4": wall_4
+        }
+        return images
+
+    def load_tech_icons(self):
+        Advance_age_II = pygame.image.load("resources/assets/icons/tech/advance_2_age.png").convert_alpha()
+        Advance_age_III = pygame.image.load("resources/assets/icons/tech/advance_3_age.png").convert_alpha()
+        Advance_age_IV = pygame.image.load("resources/assets/icons/tech/advance_4_age.png").convert_alpha()
+
+        iron_swords = pygame.image.load("resources/assets/icons/tech/dmg_tech.png").convert_alpha()
+        iron_arrows = pygame.image.load("resources/assets/icons/tech/arrow_tech.png").convert_alpha()
+        iron_horse_shoe = pygame.image.load("resources/assets/icons/tech/horse_tech.png").convert_alpha()
+        cow = pygame.image.load("resources/assets/icons/tech/cow_tech.png").convert_alpha()
+        images = {
+            "Advance_age_2": Advance_age_II,
+            "Advance_age_3": Advance_age_III,
+            "Advance_age_4": Advance_age_IV,
+            "Swords": iron_swords,
+            "Arrows": iron_arrows,
+            "Horseshoe": iron_horse_shoe,
+            "Cow": cow
         }
         return images
 
@@ -317,7 +433,7 @@ class Hud:
 
             # health bar size depends on the entity size : 1x1 tile, 2x2 tile, etc...
             # for 2x2 entities
-            if type(entity) == TownCenter or type(entity) == Barracks:
+            if type(entity) == TownCenter or type(entity) == Barracks or type(entity) == Market:
                 health_bar_length = 200
                 # bar_display_pos
                 display_pos_x = map.grid_to_renderpos(entity.pos[0], entity.pos[1])[
@@ -430,11 +546,19 @@ class Hud:
         img = None
         # as we are scaling it, we make a copy
         if isinstance(self.examined_tile, Building):
-            if self.examined_tile.__class__.__name__ != "Farm":
-                img = self.first_age_building_sprites[self.examined_tile.__class__.__name__][self.examined_tile.owner.color][self.examined_tile.owner.age - 1].copy()
+            if self.examined_tile.__class__.__name__ == "Farm":
+                img = self.first_age_building_sprites[self.examined_tile.__class__.__name__][self.examined_tile.owner.color].copy()
+
+            elif self.examined_tile.__class__.__name__ == "Tower":
+                img = scale_image(self.first_age_building_sprites[self.examined_tile.__class__.__name__][self.examined_tile.owner.color][0].copy(), w= 80)
+
+            elif self.examined_tile.__class__.__name__ == "Wall":
+                img = scale_image(self.first_age_building_sprites[self.examined_tile.__class__.__name__][
+                                      self.examined_tile.owner.color][0].copy(), w=90)
             else:
-                img = self.first_age_building_sprites[self.examined_tile.__class__.__name__][
-                    self.examined_tile.owner.color].copy()
+                img = self.first_age_building_sprites[self.examined_tile.__class__.__name__][self.examined_tile.owner.color][self.examined_tile.owner.age - 1].copy()
+
+
         # if unit, display unit with 270 degree (index : 4)
         else:
             if isinstance(self.examined_tile, Villager):
@@ -461,6 +585,18 @@ class Hud:
         elif type(self.examined_tile) == Barracks:
             img_scaled = scale_image(img, h * 0.60)
             screen.blit(img_scaled, (action_menu.get_width() + 20, self.height - selection_panel.get_height() + 75))
+
+        elif type(self.examined_tile) == Tower:
+            img_scaled = scale_image(img, h * 0.50)
+            screen.blit(img_scaled, (action_menu.get_width() + 20, self.height - selection_panel.get_height() + 75))
+
+        elif type(self.examined_tile) == Wall:
+            img_scaled = scale_image(img, h * 0.60)
+            screen.blit(img_scaled, (action_menu.get_width() + 20, self.height - selection_panel.get_height() + 75))
+
+        elif type(self.examined_tile) == Market:
+            img_scaled = scale_image(img, h * 0.60)
+            screen.blit(img_scaled, (action_menu.get_width() + 20, self.height - selection_panel.get_height() + 85))
 
         # for now, we display the picture of the object and its name
         # name
@@ -549,25 +685,34 @@ class Hud:
         # no building_built, which means we have to display a training unit progress bar
         else:
             if trained_entity == Villager:
-                icon = villager_icon
+                icon = self.images["Villager"]
+                str_name = "Villager"
+            elif trained_entity == Clubman:
+                icon = self.images["Clubman"]
+                str_name = "Clubman"
+
             else:
                 icon = None
             # health bar
-            # to get the same health bar size and not have huge ones, we use a ratio
+            # to get the same progress bar size and not have huge ones, we use a ratio
             progress_bar_length = 120
-            progress_displayed = ((training_entity.now - training_entity.resource_manager_cooldown) / (
-                    trained_entity.construction_time * 1000) * progress_bar_length)
+            progress_secs = training_entity.now - training_entity.resource_manager_cooldown
+            max_progress = (trained_entity.construction_time * 1000)
+            progress_displayed = progress_secs / max_progress * progress_bar_length
+
+            # from 1 to 100% of max health, used to know which color we use for the health bar
+            ratio = (progress_secs / max_progress) * 100
 
             pygame.draw.rect(screen, (255, 201, 14),
                              (action_menu.get_width() + 350, self.height * 0.8 + 34, progress_displayed, 6))
             pygame.draw.rect(screen, (55, 55, 55),
                              (action_menu.get_width() + 350, self.height * 0.8 + 34, progress_bar_length, 6), 2)
 
-            temp_text = "Training a " + str(trained_entity.name) + "..."
+            temp_text = "Training a " + str_name + "..."
             draw_text(screen, temp_text, 13, (255, 255, 255), (action_menu.get_width() + 354, self.height * 0.8 + 17))
 
             # progress %
-            health_text = str(int((training_entity.now - training_entity.resource_manager_cooldown) / 1000) * 20) + "%"
+            health_text = str(int(ratio)) + "%"
             draw_text(screen, health_text, 12, (255, 255, 255), (action_menu.get_width() + 400, self.height * 0.8 + 42))
 
             # icon and number of units being trained
@@ -588,6 +733,8 @@ class Hud:
         display_tooltip_for_tech = False
         if entity == "Villager":
             entity = Villager
+        elif entity == "Clubman":
+            entity = Clubman
         elif entity == "Farm":
             entity = Farm
         elif entity == "House":
@@ -596,6 +743,12 @@ class Hud:
             entity = TownCenter
         elif entity == "Barracks":
             entity = Barracks
+        elif entity == "Tower":
+            entity = Tower
+        elif entity == "Wall":
+            entity = Wall
+        elif entity == "Market":
+            entity = Market
         else:
             display_tooltip_for_entity = False
 
@@ -606,10 +759,21 @@ class Hud:
         elif entity == "Advance to Castle Age":
             display_tooltip_for_tech = True
             entity = Age_III
-
         elif entity == "Advance to Imperial Age":
             display_tooltip_for_tech = True
             entity = Age_IV
+        elif entity == "Research Iron Swords":
+            display_tooltip_for_tech = True
+            entity = iron_sword_tech
+        elif entity == "Research Iron Arrows":
+            display_tooltip_for_tech = True
+            entity = arrow_tech
+        elif entity == "Research Iron Horseshoes":
+            display_tooltip_for_tech = True
+            entity = horseshoe_tech
+        elif entity == "Research Super Cows":
+            display_tooltip_for_tech = True
+            entity = food_production_tech
 
         # display grey rectangle
         screen.blit(self.tooltip_surface, (0, self.height - action_menu.get_height() - self.tooltip_rect.height))
@@ -659,6 +823,7 @@ class Hud:
                              (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))
 
         elif display_tooltip_for_tech:
+            print("entity", entity)
             # construction/training resources costs icons
             screen.blit(wood_cost, (8, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
             screen.blit(food_cost, (0 + 60, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
@@ -697,6 +862,7 @@ class Hud:
         # not tooltip for building/unit but for order
         else:
             # text
+            print("for tech ?",display_tooltip_for_tech)
             tooltip_text = entity["tooltip"]
             draw_text(screen, tooltip_text, 14, (255, 0, 0),
                       (self.tooltip_rect.topleft[0],
@@ -738,11 +904,48 @@ class Hud:
                  "GREEN": load_images_better("Resources/assets/Models/Buildings/Barracks/GREEN/"),
                  "YELLOW": load_images_better("Resources/assets/Models/Buildings/Barracks/YELLOW/")}
 
+        market = {"BLUE": load_images_better("Resources/assets/Models/Buildings/Market/BLUE/"),
+                 "RED": load_images_better("Resources/assets/Models/Buildings/Market/RED/"),
+                 "GREEN": load_images_better("Resources/assets/Models/Buildings/Market/GREEN/"),
+                 "YELLOW": load_images_better("Resources/assets/Models/Buildings/Market/YELLOW/")}
+        # to resize
+        for x in range(0, 4):
+            market["BLUE"][x] = scale_image(market["BLUE"][x], w=200)
+            market["RED"][x] = scale_image(market["RED"][x], w=200)
+            market["GREEN"][x] = scale_image(market["GREEN"][x], w=200)
+            market["YELLOW"][x] = scale_image(market["YELLOW"][x], w=200)
+
+        tower = {"BLUE": load_images_better("Resources/assets/Models/Buildings/Tower/BLUE/"),
+                    "RED": load_images_better("Resources/assets/Models/Buildings/Tower/RED/"),
+                    "GREEN": load_images_better("Resources/assets/Models/Buildings/Tower/GREEN/"),
+                    "YELLOW": load_images_better("Resources/assets/Models/Buildings/Tower/YELLOW/")}
+        # to resize
+        for x in range (0,4):
+            tower["BLUE"][x] = scale_image(tower["BLUE"][x], w= 180)
+            tower["RED"][x] = scale_image(tower["RED"][x], w= 180)
+            tower["GREEN"][x] = scale_image(tower["GREEN"][x], w= 180)
+            tower["YELLOW"][x] = scale_image(tower["YELLOW"][x], w= 180)
+
+
+        wall = {"BLUE": load_images_better("Resources/assets/Models/Buildings/Wall/BLUE/Left/"),
+                    "RED": load_images_better("Resources/assets/Models/Buildings/Wall/RED/Left"),
+                    "GREEN": load_images_better("Resources/assets/Models/Buildings/Wall/GREEN/Left"),
+                    "YELLOW": load_images_better("Resources/assets/Models/Buildings/Wall/YELLOW/Left")}
+
+        for x in range (0,4):
+            wall["BLUE"][x] = scale_image(wall["BLUE"][x], w= 100)
+            wall["RED"][x] = scale_image(wall["RED"][x], w= 100)
+            wall["GREEN"][x] = scale_image(wall["GREEN"][x], w= 100)
+            wall["YELLOW"][x] = scale_image(wall["YELLOW"][x], w= 100)
+
         images = {
             "TownCenter": town_center,
             "House": house,
             "Barracks": barracks,
-            "Farm": farm
+            "Farm": farm,
+            "Market": market,
+            "Tower": tower,
+            "Wall": wall
         }
 
         return images
