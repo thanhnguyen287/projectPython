@@ -57,6 +57,9 @@ class Hud:
         # buildings sprites
         self.first_age_building_sprites = self.load_first_age_building_images()
 
+        #destination flags
+        self.destination_flags_sprites = self.load_destination_flags()
+
         # resources sprites
         self.resources_sprites = self.load_resources_images()
         self.resources_sprites_offsets = [(-15, -5),(-20,-5),(-20,-5),(-28,-15),(-70, -115),(-60,-45),(-65,-40),(-100, -145),(-70, -110), (-40,-70)]
@@ -1111,6 +1114,15 @@ class Hud:
                "RED": load_images_better("Resources/assets/Models/Units/Clubman/RED/Idle/static"),
                "GREEN": load_images_better("Resources/assets/Models/Units/Clubman/GREEN/Idle/static"),
                "YELLOW": load_images_better("Resources/assets/Models/Units/Clubman/YELLOW/Idle/static")
+               }
+        return dic
+
+    # flags that are displayed to show the unit's destination
+    def load_destination_flags(self):
+        dic = {"BLUE": load_images_better("Resources/assets/Models/Units/dest_flag/BLUE"),
+               "RED": load_images_better("Resources/assets/Models/Units/dest_flag/RED"),
+               "GREEN": load_images_better("Resources/assets/Models/Units/dest_flag/GREEN"),
+               "YELLOW": load_images_better("Resources/assets/Models/Units/dest_flag/YELLOW")
                }
         return dic
 
