@@ -1,5 +1,5 @@
 from settings import advance_to_second_age_icon, advance_to_third_age_icon, advance_to_fourth_age_icon, sword_tech_icon, \
-    arrow_tech_icon, horseshoe_tech_icon, cow_tech
+    arrow_tech_icon, horseshoe_tech_icon, cow_tech, improved_masonry_icon, fortified_masonry_icon, imbued_masonry_icon
 
 
 class Technology:
@@ -32,3 +32,6 @@ iron_sword_tech = Technology("Research Iron swords", sword_tech_icon,[500,0,250,
 arrow_tech = Technology("Research Iron arrows", arrow_tech_icon,[500,0,250,500], "None", " Increases Bowmen's damages by 5.")
 horseshoe_tech = Technology("Research Iron horseshoes", horseshoe_tech_icon,[500,0,250,500], "None", " Does cool stuff to your non-existant horses")
 food_production_tech = Technology("Research Super Cows", cow_tech,[500,0,250,500], "None", " Your farm now produces 5 wood every 10 secs.")
+improved_masonry_tech = Technology("Research Improved Masonry", improved_masonry_icon,[150,0,100,200], "None", " Increases the armor and hit points of buildings.")
+fortified_masonry_tech = Technology("Research Improved Masonry", fortified_masonry_icon,[350,0,125,250], "None", " Increases again the armor and hit points of buildings.")
+imbued_masonry_tech = Technology("Research Improved Masonry", imbued_masonry_icon,[500,0,150,300], "None", " Increases yet another time the armor and hit points of buildings")

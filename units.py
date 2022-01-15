@@ -1,7 +1,7 @@
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from pathfinding.finder.a_star import DiagonalMovement
-from tech import Age_II, Age_III, Age_IV
+from tech import Age_II, Age_III, Age_IV, iron_sword_tech, food_production_tech
 import pygame
 from math import ceil
 from random import randint
@@ -90,10 +90,11 @@ class Farm(Building):
                 self.construction_progress = 25
 
         else:
-            #every 5 seconds, we get 10 food
-            if self.now - self.resource_manager_cooldown > 5000:
-                self.resource_manager_cooldown = self.now
-                self.owner.update_resource("FOOD", 10)
+            #every 10 seconds, we get 10 food if tech_food has been researched
+            if self.owner.tech_food_unlocked:
+                if self.now - self.resource_manager_cooldown > 10000:
+                    self.resource_manager_cooldown = self.now
+                    self.owner.update_resource("FOOD", 10)
 
 
 class TownCenter(Building):
@@ -297,6 +298,22 @@ class Market(Building):
             elif progress_time_pourcent > 25:
                 self.construction_progress = 25
 
+    def research_tech(self, tech):
+        # if iron swords has been researched, we increase all unit's dmg by 5.
+        if tech == "Research Iron Swords":
+            tech = iron_sword_tech
+            tech.tech_increase_dmg(self.owner)
+        elif tech == "Research Iron Arrows":
+            pass
+        elif tech == "Research Iron Horseshoes":
+            pass
+        elif tech == "Research Super Cows":
+            tech = food_production_tech
+            self.owner.tech_food_unlocked = True
+
+        for resource_type in range(0, 3):
+            self.owner.resources[resource_type] -= tech.construction_costs[resource_type]
+
 
 class Barracks(Building):
     description = " Used to train military units."
@@ -406,7 +423,6 @@ class Tower(Building):
 
     def __init__(self, pos, map, player_owner_of_unit):
         self.name = "Tower"
-        print("hei je suis un tour qui naquit")
         self.construction_cost = [100, 0, 0, 75]
         self.max_health = 200
 
@@ -862,7 +878,7 @@ class Villager(Unit):
                 # for debug, because the first tile of our path is the pos of unit, not the first tile where we must go
                 if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
-                print("debug path index, path)", self.path_index, len(self.path))
+                #print("debug path index, path)", self.path_index, len(self.path))
                 if len(self.path) != 0:
                     new_pos = self.path[self.path_index]
                     #update position in the world

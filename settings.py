@@ -28,6 +28,7 @@ selection_panel = pygame.image.load("resources/assets/selection_panel.png")
 minimap_panel = pygame.image.load("resources/assets/minimap_panel.png")
 age_panel = pygame.image.load("resources/assets/age_panel.png")
 resource_panel = pygame.image.load("resources/assets/resources_panel.png")
+tech_tree_icon = pygame.image.load()
 
 #resources icons
 wood_icon = pygame.image.load("resources/assets/wood_icon.png")
@@ -56,6 +57,9 @@ sword_tech_icon = pygame.image.load("resources/assets/icons/tech/dmg_tech.png")
 arrow_tech_icon = pygame.image.load("resources/assets/icons/tech/arrow_tech.png")
 horseshoe_tech_icon = pygame.image.load("resources/assets/icons/tech/horse_tech.png")
 cow_tech = pygame.image.load("resources/assets/icons/tech/cow_tech.png")
+imbued_masonry_icon = pygame.image.load("resources/assets/icons/tech/imbuedmasonry.bmp")
+fortified_masonry_icon = pygame.image.load("resources/assets/icons/tech/advancedmasonry.bmp")
+improved_masonry_icon = pygame.image.load("resources/assets/icons/tech/improvedmasonry.bmp")
 
 
 #icons

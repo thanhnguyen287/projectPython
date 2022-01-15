@@ -63,8 +63,8 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            #self.AI_1.run()
-            self.AI_2.run()
+            self.AI_1.run()
+            #self.AI_2.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -148,7 +148,7 @@ class Game:
                                         # if it was an advancement research, we... research it. Makes sense right ?
                                         elif button["name"] == "Advance to Feudal Age" or button[
                                             "name"] == "Advance to Castle Age" or button[
-                                            "name"] == "Advance to Imperial Age":
+                                            "name"] == "Advance to Imperial Age" or button["name"] == "Research Iron Swords" or button["name"] == "Research Iron Arrows" or button["name"] == "Research Iron Horseshoes" or button["name"] == "Research Super Cows":
                                             entity.research_tech(button["name"])
                                         # else it is a building
                                         else:

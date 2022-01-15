@@ -28,6 +28,10 @@ class Player:
         self.towncenter = None
         self.townhall_placed = False
 
+        #tech
+        # if tech_food is unlocked, all farms produces 5 food every 10 seconds.
+        self.tech_food_unlocked = False
+
         self.entity_costs = {
             "Farm": {"wood": 100, "food": 0, "gold": 0, "stone": 0},
             "House": {"wood": 300, "food": 0, "gold": 0, "stone": 50},

@@ -175,7 +175,6 @@ class Hud:
                     }
                 )
                 render_pos[0] += image.get_width() + 5
-        print (tiles)
         return tiles
 
     def create_villager_action_panel(self):
@@ -331,7 +330,6 @@ class Hud:
                             icon.set_alpha(100)
                         screen.blit(icon, tile["rect"].topleft)
                         if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP":
-                            print("hud draw tile", tile)
                             self.display_construction_tooltip(screen, tile["name"])
                         if tile["rect"].collidepoint(mouse_pos) and (
                                 tile["name"] == "STOP" and tile["name"] != "Advance to Feudal Age" and tile[
@@ -826,7 +824,6 @@ class Hud:
                              (temp_pos[0] + self.tooltip_rect.width - 20, temp_pos[1]))
 
         elif display_tooltip_for_tech:
-            print("entity", entity)
             # construction/training resources costs icons
             screen.blit(wood_cost, (8, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
             screen.blit(food_cost, (0 + 60, self.height - action_menu.get_height() - self.tooltip_rect.height + 30))
@@ -865,7 +862,6 @@ class Hud:
         # not tooltip for building/unit but for order
         else:
             # text
-            print("for tech ?",display_tooltip_for_tech)
             tooltip_text = entity["tooltip"]
             draw_text(screen, tooltip_text, 14, (255, 0, 0),
                       (self.tooltip_rect.topleft[0],
