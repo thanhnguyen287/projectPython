@@ -268,8 +268,31 @@ class Hud:
                                 self.bottom_left_menu.pop()
                                 self.is_cancel_button_present = False
 
-            if self.examined_tile is not None and isinstance(self.examined_tile, TownCenter):
+                # we remove the advance to x age tech if it has been researched, and add the next one
+                if self.examined_tile is not None and isinstance(self.examined_tile, Market):
+                    if (button["name"] == "Research Iron Swords" and self.examined_tile.owner.iron_swords_unlocked) or (button["name"] == "Research Iron Arrows" and self.examined_tile.owner.iron_arrows_unlocked) or (button["name"] == "Research Iron Horseshoes" and self.examined_tile.owner.iron_horseshoes_unlocked) or (button["name"] == "Research Super Cows" and self.examined_tile.owner.super_cows_unlocked):
+                        self.bottom_left_menu.remove(button)
+                    # Will be useful for masonry tech, don't remove yet
+                    #elif button[
+                    #    "name"] == "Advance to Castle Age" and self.examined_tile.owner.age == 3:
+                    #    self.bottom_left_menu.remove(button)
+                        # adding next advancing age
+                   #     self.bottom_left_menu.append(
+                   #         {
+                   #             "name": "Advance to Imperial Age",
+                    #            "icon": advance_to_fourth_age_icon,
+                   #             "image": None,
+                    #            "rect": advance_to_fourth_age_icon.get_rect(
+                  #                  topleft=[25, self.height - action_menu.get_height() + 125]),
+                #                "affordable": True
+                #            })
+               #     elif button[
+                 #       "name"] == "Advance to Imperial Age" and self.examined_tile.owner.age == 4:
+                #        self.bottom_left_menu.remove(button)
 
+
+            # to remove the stop action button if it is no longer useful
+            if self.examined_tile is not None and isinstance(self.examined_tile, TownCenter):
                 if self.examined_tile.is_working and not self.is_cancel_button_present:
                     stop_icon_pos = [action_menu.get_width() - 90, self.height * 0.8 + 52 * 2]
                     icon = stop_icon

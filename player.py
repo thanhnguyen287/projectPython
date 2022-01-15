@@ -31,6 +31,15 @@ class Player:
         #tech
         # if tech_food is unlocked, all farms produces 5 food every 10 seconds.
         self.tech_food_unlocked = False
+        self.iron_swords_unlocked = False
+        self.iron_arrows_unlocked = False
+        self.iron_horseshoes_unlocked = False
+        self.super_cows_unlocked = False
+        self.improved_masonry_unlocked = False
+        self.fortified_masonry_unlocked = False
+        self.imbued_masonry_unlocked = False
+
+
 
         self.entity_costs = {
             "Farm": {"wood": 100, "food": 0, "gold": 0, "stone": 0},

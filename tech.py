@@ -23,6 +23,7 @@ class Technology:
     def tech_increase_dmg(self, player):
         for unit in player.unit_list:
             unit.attack_dmg += 5
+            player.iron_swords_unlocked = True
 
 
 Age_II = Technology("Advance to Feudal Age", advance_to_second_age_icon,[0,500,0,0], ["House"], "In the Feudal Age, you can train a variety of new military units and construct new buildings such as the Barracks.")
