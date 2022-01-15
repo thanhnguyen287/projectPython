@@ -14,6 +14,7 @@ class Hud:
 
     def __init__(self, width, height, screen):
 
+        self.tech_tree_display_flag = False
         self.width = width
         self.height = height
         self.hud_color = (198, 155, 93, 175)
@@ -40,6 +41,8 @@ class Hud:
 
         #tech sprites
         self.tech_sprites = self.load_tech_icons()
+        self.tech_tree_button_surface = pygame.Surface((tech_tree_icon.get_width(), tech_tree_icon.get_height()), pygame.SRCALPHA)
+        self.tech_tree_rect = self.tech_tree_button_surface.get_rect(topleft=(screen.get_size()[0] - tech_tree_icon.get_width() - 5, age_panel.get_height() + 10))
 
         #action_panel for all units/buildings
         self.images = self.load_buildings_icons()
@@ -209,8 +212,6 @@ class Hud:
 
         return tiles
 
-
-
     def update(self, screen, the_player=MAIN_PLAYER):
 
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -219,6 +220,10 @@ class Hud:
         if mouse_action[2]:
             self.selected_tile = None
 
+        # if we left click on the tech_tree_icon
+        if mouse_action[0]:
+            if self.tech_tree_rect.collidepoint(mouse_pos):
+                self.tech_tree_display_flag = False if self.tech_tree_display_flag else True
         # building action_menu
         if self.bottom_left_menu is not None:
             for button in self.bottom_left_menu:
@@ -300,7 +305,9 @@ class Hud:
         # resources bar
         the_player.update_resources_bar(screen)
         # bottom menu
-        #self.display_tech_tree(screen)
+
+        if self.tech_tree_display_flag:
+            self.display_tech_tree(screen)
         if self.examined_tile is not None:
             # Draw minimap
             screen.blit(minimap_panel,

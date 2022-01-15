@@ -120,7 +120,7 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
 
                 # if we left click on the action panel and a building/unit is selected
-                if event.button == 1 and self.hud.bottom_left_menu is not None and self.map.hud.examined_tile is not None:
+                if self.hud.bottom_left_menu is not None and self.map.hud.examined_tile is not None:
                     entity = self.map.hud.examined_tile
                     # if the examined entity belongs to us (or we are in debug mode)
                     #if entity.owner == MAIN_PLAYER or TEST_MODE:

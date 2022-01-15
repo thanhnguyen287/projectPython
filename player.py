@@ -135,12 +135,10 @@ class Player:
 
         #population
         population_text = str(MAIN_PLAYER.current_population) + "/" + str(MAIN_PLAYER.max_population)
-
         screen.blit(myfont.render(population_text, True, (255, 255, 255)), (resource_text_pos, 17))
+
         # age
         screen.blit(age_panel, (screen.get_size()[0]-age_panel.get_width(), 0))
-        screen.blit(age_1, (screen.get_size()[0] - age_panel.get_width() + 12, 9))
-        population_text = str(MAIN_PLAYER.current_population) + "/" + str(MAIN_PLAYER.max_population)
         if self.age == 1:
             screen.blit(age_1, (screen.get_size()[0] - age_panel.get_width() + 12, 9))
             age_text = "Dark Age"
@@ -158,6 +156,9 @@ class Player:
             age_text = "Imperial Age"
 
         draw_text(screen, age_text, 18, "WHITE", (screen.get_size()[0] - age_panel.get_width() + 90, 17))
+
+        #tech_tree_display_button
+        screen.blit(tech_tree_icon, (screen.get_size()[0] - tech_tree_icon.get_width() - 5, age_panel.get_height() + 10))
 
 
 playerOne = Player("Lucien", True, [1000, 1000, 1000, 1000], color="BLUE")
