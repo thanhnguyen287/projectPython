@@ -31,12 +31,21 @@ class Player:
         #tech
         # if tech_food is unlocked, all farms produces 5 food every 10 seconds.
         self.tech_food_unlocked = False
+
         self.iron_swords_unlocked = False
+        self.steel_swords_unlocked = False
+        self.mithril_swords_unlocked = False
+
+        self.iron_armors_unlocked = False
+        self.steel_armors_unlocked = False
+        self.mithril_armors_unlocked = False
+
         self.iron_arrows_unlocked = False
         self.iron_horseshoes_unlocked = False
         self.super_cows_unlocked = False
+
         self.improved_masonry_unlocked = False
-        self.fortified_masonry_unlocked = False
+        self.reinforced_masonry_unlocked = False
         self.imbued_masonry_unlocked = False
 
 
@@ -57,12 +66,24 @@ class Player:
             "Advance to Castle Age": {"wood": 0, "food": 800, "gold": 200, "stone": 0},
             "Advance to Imperial Age": {"wood": 0, "food": 1000, "gold": 800, "stone": 0},
 
-            "Research Iron Swords": {"wood": 500, "food": 0, "gold": 250, "stone": 300},
-            "Research Iron Arrows": {"wood": 500, "food": 0, "gold": 250, "stone": 300},
-            "Research Iron Horseshoes": {"wood": 500, "food": 0, "gold": 250, "stone": 300},
+            "Research Iron Swords": {"wood": 25, "food": 0, "gold": 75, "stone": 100},
+            "Research Steel Swords": {"wood": 50, "food": 0, "gold": 150, "stone": 150},
+            "Research Mithril Swords": {"wood": 75, "food": 0, "gold": 225, "stone": 200},
+
+            "Research Iron Armors": {"wood": 25, "food": 0, "gold": 75, "stone": 100},
+            "Research Steel Armors": {"wood": 50, "food": 0, "gold": 150, "stone": 150},
+            "Research Mithril Armors": {"wood": 75, "food": 0, "gold": 225, "stone": 200},
+
+            "Research Improved Masonry": {"wood": 150, "food": 0, "gold": 100, "stone": 300},
+            "Research Reinforced Masonry": {"wood": 350, "food": 0, "gold": 125, "stone": 350},
+            "Research Imbued Masonry": {"wood": 500, "food": 0, "gold": 150, "stone": 400},
+
+            "Research Iron Arrows": {"wood": 25, "food": 0, "gold": 75, "stone": 100},
+            "Research Iron Horseshoes": {"wood": 500, "food": 0, "gold": 250, "stone": 100},
             "Research Super Cows": {"wood": 0, "food": 750, "gold": 250, "stone": 0}
 
         }
+
 
         self.entity_population_cost = {
             "Farm": 0,
@@ -107,7 +128,7 @@ class Player:
                 affordable = False
             i += 1
 
-        if entity != "Advance to Feudal Age" and entity != "Research Iron Swords" and entity != "Research Iron Arrows" and entity != "Research Iron Horseshoes" and entity != "Research Super Cows" and entity != "Advance to Castle Age" and entity != "Advance to Imperial Age" and self.current_population + self.entity_population_cost[entity] > self.max_population:
+        if entity != "Advance to Feudal Age" and entity != "Research Improved Masonry" and entity != "Research Reinforced Masonry" and entity != "Research Imbued Masonry" and entity != "Research Iron Swords" and entity != "Research Steel Swords" and entity != "Research Mithril Swords" and entity != "Research Iron Armors" and entity != "Research Steel Armors" and entity != "Research Mithril Armors" and entity != "Research Iron Arrows" and entity != "Research Iron Horseshoes" and entity != "Research Super Cows" and entity != "Advance to Castle Age" and entity != "Advance to Imperial Age" and self.current_population + self.entity_population_cost[entity] > self.max_population:
             affordable = False
         return affordable
 

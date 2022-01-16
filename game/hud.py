@@ -6,7 +6,7 @@ from player import playerOne, playerTwo, player_list, MAIN_PLAYER
 from units import Villager, TownCenter, House, Farm, Building, Barracks, Clubman, Dragon, Tower, Wall, Market
 # from buildings import TownCenter, House, Farm, Building
 from .ActionMenu import *
-from tech import Age_II, Age_III, Age_IV, horseshoe_tech, arrow_tech, iron_sword_tech, food_production_tech
+from tech import Age_II, Age_III, Age_IV, horseshoe_tech, arrow_tech, iron_sword_tech, steel_sword_tech, mithril_sword_tech, iron_armor_tech, steel_armor_tech, mithril_armor_tech, improved_masonry_tech, reinforced_masonry_tech, imbued_masonry_tech, food_production_tech
 from .animation import load_images_better, Animation, BuildingAnimation
 
 
@@ -156,17 +156,17 @@ class Hud:
         rect = None
 
         for image_name, image in self.tech_sprites.items():
-            if image_name == "Swords" or image_name == "Arrows" or image_name == "Cow" or image_name == "Horseshoe":
+            if image_name == "Swords" or image_name == "Armor" or image_name == "Masonry":
                 pos = render_pos.copy()
                 name = image_name
                 if image_name == "Swords":
                     name = "Research Iron Swords"
-                elif image_name == "Arrows":
-                    name = "Research Iron Arrows"
-                elif image_name == "Cow":
-                    name = "Research Super Cows"
-                elif image_name == "Horseshoe":
-                    name = "Research Iron Horseshoes"
+
+                elif image_name == "Armor":
+                    name = "Research Iron Armors"
+
+                elif image_name == "Masonry":
+                    name = "Research Improved Masonry"
 
                 tiles.append(
                     {
@@ -270,25 +270,80 @@ class Hud:
 
                 # we remove the advance to x age tech if it has been researched, and add the next one
                 if self.examined_tile is not None and isinstance(self.examined_tile, Market):
-                    if (button["name"] == "Research Iron Swords" and self.examined_tile.owner.iron_swords_unlocked) or (button["name"] == "Research Iron Arrows" and self.examined_tile.owner.iron_arrows_unlocked) or (button["name"] == "Research Iron Horseshoes" and self.examined_tile.owner.iron_horseshoes_unlocked) or (button["name"] == "Research Super Cows" and self.examined_tile.owner.super_cows_unlocked):
+                    if (button["name"] == "Research Iron Swords" and self.examined_tile.owner.iron_swords_unlocked)\
+                            or (button["name"] == "Research Steel Swords" and self.examined_tile.owner.steel_swords_unlocked) \
+                            or (button["name"] == "Research Mithril Swords" and self.examined_tile.owner.mithril_swords_unlocked) \
+                            or (button["name"] == "Research Iron Armors" and self.examined_tile.owner.iron_armors_unlocked) \
+                            or (button["name"] == "Research Steel Armors" and self.examined_tile.owner.steel_armors_unlocked) \
+                            or (button["name"] == "Research Mithril Armors" and self.examined_tile.owner.mithril_armors_unlocked) \
+                            or (button["name"] == "Research Iron Arrows" and self.examined_tile.owner.iron_arrows_unlocked)\
+                            or (button["name"] == "Research Iron Horseshoes" and self.examined_tile.owner.iron_horseshoes_unlocked) \
+                            or (button["name"] == "Research Improved Masonry" and self.examined_tile.owner.improved_masonry_unlocked) \
+                            or (button["name"] == "Research Reinforced Masonry" and self.examined_tile.owner.reinforced_masonry_unlocked) \
+                            or (button["name"] == "Research Imbued Masonry" and self.examined_tile.owner.imbued_masonry_unlocked) \
+                            or (button["name"] == "Research Super Cows" and self.examined_tile.owner.super_cows_unlocked):
                         self.bottom_left_menu.remove(button)
-                    # Will be useful for masonry tech, don't remove yet
-                    #elif button[
-                    #    "name"] == "Advance to Castle Age" and self.examined_tile.owner.age == 3:
-                    #    self.bottom_left_menu.remove(button)
-                        # adding next advancing age
-                   #     self.bottom_left_menu.append(
-                   #         {
-                   #             "name": "Advance to Imperial Age",
-                    #            "icon": advance_to_fourth_age_icon,
-                   #             "image": None,
-                    #            "rect": advance_to_fourth_age_icon.get_rect(
-                  #                  topleft=[25, self.height - action_menu.get_height() + 125]),
-                #                "affordable": True
-                #            })
-               #     elif button[
-                 #       "name"] == "Advance to Imperial Age" and self.examined_tile.owner.age == 4:
-                #        self.bottom_left_menu.remove(button)
+
+                        if button["name"] == "Research Iron Swords":
+                        #adding next tech tier
+                            self.bottom_left_menu.append(
+                            {
+                                "name": "Research Steel Swords",
+                                "icon": steel_sword_icon,
+                                "image": steel_sword_icon,
+                                "rect": button["rect"],
+                                "affordable": True
+                            })
+                        elif button["name"] == "Research Steel Swords":
+                        #adding next tech tier
+                            self.bottom_left_menu.append(
+                            {
+                                "name": "Research Mithril Swords",
+                                "icon": mithril_sword_icon,
+                                "image": mithril_sword_icon,
+                                "rect": button["rect"],
+                                "affordable": True
+                            })
+                        elif button["name"] == "Research Iron Armors":
+                        #adding next tech tier
+                            self.bottom_left_menu.append(
+                            {
+                                "name": "Research Steel Armors",
+                                "icon": steel_armor_icon,
+                                "image": steel_armor_icon,
+                                "rect": button["rect"],
+                                "affordable": True
+                            })
+                        elif button["name"] == "Research Steel Armors":
+                        #adding next tech tier
+                            self.bottom_left_menu.append(
+                            {
+                                "name": "Research Mithril Armors",
+                                "icon": mithril_armor_icon,
+                                "image": mithril_armor_icon,
+                                "rect": button["rect"],
+                                "affordable": True
+                            })
+                        elif button["name"] == "Research Improved Masonry":
+                        #adding next tech tier
+                            self.bottom_left_menu.append(
+                            {
+                                "name": "Research Reinforced Masonry",
+                                "icon": fortified_masonry_icon,
+                                "image": fortified_masonry_icon,
+                                "rect": button["rect"],
+                                "affordable": True
+                            })
+                        elif button["name"] == "Research Reinforced Masonry":
+                        #adding next tech tier
+                            self.bottom_left_menu.append(
+                            {
+                                "name": "Research Imbued Masonry",
+                                "icon": imbued_masonry_icon,
+                                "image": imbued_masonry_icon,
+                                "rect": button["rect"],
+                                "affordable": True
+                            })
 
 
             # to remove the stop action button if it is no longer useful
@@ -361,9 +416,10 @@ class Hud:
                         screen.blit(icon, tile["rect"].topleft)
                         if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP":
                             self.display_construction_tooltip(screen, tile["name"])
-                        if tile["rect"].collidepoint(mouse_pos) and (
-                                tile["name"] == "STOP" and tile["name"] != "Advance to Feudal Age" and tile[
-                            "name"] != "Advance to Castle Age" and tile["name"] != "Advance to Imperial Age" and tile["name"] != "Research Iron Swords" and tile["name"] != "Research Iron Arrows" and tile["name"] != "Research Iron Horseshoes" and tile["name"] != "Research Super Cows"):
+                        #if tile["rect"].collidepoint(mouse_pos) and (
+                         #       tile["name"] == "STOP" and tile["name"] != "Advance to Feudal Age" and tile[
+                        #    "name"] != "Advance to Castle Age" and tile["name"] != "Advance to Imperial Age" and tile["name"] != "Research Iron Swords" and tile["name"] != "Research Iron Arrows" and tile["name"] != "Research Iron Horseshoes" and tile["name"] != "Research Super Cows"):
+                        elif tile["rect"].collidepoint(mouse_pos) and tile["name"] == "STOP":
                             self.display_construction_tooltip(screen, tile)
 
     def load_buildings_icons(self):
@@ -409,7 +465,9 @@ class Hud:
         Advance_age_III = pygame.image.load("resources/assets/icons/tech/advance_3_age.png").convert_alpha()
         Advance_age_IV = pygame.image.load("resources/assets/icons/tech/advance_4_age.png").convert_alpha()
 
-        iron_swords = pygame.image.load("resources/assets/icons/tech/dmg_tech.png").convert_alpha()
+        iron_swords = iron_sword_icon
+        iron_armor = iron_armor_icon
+        masonry = improved_masonry_icon
         iron_arrows = pygame.image.load("resources/assets/icons/tech/arrow_tech.png").convert_alpha()
         iron_horse_shoe = pygame.image.load("resources/assets/icons/tech/horse_tech.png").convert_alpha()
         cow = pygame.image.load("resources/assets/icons/tech/cow_tech.png").convert_alpha()
@@ -420,7 +478,9 @@ class Hud:
             "Swords": iron_swords,
             "Arrows": iron_arrows,
             "Horseshoe": iron_horse_shoe,
-            "Cow": cow
+            "Cow": cow,
+            "Armor": iron_armor,
+            "Masonry": masonry
         }
         return images
 
@@ -783,27 +843,48 @@ class Hud:
         else:
             display_tooltip_for_entity = False
 
-        if entity == "Advance to Feudal Age":
+        if entity == "Advance to Feudal Age" or entity == "Advance to Castle Age" or \
+                entity == "Advance to Imperial Age" or entity == "Research Improved Masonry" or \
+                entity == "Research Reinforced Masonry" or entity == "Research Imbued Masonry" or \
+                entity == "Research Iron Swords" or entity == "Research Steel Swords" or \
+                entity == "Research Mithril Swords" or entity == "Research Iron Armors" or \
+                entity == "Research Steel Armors" or entity == "Research Mithril Armors" or \
+                entity == "Research Iron Arrows" or entity == "Research Iron Horseshoes":
             display_tooltip_for_tech = True
-            entity = Age_II
 
+        if entity == "Advance to Feudal Age":
+            entity = Age_II
         elif entity == "Advance to Castle Age":
-            display_tooltip_for_tech = True
             entity = Age_III
         elif entity == "Advance to Imperial Age":
-            display_tooltip_for_tech = True
             entity = Age_IV
+
         elif entity == "Research Iron Swords":
-            display_tooltip_for_tech = True
             entity = iron_sword_tech
+        elif entity == "Research Steel Swords":
+            entity = steel_sword_tech
+        elif entity == "Research Mithril Swords":
+            entity = mithril_sword_tech
+
+        elif entity == "Research Iron Armors":
+            entity = iron_armor_tech
+        elif entity == "Research Steel Armors":
+            entity = steel_armor_tech
+        elif entity == "Research Mithril Armors":
+            entity = mithril_armor_tech
+
+        elif entity == "Research Improved Masonry":
+            entity = improved_masonry_tech
+        elif entity == "Research Reinforced Masonry":
+            entity = reinforced_masonry_tech
+        elif entity == "Research Imbued Masonry":
+            entity = imbued_masonry_tech
+
         elif entity == "Research Iron Arrows":
-            display_tooltip_for_tech = True
             entity = arrow_tech
         elif entity == "Research Iron Horseshoes":
-            display_tooltip_for_tech = True
             entity = horseshoe_tech
         elif entity == "Research Super Cows":
-            display_tooltip_for_tech = True
             entity = food_production_tech
 
         # display grey rectangle

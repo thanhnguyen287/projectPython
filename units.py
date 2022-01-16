@@ -1,7 +1,9 @@
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from pathfinding.finder.a_star import DiagonalMovement
-from tech import Age_II, Age_III, Age_IV, iron_sword_tech, food_production_tech
+from tech import Age_II, Age_III, Age_IV, iron_sword_tech, food_production_tech, steel_sword_tech, mithril_sword_tech, \
+    iron_armor_tech, steel_armor_tech, mithril_armor_tech, improved_masonry_tech, reinforced_masonry_tech, \
+    imbued_masonry_tech
 import pygame
 from math import ceil
 from random import randint
@@ -303,6 +305,52 @@ class Market(Building):
         if tech == "Research Iron Swords":
             tech = iron_sword_tech
             tech.tech_increase_dmg(self.owner)
+            self.owner.iron_swords_unlocked = True
+
+        if tech == "Research Steel Swords":
+            tech = steel_sword_tech
+            tech.tech_increase_dmg(self.owner)
+            self.owner.steel_swords_unlocked = True
+
+        if tech == "Research Mithril Swords":
+            tech = mithril_sword_tech
+            tech.tech_increase_dmg(self.owner)
+            self.owner.mithril_swords_unlocked = True
+
+        if tech == "Research Iron Armors":
+            tech = iron_armor_tech
+            tech.tech_increase_armor(self.owner)
+            self.owner.iron_armors_unlocked = True
+
+        if tech == "Research Steel Armors":
+            tech = steel_armor_tech
+            tech.tech_increase_armor(self.owner)
+            self.owner.steel_armors_unlocked = True
+
+        if tech == "Research Mithril Armors":
+            tech = mithril_armor_tech
+            tech.tech_increase_armor(self.owner)
+            self.owner.mithril_armors_unlocked = True
+
+
+        if tech == "Research Improved Masonry":
+            tech = improved_masonry_tech
+            tech.tech_increase_armor(self.owner, for_building=True)
+            tech.tech_increase_max_health(self.owner)
+            self.owner.improved_masonry_unlocked = True
+
+        if tech == "Research Reinforced Masonry":
+            tech = reinforced_masonry_tech
+            tech.tech_increase_armor(self.owner, for_building=True)
+            tech.tech_increase_max_health(self.owner)
+            self.owner.reinforced_masonry_unlocked = True
+
+        if tech == "Research Imbued Masonry":
+            tech = imbued_masonry_tech
+            tech.tech_increase_armor(self.owner, for_building=True)
+            tech.tech_increase_max_health(self.owner)
+            self.owner.imbued_masonry_unlocked = True
+
         elif tech == "Research Iron Arrows":
             pass
         elif tech == "Research Iron Horseshoes":

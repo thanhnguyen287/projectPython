@@ -146,9 +146,21 @@ class Game:
                                         elif button["name"] == "Clubman" and not self.hud.examined_tile.is_being_built:
                                             entity.train(Clubman)
                                         # if it was an advancement research, we... research it. Makes sense right ?
-                                        elif button["name"] == "Advance to Feudal Age" or button[
-                                            "name"] == "Advance to Castle Age" or button[
-                                            "name"] == "Advance to Imperial Age" or button["name"] == "Research Iron Swords" or button["name"] == "Research Iron Arrows" or button["name"] == "Research Iron Horseshoes" or button["name"] == "Research Super Cows":
+                                        elif button["name"] == "Advance to Feudal Age" \
+                                                or button["name"] == "Advance to Castle Age"\
+                                                or button["name"] == "Advance to Imperial Age" \
+                                                or button["name"] == "Research Improved Masonry" \
+                                                or button["name"] == "Research Reinforced Masonry" \
+                                                or button["name"] == "Research Imbued Masonry" \
+                                                or button["name"] == "Research Iron Swords" \
+                                                or button["name"] == "Research Steel Swords" \
+                                                or button["name"] == "Research Mithril Swords" \
+                                                or button["name"] == "Research Iron Armors" \
+                                                or button["name"] == "Research Steel Armors" \
+                                                or button["name"] == "Research Mithril Armors" \
+                                                or button["name"] == "Research Iron Arrows" \
+                                                or button["name"] == "Research Iron Horseshoes" \
+                                                or button["name"] == "Research Super Cows":
                                             entity.research_tech(button["name"])
                                         # else it is a building
                                         else:

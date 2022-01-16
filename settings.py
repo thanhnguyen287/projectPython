@@ -57,6 +57,15 @@ sword_tech_icon = pygame.image.load("resources/assets/icons/tech/dmg_tech.png")
 arrow_tech_icon = pygame.image.load("resources/assets/icons/tech/arrow_tech.png")
 horseshoe_tech_icon = pygame.image.load("resources/assets/icons/tech/horse_tech.png")
 cow_tech = pygame.image.load("resources/assets/icons/tech/cow_tech.png")
+
+iron_sword_icon = pygame.image.load("resources/assets/icons/tech/BTNSteelMelee.png")
+steel_sword_icon = pygame.image.load("resources/assets/icons/tech/BTNThoriumMelee.png")
+mithril_sword_icon = pygame.image.load("resources/assets/icons/tech/BTNArcaniteMelee.png")
+
+iron_armor_icon = pygame.image.load("resources/assets/icons/tech/BTNHumanArmorUpOne.png")
+steel_armor_icon = pygame.image.load("resources/assets/icons/tech/BTNHumanArmorUpTwo.png")
+mithril_armor_icon = pygame.image.load("resources/assets/icons/tech/BTNHumanArmorUpThree.png")
+
 imbued_masonry_icon = pygame.image.load("resources/assets/icons/tech/imbuedmasonry.bmp")
 fortified_masonry_icon = pygame.image.load("resources/assets/icons/tech/advancedmasonry.bmp")
 improved_masonry_icon = pygame.image.load("resources/assets/icons/tech/improvedmasonry.bmp")
