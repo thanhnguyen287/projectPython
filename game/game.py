@@ -37,7 +37,7 @@ class Game:
 
         # IA
         self.AI_1 = AI(playerTwo, self.map.map)
-        self.AI_2 = AI(playerOne, self.map.map)
+        #self.AI_2 = AI(playerOne, self.map.map)
 
         #defeated player
         self.defeated_player = None
@@ -178,7 +178,7 @@ class Game:
                         this_villager.print_state()
 
                 #BOOM WHEN RIGHT CLICKING
-                elif event.button == 3:  # RIGHT CLICK
+                if event.button == 3:  # RIGHT CLICK
                     # right click, gathering and moving units (fighting in future)
                     grid_pos = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
                     if 0 <= grid_pos[0] < self.map.grid_length_x and 0 <= grid_pos[1] < self.map.grid_length_y:
@@ -189,6 +189,7 @@ class Game:
                             villager_pos = self.map.hud.examined_tile.pos
                             this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
 
+                            print(this_villager.owner, MAIN_PLAYER)
                             if this_villager.owner == MAIN_PLAYER or TEST_MODE:
                                 pos_mouse = self.map.mouse_to_grid(mouse_pos[0], mouse_pos[1], self.camera.scroll)
                                 pos_x = pos_mouse[0]
@@ -236,7 +237,7 @@ class Game:
             if p.towncenter is None:
                 self.is_chat_activated = False
                 self.display_msg_flag = True
-                self.chat_text = str(p.name) + "has been defeated"
+                self.chat_text = str(p.name) + " has been defeated"
 
                 player_list.remove(p)
                 self.timer = self.map.timer

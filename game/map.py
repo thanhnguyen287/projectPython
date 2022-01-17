@@ -84,7 +84,9 @@ class Map:
         self.timer = pygame.time.get_ticks()
         mouse_pos = pygame.mouse.get_pos()
         mouse_action = pygame.mouse.get_pressed()
-        if mouse_action[1] and self.hud.examined_tile is not None:
+        if mouse_action[1] and self.hud.examined_tile is not None and TEST_MODE:
+            print(self.hud.examined_tile)
+            if isinstance(self.hud.examined_tile, TownCenter): self.hud.examined_tile.owner.towncenter = None
             self.remove_entity(self.hud.examined_tile, camera.scroll)
         self.temp_tile = None
 
@@ -837,7 +839,7 @@ class Map:
 
             if unit.searching_for_path:
                 # creates a flag to display where the unit is going
-                offset = (20, 35)
+                offset = (20, -25)
                 screen.blit(self.hud.destination_flags_sprites[unit.owner.color][0], (
                     unit.dest["render_pos"][0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + offset[0],
                     unit.dest["render_pos"][1] - (self.hud.destination_flags_sprites[unit.owner.color][0].get_height() - TILE_SIZE) + camera.scroll.y + offset[1])
