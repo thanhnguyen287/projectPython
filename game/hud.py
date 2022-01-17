@@ -41,6 +41,7 @@ class Hud:
 
         #tech sprites
         self.tech_sprites = self.load_tech_icons()
+        self.tech_sprites_disabled = self.load_tech_icons_disabled()
         self.tech_tree_button_surface = pygame.Surface((tech_tree_icon.get_width(), tech_tree_icon.get_height()), pygame.SRCALPHA)
         self.tech_tree_rect = self.tech_tree_button_surface.get_rect(topleft=(screen.get_size()[0] - tech_tree_icon.get_width() - 5, age_panel.get_height() + 10))
 
@@ -220,10 +221,6 @@ class Hud:
         if mouse_action[2]:
             self.selected_tile = None
 
-        # if we left click on the tech_tree_icon
-        if mouse_action[0]:
-            if self.tech_tree_rect.collidepoint(mouse_pos):
-                self.tech_tree_display_flag = False if self.tech_tree_display_flag else True
         # building action_menu
         if self.bottom_left_menu is not None:
             for button in self.bottom_left_menu:
@@ -384,8 +381,6 @@ class Hud:
         the_player.update_resources_bar(screen)
         # bottom menu
 
-        if self.tech_tree_display_flag:
-            self.display_tech_tree(screen)
         if self.examined_tile is not None:
             # Draw minimap
             screen.blit(minimap_panel,
@@ -421,6 +416,8 @@ class Hud:
                         #    "name"] != "Advance to Castle Age" and tile["name"] != "Advance to Imperial Age" and tile["name"] != "Research Iron Swords" and tile["name"] != "Research Iron Arrows" and tile["name"] != "Research Iron Horseshoes" and tile["name"] != "Research Super Cows"):
                         elif tile["rect"].collidepoint(mouse_pos) and tile["name"] == "STOP":
                             self.display_construction_tooltip(screen, tile)
+        if self.tech_tree_display_flag:
+            self.display_tech_tree(screen)
 
     def load_buildings_icons(self):
 
@@ -483,6 +480,11 @@ class Hud:
             "Masonry": masonry
         }
         return images
+    #list of disabled icons. 0,1,2 for masonry, 3,4,5 for swords, 6,7,8 for armor
+    def load_tech_icons_disabled(self):
+        return load_images_better("resources/assets/icons/tech/disabled")
+
+
 
     # display life of entity inside mid bottom menu (when examining smth)
     # if below 25 pourcent, life bar in red, 25-40 : orange , 40-60 : yellow, 60-100 : light or dark green
@@ -1295,5 +1297,73 @@ class Hud:
         screen.blit(self.tech_tree_images[1], (init_pos[0] + self.tech_tree_images[0].get_width(), init_pos[1]))
         screen.blit(self.tech_tree_images[2], (init_pos[0] + self.tech_tree_images[0].get_width() + self.tech_tree_images[1].get_width(), init_pos[1]))
 
+        # player name
+        draw_text(screen, MAIN_PLAYER.name, 30, "GOLD", (init_pos[0] + 150, init_pos[1] + 30))
+        #rows
+        first_age_height = init_pos[1] + 125
+        second_age_height = first_age_height + 150
+        third_age_height = second_age_height + 150
+        fourth_age_height = third_age_height + 150
+        #columns
+        first_column = init_pos[0] + 600
+        second_column = first_column + 150
+        third_column = second_column + 150
 
+        #**************************************** masonry tech
+        if MAIN_PLAYER.improved_masonry_unlocked:
+            screen.blit(improved_masonry_icon, (third_column, second_age_height))
+            screen.blit(scale_image(tech_line, w=30), (third_column + 10, second_age_height + 55))
 
+        # else blit disabled version of icon
+        else:
+            screen.blit(self.tech_sprites_disabled[0], (third_column, second_age_height))
+
+        if MAIN_PLAYER.reinforced_masonry_unlocked:
+            screen.blit(fortified_masonry_icon, (third_column, third_age_height))
+            screen.blit(scale_image(tech_line, w=30), (third_column + 10, third_age_height + 55))
+
+        else:
+            screen.blit(self.tech_sprites_disabled[1], (third_column, third_age_height))
+
+        if MAIN_PLAYER.imbued_masonry_unlocked:
+            screen.blit(imbued_masonry_icon, (third_column, fourth_age_height))
+        else:
+            screen.blit(self.tech_sprites_disabled[2], (third_column, fourth_age_height))
+
+        # *****************************************sword tech
+        if MAIN_PLAYER.iron_swords_unlocked:
+            screen.blit(iron_sword_icon, (first_column, second_age_height))
+            screen.blit(scale_image(tech_line, w=30), (first_column + 10, second_age_height + 55))
+        # else blit disabled version of icon
+        else:
+            screen.blit(self.tech_sprites_disabled[3], (first_column, second_age_height))
+
+        if MAIN_PLAYER.steel_swords_unlocked:
+            screen.blit(steel_sword_icon, (first_column, third_age_height))
+            screen.blit(scale_image(tech_line, w=30), (first_column + 10, third_age_height + 55))
+        else:
+            screen.blit(self.tech_sprites_disabled[4], (first_column, third_age_height))
+
+        if MAIN_PLAYER.mithril_swords_unlocked:
+            screen.blit(mithril_sword_icon, (first_column, fourth_age_height))
+        else:
+            screen.blit(self.tech_sprites_disabled[5], (first_column, fourth_age_height))
+
+        #*******************************armor tech
+        if MAIN_PLAYER.iron_armors_unlocked:
+            screen.blit(iron_armor_icon, (second_column, second_age_height))
+            screen.blit(scale_image(tech_line, w=30), (second_column + 10, second_age_height + 55))
+        #else blit disabled version of icon
+        else:
+            screen.blit(self.tech_sprites_disabled[6], (second_column, second_age_height))
+
+        if MAIN_PLAYER.steel_armors_unlocked:
+            screen.blit(steel_armor_icon, (second_column, third_age_height))
+            screen.blit(scale_image(tech_line, w=30), (second_column + 10, third_age_height + 55))
+        else:
+            screen.blit(self.tech_sprites_disabled[7], (second_column, third_age_height))
+
+        if MAIN_PLAYER.mithril_armors_unlocked:
+            screen.blit(mithril_armor_icon, (second_column, fourth_age_height))
+        else:
+            screen.blit(self.tech_sprites_disabled[8], (second_column, fourth_age_height))

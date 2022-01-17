@@ -50,6 +50,7 @@ age_3 = pygame.image.load("resources/assets/age_3.png")
 age_4 = pygame.image.load("resources/assets/age_4.png")
 
 #tech icons
+tech_line = pygame.image.load("resources/assets/icons/tech/t.png")
 advance_to_second_age_icon = pygame.image.load("resources/assets/advance_2_age.png")
 advance_to_third_age_icon = pygame.image.load("resources/assets/advance_3_age.png")
 advance_to_fourth_age_icon = pygame.image.load("resources/assets/advance_4_age.png")
@@ -110,6 +111,3 @@ building_construction_4_2x2 = pygame.image.load("resources/assets/Models/Buildin
 
 
 standard_cursor = pygame.image.load("resources/assets/standard_cursor.png")
-
-destination_flag = pygame.image.load("resources/assets/dflag.png")
-

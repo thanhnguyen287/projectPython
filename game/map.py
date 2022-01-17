@@ -840,7 +840,7 @@ class Map:
                 offset = (20, 35)
                 screen.blit(self.hud.destination_flags_sprites[unit.owner.color][0], (
                     unit.dest["render_pos"][0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + offset[0],
-                    unit.dest["render_pos"][1] - (destination_flag.get_height() - TILE_SIZE) + camera.scroll.y + offset[1])
+                    unit.dest["render_pos"][1] - (self.hud.destination_flags_sprites[unit.owner.color][0].get_height() - TILE_SIZE) + camera.scroll.y + offset[1])
                             )
 
     # temp tile is a dictionary containing name + image + render pos + iso_poly + collision

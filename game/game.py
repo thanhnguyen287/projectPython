@@ -119,6 +119,11 @@ class Game:
             # USER PRESSED A MOUSEBUTTON
             elif event.type == pygame.MOUSEBUTTONDOWN:
 
+                #if we left click on the display tech tree button
+                if event.button == 1:
+                    if self.map.hud.tech_tree_rect.collidepoint(mouse_pos):
+                        self.map.hud.tech_tree_display_flag = False if self.map.hud.tech_tree_display_flag else True
+
                 # if we left click on the action panel and a building/unit is selected
                 if self.hud.bottom_left_menu is not None and self.map.hud.examined_tile is not None:
                     entity = self.map.hud.examined_tile
