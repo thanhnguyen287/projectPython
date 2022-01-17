@@ -1,7 +1,7 @@
 from player import player_list
 from .utils import tile_founding, better_look_around, RESSOURCE_LIST
 from units import Villager
-from random import randint
+from random import randint, random
 from settings import MAP_SIZE_X, MAP_SIZE_Y
 
 
@@ -22,7 +22,11 @@ class AI:
         self.needed_ressource = []
 
         # number of each ressource needed per villager
-        self.quantity_of_each_ressource = [150, 50, 25, 100]
+        self.base_quantity_of_each_ressource = [150, 50, 25, 100]
+        self.quantity_of_each_ressource = self.base_quantity_of_each_ressource
+
+        # the building we are aiming to build
+        self.goal_building = None
 
         # a list of tiles to manage the gathering of ressources with the multiple units
         self.targeted_tiles = []
@@ -30,6 +34,8 @@ class AI:
         # a list of the tiles where buildings are being built, to not build more on it
         self.in_building_tiles = []
 
+        # a list of enemy units focused
+        self.units_focused = []
 
         # to know if we are developping pop or not to know if we can build a building or not
         self.dev_pop = False
@@ -48,14 +54,14 @@ class AI:
                     if self.behaviour == "defense":
                         break
                     # if a enemy unit is in a 10 tiles range of the towncenter
-                    if abs(self.tc_pos[0] - u.pos[0]) < 10 and abs(self.tc_pos[1] - u.pos[1]) < 10:  # in tiles
+                    if abs(self.tc_pos[0] - u.pos[0]) <= 1 and abs(self.tc_pos[1] - u.pos[1]) <= 1:  # in tiles
                         self.behaviour = "defense"
                         break
         # if we are the strongest we attack !
         if self.is_stronger():
             self.behaviour = "attack"
         # if we dont attack not defend, we are neutral
-        else:
+        elif self.behaviour != "defense":
             self.behaviour = "neutral"
 
         # at the end, we try to expand (go to expand method to see the conditions)
@@ -102,6 +108,11 @@ class AI:
 
     # gather, build, spawn villagers
     def neutral_routine(self):
+        # we just send a unit randomly to try to destroy the enemy townhall, if everything is correct the enemy AI will
+        #kill the unit
+        self.poking_routine()
+
+
         self.planning_gathering()
 
         # if we dont need ressources, we are not training units, we have free pop space and we have at least as many
@@ -119,14 +130,15 @@ class AI:
 
                 # if we need ressources and the unit is a villager and he is free, he will go gather
                 if self.needed_ressource and isinstance(u, Villager) and u.building_to_create is None and \
-                        not self.dev_pop:
+                        not self.dev_pop and not u.is_moving_to_attack and u.target is None:
                     if u.gathered_ressource_stack < u.stack_max:
                         self.gathering_routine(u)
                     else:
                         u.go_to_townhall()
 
                 # if we dont need ressources or when the villager is building, we are using the building routine
-                elif isinstance(u, Villager) and (not self.dev_pop or u.building_to_create is not None):
+                elif isinstance(u, Villager) and (not self.dev_pop or u.building_to_create is not None) \
+                        and not u.is_moving_to_attack and u.target is None:
                     self.building_routine(u)
 
         for u in self.player.unit_list:
@@ -141,17 +153,16 @@ class AI:
         for p in player_list:
             if p != self.player:
                 for u in p.unit_list:
-                    if abs(self.tc_pos[0] - u.pos[0]) < 10 and abs(self.tc_pos[1] - u.pos[1]) < 10:  # in tiles
-                        pos_unit_to_attack = u.pos
-
-                        focused = False
+                    if abs(self.tc_pos[0] - u.pos[0]) <= 1 and abs(self.tc_pos[1] - u.pos[1]) <= 1 \
+                            and not u in self.units_focused:  # in tiles
 
                         for my_u in self.player.unit_list:
                             # et rajouter si le type de l'unité n'est pas un villageois
-                            if my_u.building_to_create is None and my_u.targeted_ressource is None and \
-                                    my_u.target is None and not focused:
-                                my_u.go_to_attack(pos_unit_to_attack)
-                                focused = True
+                            self.reset_villager(my_u)
+
+                            if my_u.target is None and not u in self.units_focused:
+                                my_u.go_to_attack(u.pos)
+                            self.units_focused.append(u)
         #creer une routine de repli des villageois près de l'hotel de ville
 
 
@@ -190,15 +201,42 @@ class AI:
                     unit.go_to_townhall()
 
     def building_routine(self, unit):
+        #if we have a building we want to build, we wait until we have the ressources and we
+        if self.goal_building is not None:
+            print("in goal building")
+            can_afford = []
+            for r in range(len(self.player.resources)):
+                if self.player.resources[r] >= self.player.entity_costs[self.goal_building][RESSOURCE_LIST[r]]:
+                    can_afford.append(True)
+                else:
+                    can_afford.append(False)
+
+            if unit.building_to_create is None and False not in can_afford:
+                tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
+                for i in range(len(tiles_to_build)):
+                    if tiles_to_build:
+                        random_number = randint(0, len(tiles_to_build) - 1)
+                        if len(tiles_to_build) >= 2 and tiles_to_build[random_number] not in self.in_building_tiles \
+                                and unit.building_to_create is None:
+                            unit.go_to_build(tiles_to_build[random_number], self.goal_building)
+                            self.in_building_tiles.append(tiles_to_build[random_number])
+                            self.goal_building = None
+                            self.quantity_of_each_ressource = self.base_quantity_of_each_ressource
+
         # if we have more than 90% of our pop capacity occupied, we build a house
-        if self.player.current_population >= 0.9 * self.player.max_population:
+        elif self.player.current_population >= 0.8 * self.player.max_population:
             # we check if the player has enough ressource to build
             can_afford = []
             for r in range(len(self.player.resources)):
                 if self.player.resources[r] >= self.player.entity_costs["House"][RESSOURCE_LIST[r]]:
                     can_afford.append(True)
+                elif self.quantity_of_each_ressource[r] < self.player.entity_costs["House"][RESSOURCE_LIST[r]]:
+                    can_afford.append(False)
+                    self.quantity_of_each_ressource[r] = self.player.entity_costs["House"][RESSOURCE_LIST[r]]
+                    self.goal_building = "House"
                 else:
                     can_afford.append(False)
+
             if unit.building_to_create is None and False not in can_afford:
                 tiles_to_build = tile_founding(10, 2, self.range, self.map, self.player, "")
                 for i in range(len(tiles_to_build)):
@@ -211,8 +249,6 @@ class AI:
 
 
         # /!\ with the "elif" we can only build 1 building after 1 building
-        # if we have more than 50% of our pop capacity occupied, we build a farm
-        #elif self.player.current_population >= 0.5 * self.player.max_population:
 
         #we are currently always trying to build a farm if we are in the building routine
         else:
@@ -221,6 +257,9 @@ class AI:
             for r in range(len(self.player.resources)):
                 if self.player.resources[r] >= self.player.entity_costs["Farm"][RESSOURCE_LIST[r]]:
                     can_afford.append(True)
+                elif self.quantity_of_each_ressource[r] < self.player.entity_costs["House"][RESSOURCE_LIST[r]]:
+                    can_afford.append(False)
+                    self.quantity_of_each_ressource[r] = self.player.entity_costs["House"][RESSOURCE_LIST[r]]
                 else:
                     can_afford.append(False)
 
@@ -255,9 +294,30 @@ class AI:
                     if not b.is_being_built:
                         self.in_building_tiles.remove(unit.building_to_create["pos"])
                         unit.building_to_create = None
+                        unit.is_building = False
+                        print(unit, "freed")
 
     def population_developpement_routine(self):
-        self.player.towncenter.train(Villager)
+        nb_of_villagers = 0
+        for u in self.player.unit_list:
+            if isinstance(u, Villager):
+                nb_of_villagers +=1
+        if nb_of_villagers < 5:
+            self.player.towncenter.train(Villager)
+        else:
+            pass
+            #military unit training
+
+
+    def poking_routine(self):
+        r = random()
+        if r <= 0.001:
+            for u in self.player.unit_list:
+                if u.building_to_create is None and not u.is_moving_to_gather and not u.is_moving_to_attack \
+                        and u.targeted_ressource is None and not u.is_gathering and u.target is None:
+                    for p in player_list:
+                        if p != self.player:
+                            u.go_to_attack(p.towncenter.pos)
 
     # ==================================================================================================================
     # ---------------------------------------------USEFUL FUNCTIONS-----------------------------------------------------
@@ -303,3 +363,16 @@ class AI:
 
     def free_villagers(self):
         pass
+
+    def reset_villager(self, u):
+        u.is_moving_to_gather = False
+        u.is_moving_to_attack = False
+        u.is_moving_to_build = False
+
+        u.building_to_create = None
+        u.targeted_ressource = None
+        u.target = None
+
+        u.is_building = False
+        u.is_gathering = False
+        u.is_attacking = False

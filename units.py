@@ -960,10 +960,12 @@ class Villager(Unit):
 
 
     def print_state(self):
+        print("I am ", self)
         print("Gathering : ", self.is_gathering)
         print("Moving to gather : ", self.is_moving_to_gather)
         print("stack", self.gathered_ressource_stack)
-        print("Building : ", self.building_to_create)
+        print("Building to create: ", self.building_to_create)
+        print("Building : ", self.is_building)
         print("Moving to build : ", self.is_moving_to_build)
         print("Moving : ", self.searching_for_path)
 
@@ -1119,7 +1121,7 @@ class Clubman(Unit):
                 if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
                 #print("debug path index, path)", self.path_index, len(self.path))
-                if len(self.path) != self.path_index:
+                if len(self.path) > self.path_index:
                     new_pos = self.path[self.path_index]
                     #update position in the world
                     self.change_tile(new_pos)
