@@ -4,6 +4,7 @@ from .utils import draw_text, find_owner
 from .hud import Hud
 from .animation import *
 from .AI import AI
+from.new_AI import new_AI
 from time import sleep
 
 
@@ -36,7 +37,8 @@ class Game:
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
 
         # IA
-        self.AI_1 = AI(playerTwo, self.map.map)
+        self.AI_1 = new_AI(playerTwo, self.map)
+        #self.AI_1 = AI(playerTwo, self.map.map)
         #self.AI_2 = AI(playerOne, self.map.map)
 
         #defeated player

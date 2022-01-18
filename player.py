@@ -26,6 +26,7 @@ class Player:
 
         self.towncenter_pos = None
         self.towncenter = None
+        self.side = None
         self.townhall_placed = False
 
         #tech

@@ -453,8 +453,8 @@ class Map:
                     collision_matrix[y][x] = 0
         return collision_matrix
 
-    # here is the fonction that places the townhall randomly on the map
-    def place_townhall(self, the_player=MAIN_PLAYER):
+    # here is the OLD fonction that places the townhall randomly on the map
+    """def place_townhall(self, the_player=MAIN_PLAYER):
         while not the_player.townhall_placed:
             place_x = random.randint(0, self.grid_length_x - 2)
             place_y = random.randint(1, self.grid_length_y - 1)
@@ -485,7 +485,7 @@ class Map:
             self.collision_matrix[place_y-1][place_x] = 0
             self.map[place_x + 1][place_y - 1]["tile"] = "building"
             self.map[place_x + 1][place_y - 1]["collision"] = True
-            self.collision_matrix[place_y-1][place_x+1] = 0
+            self.collision_matrix[place_y-1][place_x+1] = 0"""
 
     # here is the fonction that randomly places a player's starting units 4 tiles from the corner
     def place_starting_units(self, the_player=MAIN_PLAYER):
@@ -517,6 +517,7 @@ class Map:
                 start_unit = Villager(self.map[4][6]["grid"], the_player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[4][6]["grid"])
+                the_player.side = "top"
 
             # top_right
             elif (place_x, place_y) == (1, 0):
@@ -530,6 +531,7 @@ class Map:
                 start_unit = Villager(self.map[self.grid_length_x - 6][6]["grid"], the_player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[self.grid_length_x - 6][6]["grid"])
+                the_player.side = "right"
 
             # bot_left
             elif (place_x, place_y) == (0, 1):
@@ -543,6 +545,7 @@ class Map:
                 start_unit = Villager(self.map[4][self.grid_length_y - 4]["grid"], the_player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[4][self.grid_length_y - 4]["grid"])
+                the_player.side = "left"
 
             # bot_right
             elif (place_x, place_y) == (1, 1):
@@ -557,6 +560,7 @@ class Map:
                                       self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"])
+                the_player.side = "bot"
 
             # for towncenter
             new_building.is_being_built = False
@@ -648,8 +652,11 @@ class Map:
 
     # returns true if there is collision, else False
     def is_there_collision(self, grid_pos: [int, int]):
-        return True if (self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 or self.map[grid_pos[0]][grid_pos[1]][
-            "collision"]) else False
+        if 0 <= grid_pos[0] < self.grid_length_x - 1 and 0 < grid_pos[1] < self.grid_length_y - 1:
+            return True if (self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 or self.map[grid_pos[0]][grid_pos[1]][
+                "collision"]) else False
+        else:
+            return False
 
     # return a list of empty tiles around origin
     def get_empty_adjacent_tiles(self, origin_pos: [int, int], origin_size=1):
@@ -871,13 +878,14 @@ class Map:
         # For towncenter, we have to display a 2x2 green/Red case, else we only need to highlight a 1x1 case
         if self.temp_tile["name"] == "TownCenter" or self.temp_tile["name"] == "Barracks" or self.temp_tile["name"] == "Market":
             # collision matrix : 0 if collision, else 1, we check the 4 cases of the town center
-            if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or \
-                    self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or \
-                    self.collision_matrix[grid[1] - 1][grid[0]] == 0:
-                self.highlight_tile(grid[0], grid[1] - 1, screen, "RED", camera.scroll, multiple_tiles_tiles_flag=True)
-            else:
-                self.highlight_tile(grid[0], grid[1] - 1, screen, "GREEN", camera.scroll,
-                                    multiple_tiles_tiles_flag=True)
+            if 0 <= grid[0] < self.grid_length_x - 1 and 0 < grid[0] < self.grid_length_y:
+                if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or \
+                        self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or \
+                        self.collision_matrix[grid[1] - 1][grid[0]] == 0:
+                    self.highlight_tile(grid[0], grid[1] - 1, screen, "RED", camera.scroll, multiple_tiles_tiles_flag=True)
+                else:
+                    self.highlight_tile(grid[0], grid[1] - 1, screen, "GREEN", camera.scroll,
+                                        multiple_tiles_tiles_flag=True)
 
         # for normal buildings (1x1)
         else:
