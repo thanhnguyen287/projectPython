@@ -385,7 +385,7 @@ class Hud:
             # Draw minimap
             screen.blit(minimap_panel,
                         (self.width - minimap_panel.get_width(), self.height - selection_panel.get_height()))
-            #map.draw_minimap(screen, camera)
+            map.draw_minimap(screen, camera)
             screen.blit(action_menu, (0, self.height - action_menu.get_height()))
             screen.blit(selection_panel, (action_menu.get_width(), self.height - selection_panel.get_height()))
 
@@ -418,6 +418,7 @@ class Hud:
                             self.display_construction_tooltip(screen, tile)
         if self.tech_tree_display_flag:
             self.display_tech_tree(screen)
+
 
     def load_buildings_icons(self):
 

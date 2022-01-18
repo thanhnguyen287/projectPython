@@ -707,24 +707,39 @@ class Map:
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
                 # Draw polygon
-                mini = self.map[x][y]["iso_poly_minimap"]
+                mini = self.map[x][y]["iso_poly"]
                 # mini = [((x + self.width / 2) / minimap_scaling + 1640,
                 #        (y + self.height / 4) / minimap_scaling + 820) for x, y in mini]  # position x + ...., y  + ...
-                mini = [(x / minimap_scaling + 0.89 * self.width,
-                         y / minimap_scaling + 0.82 * self.height) for x, y in mini]  # position x + ...., y  + ...
+                mini = [((x) / minimap_scaling + self.width - 420 / 2,
+                         (y) / minimap_scaling + self.height - 200) for x, y in mini]
                 # pygame.draw.polygon(screen, "WHITE", mini, 1)
 
                 # Draw small dot representing entities
-                render_pos = self.map[x][y]["render_pos"]
+
                 tile = self.map[x][y]["tile"]
 
                 if tile == "tree":
                     # pygame.draw.circle(screen, "GREEN", (render_pos[0]/minimap_scaling + 1640, render_pos[1]/minimap_scaling+820), 1)
                     pygame.draw.circle(screen, "GREEN", (mini[1][0], mini[1][1]), 1)
                 elif tile == "rock":
-                    pygame.draw.circle(screen, "BlACK", (mini[1][0], mini[1][1]), 1)
+                    pygame.draw.circle(screen, "WHITE", (mini[1][0], mini[1][1]), 1)
                 elif tile == "gold":
                     pygame.draw.circle(screen, "YELLOW", (mini[1][0], mini[1][1]), 1)
+                elif tile == "berrybush":
+                    pygame.draw.circle(screen, "PINK", (mini[1][0], mini[1][1]), 1)
+        for player in player_list:
+            for building in player.building_list:
+                iso_pos = self.grid_to_iso_poly(building.pos[0], building.pos[1])
+                iso_pos = [((x) / minimap_scaling + self.width - 420 / 2,
+                         (y) / minimap_scaling + self.height - 200) for x, y in iso_pos]
+                pygame.draw.circle(screen, building.owner.color, (iso_pos[1][0], iso_pos[1][1]), 2)
+                # print(building.owner.color, iso_pos) Debug purpose
+            for unit in player.unit_list:
+                unit_pos = self.grid_to_iso_poly(unit.pos[0], unit.pos[1])
+                unit_pos = [((x) / minimap_scaling + self.width - 420 / 2,
+                            (y) / minimap_scaling + self.height - 200) for x, y in unit_pos]
+                pygame.draw.circle(screen, building.owner.color, (unit_pos[1][0], unit_pos[1][1]), 3)
+
 
     # display resources on map. Most resources have different variations. If resource is selected or has less than max health, we display its health bar
     def display_resources_on_tile(self, resource_tile, screen, camera):
