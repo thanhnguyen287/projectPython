@@ -195,13 +195,13 @@ class Player:
 playerOne = Player("Lucien", True, [1000, 1000, 1000, 1000], color="BLUE")
 playerOne.age = 1
 
-playerTwo = Player("AI", True, [1000, 1000, 1000, 1000], color="RED")
+playerTwo = Player("AI", True, [5000, 5000, 5000, 5000], color="RED")
 playerTwo.age = 1
 player_list = [playerOne, playerTwo]
 #  INIT FOR RESSOURCES DISPLAY
 
 #define which player is controlled by us
-MAIN_PLAYER = playerTwo
+MAIN_PLAYER = playerOne
 
 def str_to_entity_class(name: str):
     if name == "TownCenter":

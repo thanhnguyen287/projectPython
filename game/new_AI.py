@@ -13,7 +13,7 @@ class new_AI:
         self.tc_pos = self.player.towncenter_pos
 
         #we chose a behaviour between all the behaviours we defined
-        self.behaviour_possible = ["neutral"]
+        self.behaviour_possible = ["defensive"]
         r = randint(0, len(self.behaviour_possible)-1)
         self.behaviour = self.behaviour_possible[r]
 
@@ -33,8 +33,8 @@ class new_AI:
         #for defense
         self.has_defense = False
         self.has_second_tower = False
-        self.tower = None
-        self.second_tower = None
+        self.tower_pos = None
+        self.second_tower_pos = None
 
         #for attack
         self.has_barracks = False
@@ -50,6 +50,11 @@ class new_AI:
         self.nb_ferme = 0
         self.building_queue = []
         self.training_queue = []
+
+        self.army = []
+
+        self.poking_unit = None
+        self.in_poking_player = None
 
         # a list of tiles to manage the gathering of ressources with the multiple units
         self.targeted_tiles = []
@@ -93,6 +98,11 @@ class new_AI:
     def run(self):
         if self.player.towncenter is not None:
 
+            #we update the army
+            for u in self.player.unit_list:
+                if isinstance(u, Clubman) and u not in self.army:
+                    self.army.append(u)
+
             #we execute a different routine for each behaviour that exists
             self.routine()
 
@@ -106,15 +116,17 @@ class new_AI:
 
     # gather, build, spawn villagers
     def routine(self):
+
+        #to know if we need to gather ressources
         self.planning_gathering()
-        #print(self.needed_ressource)
-        #print(self.quantity_of_each_ressource)
-        print(self.needed_ressource)
-        print(self.ressource_to_gather)
 
         #the defense
         if self.behaviour != "pacifist":
             self.defense_routine()
+
+        # the poke
+        if self.army:
+            self.poking_routine()
 
         # if we dont need ressources, we are not training units, we have free pop space and we have at least as many
         # buildings as units, then we can train a new unit
@@ -171,13 +183,17 @@ class new_AI:
                     if u in self.units_focused:
                         for my_u in self.player.unit_list:
                             if my_u.target == u:
-                                my_u.go_to_attack(u.pos)
+                                my_u.attack()
+
 
         #creer une routine de repli des villageois près de l'hotel de ville
 
 
     def attack_routine(self):
-        pass
+        #TODO
+        if self.army:
+            for u in self.army:
+                pass
 
     # TODO
 
@@ -232,6 +248,7 @@ class new_AI:
                         self.building_queue.append(("House", pos))
                         self.in_building_tiles.append(pos)
 
+            #TECHNOLOGY NOT IMPLEMENTED YET
             #elif not self.has_market and self.has_defense and \
                     #(self.behaviour == "neutral" or self.behaviour == "pacifist"):
                 #while not self.has_market and not self.ressource_to_gather:
@@ -312,21 +329,33 @@ class new_AI:
                 self.needed_ressource[i] -= Villager.construction_cost[i]
 
         elif self.check_price(Clubman) and \
-                self.player.current_population+len(self.training_queue) < self.player.max_population:
+                self.player.current_population+len(self.training_queue) < self.player.max_population and \
+                self.behaviour != "pacifist" and len(self.army) < 5:
             self.barracks.train(Clubman)
             for i in range(4):
                 self.needed_ressource[i] -= Clubman.construction_cost[i]
 
 
     def poking_routine(self):
-        for u in self.player.unit_list:
-            for p in player_list:
-                if p != self.player:
-                    if u.building_to_create is None and not u.is_moving_to_gather and not u.is_moving_to_attack \
-                            and u.targeted_ressource is None and not u.is_gathering and u.target is None:
-                        r = random()
-                        if r <= 0.001:
+        #in case the unit get killed
+        if self.poking_unit not in self.player.unit_list:
+            self.poking_unit = None
+
+        if self.in_poking_player is not None and self.in_poking_player.towncenter is None:
+            self.in_poking_player = None
+            self.poking_unit = None
+
+        if self.poking_unit is None:
+            for u in self.army:
+                for p in player_list:
+                    if p != self.player:
+                        if not u.is_moving_to_attack and u.target is None and self.poking_unit is None:
                             u.go_to_attack(p.towncenter.pos)
+                            self.poking_unit = u
+                            self.in_poking_player = p
+
+        else:
+            self.poking_unit.attack()
 
     # ==================================================================================================================
     # ---------------------------------------------USEFUL FUNCTIONS-----------------------------------------------------
@@ -448,6 +477,13 @@ class new_AI:
             if self.map.collision_matrix[pos[1]][pos[0]]:
                 self.building_queue.append(("Wall", pos))
                 self.in_building_tiles.append(pos)
+
+        if self.behaviour == "defensive" and not self.has_second_tower:
+            self.has_defense = False
+            self.has_second_tower = True
+            self.second_tower_pos = self.tower_pos
+            self.tower_pos = None
+
 
     def let_a_path(self, pos):
         if self.player.side == "top" or self.player.side == "left":

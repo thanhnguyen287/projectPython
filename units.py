@@ -784,9 +784,14 @@ class Villager(Unit):
                 self.target.is_attacking = True
                 self.target.attack()
         else:
-            ind = GENERAL_UNIT_LIST.index(self.target)
-            pos = GENERAL_UNIT_LIST[ind].pos
-            self.go_to_attack(pos)
+            if self.target in GENERAL_UNIT_LIST:
+                ind = GENERAL_UNIT_LIST.index(self.target)
+                pos = GENERAL_UNIT_LIST[ind].pos
+                self.go_to_attack(pos)
+            elif self.target in GENERAL_BUILDING_LIST:
+                ind = GENERAL_BUILDING_LIST.index(self.target)
+                pos = GENERAL_BUILDING_LIST[ind].pos
+                self.go_to_attack(pos)
 
     def go_to_build(self, pos, name):
         if self.map.get_empty_adjacent_tiles(pos):
@@ -1106,9 +1111,14 @@ class Clubman(Unit):
                 self.target.is_attacking = True
                 self.target.attack()
         else:
-            ind = GENERAL_UNIT_LIST.index(self.target)
-            pos = GENERAL_UNIT_LIST[ind].pos
-            self.go_to_attack(pos)
+            if self.target in GENERAL_UNIT_LIST:
+                ind = GENERAL_UNIT_LIST.index(self.target)
+                pos = GENERAL_UNIT_LIST[ind].pos
+                self.go_to_attack(pos)
+            elif self.target in GENERAL_BUILDING_LIST:
+                ind = GENERAL_BUILDING_LIST.index(self.target)
+                pos = GENERAL_BUILDING_LIST[ind].pos
+                self.go_to_attack(pos)
 
     def update(self):
         self.now = pygame.time.get_ticks()
