@@ -38,6 +38,7 @@ class Game:
 
         # IA
         self.AI_1 = new_AI(playerTwo, self.map)
+        self.AI_2 = new_AI(playerOne, self.map)
         #self.AI_1 = AI(playerTwo, self.map.map)
         #self.AI_2 = AI(playerOne, self.map.map)
 
@@ -66,7 +67,7 @@ class Game:
             self.update()
             self.draw()
             self.AI_1.run()
-            #self.AI_2.run()
+            self.AI_2.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
