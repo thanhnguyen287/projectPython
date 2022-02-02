@@ -23,10 +23,13 @@ class Game:
         # map
         self.map = Map(self.hud, self.entities, 50, 50, self.width, self.height)
 
+        # camera
+        self.camera = Camera(self.width, self.height, self.map)
+        self.hud.camera = self.camera
+
         self.timer = self.map.timer
 
-        # camera
-        self.camera = Camera(self.width, self.height)
+
         # on centre la camera au milieu de la carte
         #th_x = self.map.place_x
         th_x = 25

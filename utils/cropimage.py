@@ -11,10 +11,10 @@ def trim(im):
         return im.crop(bbox)
 
 if __name__ == "__main__":
-    for i in range(16,31):
-        bg = Image.open(f"Villagerdie{i:03d}.png")  # The image to be cropped
+    for i in range(271,301):
+        bg = Image.open(f"u_all_axeman_attackA_x2_{i}.png")  # The image to be cropped
         new_im = trim(bg)
-        new_im.save(f"{i-16}.png")
+        new_im.save(f"{i}.png")
 
 # import Image
 # import numpy as np

@@ -13,12 +13,13 @@ from .animation import load_images_better, Animation, BuildingAnimation
 class Hud:
 
     def __init__(self, width, height, screen):
-
+        self.camera = None
         self.tech_tree_display_flag = False
         self.width = width
         self.height = height
         self.hud_color = (198, 155, 93, 175)
         self.screen = screen
+        # self.camera = camera
 
         # bottom hud
         self.bottom_hud_surface = pygame.Surface((887, 182), pygame.SRCALPHA)
@@ -385,7 +386,7 @@ class Hud:
             # Draw minimap
             screen.blit(minimap_panel,
                         (self.width - minimap_panel.get_width(), self.height - selection_panel.get_height()))
-            map.draw_minimap(screen, camera)
+            map.draw_minimap(screen, self.camera)
             screen.blit(action_menu, (0, self.height - action_menu.get_height()))
             screen.blit(selection_panel, (action_menu.get_width(), self.height - selection_panel.get_height()))
 

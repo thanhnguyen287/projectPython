@@ -34,6 +34,10 @@ class Map:
         self.units = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
         self.resources_list = []
 
+        # Fog of war
+        # self.visible = self.
+        # self.fog = False
+
         self.map = self.create_map()
 
         self.place_x = 0
@@ -711,6 +715,21 @@ class Map:
         Camera is highly recommended, draw the polygon once so increase
         FPS. '''
         minimap_scaling = 16
+        ### Draw the camera on the map
+        ### 420 and 200 is the size of minimap panel
+        self.cam_width = self.width/minimap_scaling
+        self.cam_height = self.height/minimap_scaling
+
+        # iso_pos_cam = self.grid_to_iso_poly(camera.scroll.x , camera.scroll.y)
+        iso_pos_cam = [(-camera.scroll.x / minimap_scaling + self.width  - 420 ,
+                         -camera.scroll.y/ minimap_scaling + self.height - 200)]
+        for xh in iso_pos_cam:
+            print(xh)
+            print("**********")
+        rect_cam = pygame.Rect((iso_pos_cam[0][0],iso_pos_cam[0][1]), (self.cam_width, self.cam_height))
+        pygame.draw.rect(screen, "WHITE", rect_cam, 2 )
+
+
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
                 # Draw polygon
