@@ -17,6 +17,7 @@ class new_AI:
         r = randint(0, len(self.behaviour_possible)-1)
         self.behaviour = self.behaviour_possible[r]
 
+
         # the range (in layers) that the AI will go to. It increase when the AI becomes stronger
         # or is lacking ressources
         self.range = 3
@@ -31,11 +32,15 @@ class new_AI:
         self.needed_ressource = [0, 0, 0, 0]
         #for defense
         self.has_defense = False
-        self.tower_pos = None
+        self.has_second_tower = False
+        self.tower = None
+        self.second_tower = None
 
         #for attack
         self.has_barracks = False
+        self.has_second_barracks = False
         self.barracks = None
+        self.second_barracks = False
 
         #for technologies
         self.has_market = False
@@ -70,7 +75,7 @@ class new_AI:
 
         # WARNING i will modify this so the AI expand only if a ressource she needs is lacking
         # or if she is neutral but lacking ressources to gather
-        elif self.behaviour == "neutral" and self.range < MAP_SIZE_X and self.range < MAP_SIZE_Y:
+        elif self.range < MAP_SIZE_X and self.range < MAP_SIZE_Y:
             ressources_available = []
             for r in self.ressource_to_gather:
                 ressources_available = []
@@ -89,12 +94,7 @@ class new_AI:
         if self.player.towncenter is not None:
 
             #we execute a different routine for each behaviour that exists
-            if self.behaviour == "neutral":
-                self.neutral_routine()
-            elif self.behaviour == "defense":
-                self.defense_routine()
-            elif self.behaviour == "attack":
-                self.attack_routine()
+            self.routine()
 
             # at the end, we try to expand (go to expand method to see the conditions)
             self.expand()
@@ -105,12 +105,16 @@ class new_AI:
     # ==================================================================================================================
 
     # gather, build, spawn villagers
-    def neutral_routine(self):
+    def routine(self):
         self.planning_gathering()
         #print(self.needed_ressource)
         #print(self.quantity_of_each_ressource)
         print(self.needed_ressource)
         print(self.ressource_to_gather)
+
+        #the defense
+        if self.behaviour != "pacifist":
+            self.defense_routine()
 
         # if we dont need ressources, we are not training units, we have free pop space and we have at least as many
         # buildings as units, then we can train a new unit
@@ -158,12 +162,17 @@ class new_AI:
                             and not u in self.units_focused:  # in tiles
 
                         for my_u in self.player.unit_list:
-                            # et rajouter si le type de l'unité n'est pas un villageois
                             self.reset_villager(my_u)
 
                             if my_u.target is None and not u in self.units_focused:
                                 my_u.go_to_attack(u.pos)
                             self.units_focused.append(u)
+
+                    if u in self.units_focused:
+                        for my_u in self.player.unit_list:
+                            if my_u.target == u:
+                                my_u.go_to_attack(u.pos)
+
         #creer une routine de repli des villageois près de l'hotel de ville
 
 
@@ -223,24 +232,26 @@ class new_AI:
                         self.building_queue.append(("House", pos))
                         self.in_building_tiles.append(pos)
 
-            elif not self.has_market and self.has_defense:
-                while not self.has_market and not self.ressource_to_gather:
-                    tiles_to_build = tile_founding(10, 3, self.range+1, self.map.map, self.player, "", self.map)
-                    if tiles_to_build:
-                        r = randint(0, len(tiles_to_build) - 1)
-                        pos = tiles_to_build[r]
-                        if self.check_matrix_and_in_building_tiles(pos) and pos not in self.in_building_tiles and \
-                                self.let_a_path(pos) and self.let_a_path((pos[0], pos[1]+1)):
-                            self.building_queue.append(("Market", pos))
-                            self.in_building_tiles.append(pos)
-                            self.in_building_tiles.append((pos[0], pos[1] - 1))
-                            self.in_building_tiles.append((pos[0] + 1, pos[1]))
-                            self.in_building_tiles.append((pos[0] + 1, pos[1] - 1))
-                            self.has_market = True
+            #elif not self.has_market and self.has_defense and \
+                    #(self.behaviour == "neutral" or self.behaviour == "pacifist"):
+                #while not self.has_market and not self.ressource_to_gather:
+                    #tiles_to_build = tile_founding(10, 3, self.range+1, self.map.map, self.player, "", self.map)
+                    #if tiles_to_build:
+                        #r = randint(0, len(tiles_to_build) - 1)
+                        #pos = tiles_to_build[r]
+                        #if self.check_matrix_and_in_building_tiles(pos) and pos not in self.in_building_tiles and \
+                                #self.let_a_path(pos) and self.let_a_path((pos[0], pos[1]+1)):
+                            #self.building_queue.append(("Market", pos))
+                            #self.in_building_tiles.append(pos)
+                            #self.in_building_tiles.append((pos[0], pos[1] - 1))
+                            #self.in_building_tiles.append((pos[0] + 1, pos[1]))
+                            #self.in_building_tiles.append((pos[0] + 1, pos[1] - 1))
+                            #self.has_market = True
 
 
             #else we try to build a barracks if we dont have one and we have 5 villagers
-            elif self.count_villagers() >= 5 and not self.has_barracks and self.has_defense:
+            elif self.count_villagers() >= 5 and not self.has_barracks and self.has_defense and \
+            self.behaviour != "pacifist":
                 while not self.has_barracks and not self.ressource_to_gather:
                     tiles_to_build = tile_founding(10, 3, self.range+1, self.map.map, self.player, "", self.map)
                     if tiles_to_build:
@@ -256,7 +267,7 @@ class new_AI:
                             self.has_barracks = True
 
             # else we try to build a defense if we dont have one
-            elif not self.has_defense:
+            elif not self.has_defense and self.behaviour != "pacifist" and self.behaviour != "aggressive":
                 self.build_defense()
 
 
@@ -323,11 +334,11 @@ class new_AI:
 
     def planning_gathering(self):
         for i in range(4):
-            if self.player.resources[i] <= self.quantity_of_each_ressource[i] and \
+            if self.player.resources[i] < self.quantity_of_each_ressource[i] and \
                     RESSOURCE_LIST[i] not in self.ressource_to_gather:
                 self.ressource_to_gather.append(RESSOURCE_LIST[i])
-            elif self.player.resources[i] > self.quantity_of_each_ressource[i] and \
-                self.player.resources[i] > self.needed_ressource[i] and \
+            elif self.player.resources[i] >= self.quantity_of_each_ressource[i] and \
+                self.player.resources[i] >= self.needed_ressource[i] and \
                     RESSOURCE_LIST[i] in self.ressource_to_gather:
                 self.ressource_to_gather.remove(RESSOURCE_LIST[i])
 
@@ -456,11 +467,13 @@ class new_AI:
             entity_class = str_to_entity_class(entity_class)
         can_build = True
         for i in range(4):
-            self.needed_ressource[i] += entity_class.construction_cost[i]
-            if self.player.resources[i] < self.needed_ressource[i] and \
-                    RESSOURCE_LIST[i] not in self.ressource_to_gather:
-                self.ressource_to_gather.append(RESSOURCE_LIST[i])
+            if self.player.resources[i] < entity_class.construction_cost[i] and \
+                    self.player.resources[i] < self.ressource_to_gather[i]:
+                if RESSOURCE_LIST[i] not in self.ressource_to_gather:
+                    self.ressource_to_gather.append(RESSOURCE_LIST[i])
                 can_build = False
+
+            self.needed_ressource[i] += entity_class.construction_cost[i]
         return can_build
 
     def check_matrix_and_in_building_tiles(self, pos):

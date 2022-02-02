@@ -763,7 +763,6 @@ class Villager(Unit):
                     if dmg <= 0: dmg = 1
                     self.target.current_health -= dmg
                     self.attack_cooldown = self.now
-                    self.gathered_ressource_stack += 1
                     self.strike += 1
 
                 # else the unit is dead
@@ -1086,7 +1085,6 @@ class Clubman(Unit):
                     if dmg <= 0: dmg = 1
                     self.target.current_health -= dmg
                     self.attack_cooldown = self.now
-                    self.gathered_ressource_stack += 1
                     self.strike += 1
 
                 # else the unit is dead

@@ -187,7 +187,8 @@ class Game:
 
                         # There is a bug with collecting ressources on the side of the map !!!
 
-                        if self.map.hud.examined_tile is not None and self.map.hud.examined_tile.name == "Villager":
+                        if self.map.hud.examined_tile is not None and (self.map.hud.examined_tile.name == "Villager" or
+                                                                       self.map.hud.examined_tile.name == "Clubman"):
                             villager_pos = self.map.hud.examined_tile.pos
                             this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
 
@@ -204,15 +205,18 @@ class Game:
                                     this_villager.go_to_attack((pos_x, pos_y))
 
                                 # ONLY MOVEMENT
-                                if self.map.collision_matrix[grid_pos[1]][grid_pos[0]] and \
+                                if isinstance(this_villager, Villager) and self.map.collision_matrix[grid_pos[1]][grid_pos[0]] and \
                                         not this_villager.is_gathering and this_villager.targeted_ressource is None and \
+                                        not this_villager.is_attacking:
+                                    this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
+                                elif isinstance(this_villager, Clubman) and self.map.collision_matrix[grid_pos[1]][grid_pos[0]] and \
                                         not this_villager.is_attacking:
                                     this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
 
                                 # we check if the tile we right click on is a ressource and if its on an adjacent tile of
                                 # the villager pos, and if the villager isnt moving if the tile next to him is a ressource
                                 # and we right click on it and he is not moving, he will gather it
-                                if not this_villager.searching_for_path \
+                                if isinstance(this_villager, Villager) and not this_villager.searching_for_path \
                                         and (self.map.map[pos_x][pos_y]["tile"] in ["tree", "rock", "gold", "berrybush"])\
                                         and this_villager.gathered_ressource_stack < this_villager.stack_max and \
                                         (this_villager.stack_type is None or
@@ -220,7 +224,7 @@ class Game:
 
                                     this_villager.go_to_ressource((pos_x, pos_y))
 
-                                if this_villager.gathered_ressource_stack >= this_villager.stack_max \
+                                if isinstance(this_villager, Villager) and this_villager.gathered_ressource_stack >= this_villager.stack_max \
                                         or (this_villager.owner.towncenter.pos[0] <= pos_x <=
                                         this_villager.owner.towncenter.pos[0]+1
                                             and this_villager.owner.towncenter.pos[1] <= pos_y <=
