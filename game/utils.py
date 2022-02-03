@@ -115,7 +115,7 @@ def get_color_code(color: str):
      #   return Bowman
 
 # this methode return a list of the x nearest free tiles
-def tile_founding(x, first_layer, layer_max, map, player, tile_type):
+def tile_founding(x, first_layer, layer_max, map, player, tile_type, MAP=None):
     #here we convert the ressource we want to the corresponding ressource type on the map
     if tile_type == "wood": tile_type = "tree"
     if tile_type == "stone": tile_type = "rock"
@@ -135,30 +135,50 @@ def tile_founding(x, first_layer, layer_max, map, player, tile_type):
             pos_y = tc_pos[1] - layer - 1
             if 0 <= pos_x < MAP_SIZE_X and 0 <= pos_y < MAP_SIZE_Y and map[pos_x][pos_y]["tile"] == tile_type and \
                     nb_of_tile_left_to_found > 0:
-                list_of_tile.append((pos_x, pos_y))
-                nb_of_tile_left_to_found -= 1
+                if tile_type != "" or MAP is None:
+                    list_of_tile.append((pos_x, pos_y))
+                    nb_of_tile_left_to_found -= 1
+                else:
+                    if MAP is not None and MAP.collision_matrix[pos_y][pos_x]:
+                        list_of_tile.append((pos_x, pos_y))
+                        nb_of_tile_left_to_found -= 1
 
             pos_x = tc_pos[0] - layer + j
             pos_y = tc_pos[1] + layer
             if 0 <= pos_x < MAP_SIZE_X and 0 <= pos_y < MAP_SIZE_Y and map[pos_x][pos_y]["tile"] == tile_type and \
                     nb_of_tile_left_to_found > 0:
-                list_of_tile.append((pos_x, pos_y))
-                nb_of_tile_left_to_found -= 1
+                if tile_type != "" or MAP is None:
+                    list_of_tile.append((pos_x, pos_y))
+                    nb_of_tile_left_to_found -= 1
+                else:
+                    if MAP is not None and MAP.collision_matrix[pos_y][pos_x]:
+                        list_of_tile.append((pos_x, pos_y))
+                        nb_of_tile_left_to_found -= 1
 
         for k in range(1, layer * 2 + 1):
             pos_x = tc_pos[0] - layer
             pos_y = tc_pos[1] - layer - 1 + k
             if 0 <= pos_x < MAP_SIZE_X and 0 <= pos_y < MAP_SIZE_Y and map[pos_x][pos_y]["tile"] == tile_type and \
                     nb_of_tile_left_to_found > 0:
-                list_of_tile.append((pos_x, pos_y))
-                nb_of_tile_left_to_found -= 1
+                if tile_type != "" or MAP is None:
+                    list_of_tile.append((pos_x, pos_y))
+                    nb_of_tile_left_to_found -= 1
+                else:
+                    if MAP is not None and MAP.collision_matrix[pos_y][pos_x]:
+                        list_of_tile.append((pos_x, pos_y))
+                        nb_of_tile_left_to_found -= 1
 
             pos_x = tc_pos[0] + layer + 1
             pos_y = tc_pos[1] - layer - 1 + k
             if 0 <= pos_x < MAP_SIZE_X and 0 <= pos_y < MAP_SIZE_Y and map[pos_x][pos_y]["tile"] == tile_type and \
                     nb_of_tile_left_to_found > 0:
-                list_of_tile.append((pos_x, pos_y))
-                nb_of_tile_left_to_found -= 1
+                if tile_type != "" or MAP is None:
+                    list_of_tile.append((pos_x, pos_y))
+                    nb_of_tile_left_to_found -= 1
+                else:
+                    if MAP is not None and MAP.collision_matrix[pos_y][pos_x]:
+                        list_of_tile.append((pos_x, pos_y))
+                        nb_of_tile_left_to_found -= 1
 
         layer += 1
     return list_of_tile

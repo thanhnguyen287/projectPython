@@ -91,15 +91,16 @@ class AI:
 
 
     def run(self):
-        # looking at state of the game to chose mode (we should look every 5 seconds or so)
-        self.chose_behaviour()
+        if self.player.towncenter is not None:
+            # looking at state of the game to chose mode (we should look every 5 seconds or so)
+            self.chose_behaviour()
 
-        if self.behaviour == "neutral":
-            self.neutral_routine()
-        elif self.behaviour == "defense":
-            self.defense_routine()
-        elif self.behaviour == "attack":
-            self.attack_routine()
+            if self.behaviour == "neutral":
+                self.neutral_routine()
+            elif self.behaviour == "defense":
+                self.defense_routine()
+            elif self.behaviour == "attack":
+                self.attack_routine()
 
 
     # ==================================================================================================================
@@ -110,7 +111,7 @@ class AI:
     def neutral_routine(self):
         # we just send a unit randomly to try to destroy the enemy townhall, if everything is correct the enemy AI will
         #kill the unit
-        self.poking_routine()
+        #self.poking_routine()
 
 
         self.planning_gathering()
@@ -310,13 +311,13 @@ class AI:
 
 
     def poking_routine(self):
-        r = random()
-        if r <= 0.001:
-            for u in self.player.unit_list:
-                if u.building_to_create is None and not u.is_moving_to_gather and not u.is_moving_to_attack \
-                        and u.targeted_ressource is None and not u.is_gathering and u.target is None:
-                    for p in player_list:
-                        if p != self.player:
+        for u in self.player.unit_list:
+            for p in player_list:
+                if p != self.player:
+                    if u.building_to_create is None and not u.is_moving_to_gather and not u.is_moving_to_attack \
+                            and u.targeted_ressource is None and not u.is_gathering and u.target is None:
+                        r = random()
+                        if r <= 0.001:
                             u.go_to_attack(p.towncenter.pos)
 
     # ==================================================================================================================
@@ -376,3 +377,13 @@ class AI:
         u.is_building = False
         u.is_gathering = False
         u.is_attacking = False
+
+    def build_defense(self):
+        if self.player.side == "top":
+            pass
+        elif self.player.side == "bot":
+            pass
+        elif self.player.side == "right":
+            pass
+        elif self.player.side == "left":
+            pass

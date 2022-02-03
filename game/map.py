@@ -34,6 +34,10 @@ class Map:
         self.units = [[None for x in range(self.grid_length_x)] for y in range(self.grid_length_y)]
         self.resources_list = []
 
+        # Fog of war
+        # self.visible = self.
+        # self.fog = False
+
         self.map = self.create_map()
 
         self.place_x = 0
@@ -52,6 +56,8 @@ class Map:
         for p in player_list:
             self.place_starting_units(p)
 
+        self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
+        #self.map[10][10] = Dragon((10,20), MAIN_PLAYER, self)
         # to improve animations, not working for now
         #self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
 
@@ -461,8 +467,8 @@ class Map:
                     collision_matrix[y][x] = 0
         return collision_matrix
 
-    # here is the fonction that places the townhall randomly on the map
-    def place_townhall(self, the_player=MAIN_PLAYER):
+    # here is the OLD fonction that places the townhall randomly on the map
+    """def place_townhall(self, the_player=MAIN_PLAYER):
         while not the_player.townhall_placed:
             place_x = random.randint(0, self.grid_length_x - 2)
             place_y = random.randint(1, self.grid_length_y - 1)
@@ -493,7 +499,7 @@ class Map:
             self.collision_matrix[place_y-1][place_x] = 0
             self.map[place_x + 1][place_y - 1]["tile"] = "building"
             self.map[place_x + 1][place_y - 1]["collision"] = True
-            self.collision_matrix[place_y-1][place_x+1] = 0
+            self.collision_matrix[place_y-1][place_x+1] = 0"""
 
     # here is the fonction that randomly places a player's starting units 4 tiles from the corner
     def place_starting_units(self, the_player=MAIN_PLAYER):
@@ -525,6 +531,7 @@ class Map:
                 start_unit = Villager(self.map[4][6]["grid"], the_player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[4][6]["grid"])
+                the_player.side = "top"
 
             # top_right
             elif (place_x, place_y) == (1, 0):
@@ -538,6 +545,7 @@ class Map:
                 start_unit = Villager(self.map[self.grid_length_x - 6][6]["grid"], the_player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[self.grid_length_x - 6][6]["grid"])
+                the_player.side = "right"
 
             # bot_left
             elif (place_x, place_y) == (0, 1):
@@ -551,6 +559,7 @@ class Map:
                 start_unit = Villager(self.map[4][self.grid_length_y - 4]["grid"], the_player, self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[4][self.grid_length_y - 4]["grid"])
+                the_player.side = "left"
 
             # bot_right
             elif (place_x, place_y) == (1, 1):
@@ -565,6 +574,7 @@ class Map:
                                       self)
                 # starting unit. For debug reasons, we need a tuple and not a list (pathfinding)
                 vill_pos = tuple(self.map[self.grid_length_x - 6][self.grid_length_y - 4]["grid"])
+                the_player.side = "bot"
 
             # for towncenter
             new_building.is_being_built = False
@@ -577,7 +587,6 @@ class Map:
 
             # for starting villagers
             the_player.pay_entity_cost_bis(Villager)
-            print(the_player.towncenter_pos)
 
     def remove_entity(self, entity, scroll):
         self.entities.remove(entity)
@@ -657,8 +666,11 @@ class Map:
 
     # returns true if there is collision, else False
     def is_there_collision(self, grid_pos: [int, int]):
-        return True if (self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 or self.map[grid_pos[0]][grid_pos[1]][
-            "collision"]) else False
+        if 0 <= grid_pos[0] < self.grid_length_x - 1 and 0 < grid_pos[1] < self.grid_length_y - 1:
+            return True if (self.collision_matrix[grid_pos[1]][grid_pos[0]] == 0 or self.map[grid_pos[0]][grid_pos[1]][
+                "collision"]) else False
+        else:
+            return False
 
     # return a list of empty tiles around origin
     def get_empty_adjacent_tiles(self, origin_pos: [int, int], origin_size=1):
@@ -713,27 +725,57 @@ class Map:
         Camera is highly recommended, draw the polygon once so increase
         FPS. '''
         minimap_scaling = 16
+        ### Draw the camera on the map
+        ### 420 and 200 is the size of minimap panel
+        self.cam_width = self.width/minimap_scaling
+        self.cam_height = self.height/minimap_scaling
+
+        # iso_pos_cam = self.grid_to_iso_poly(camera.scroll.x , camera.scroll.y)
+        iso_pos_cam = [(-camera.scroll.x / minimap_scaling + self.width  - 420 ,
+                         -camera.scroll.y/ minimap_scaling + self.height - 200)]
+        for xh in iso_pos_cam:
+            print(xh)
+            print("**********")
+        rect_cam = pygame.Rect((iso_pos_cam[0][0],iso_pos_cam[0][1]), (self.cam_width, self.cam_height))
+        pygame.draw.rect(screen, "WHITE", rect_cam, 2 )
+
+
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
                 # Draw polygon
-                mini = self.map[x][y]["iso_poly_minimap"]
+                mini = self.map[x][y]["iso_poly"]
                 # mini = [((x + self.width / 2) / minimap_scaling + 1640,
                 #        (y + self.height / 4) / minimap_scaling + 820) for x, y in mini]  # position x + ...., y  + ...
-                mini = [(x / minimap_scaling + 0.89 * self.width,
-                         y / minimap_scaling + 0.82 * self.height) for x, y in mini]  # position x + ...., y  + ...
+                mini = [((x) / minimap_scaling + self.width - 420 / 2,
+                         (y) / minimap_scaling + self.height - 200) for x, y in mini]
                 # pygame.draw.polygon(screen, "WHITE", mini, 1)
 
                 # Draw small dot representing entities
-                render_pos = self.map[x][y]["render_pos"]
+
                 tile = self.map[x][y]["tile"]
 
                 if tile == "tree":
                     # pygame.draw.circle(screen, "GREEN", (render_pos[0]/minimap_scaling + 1640, render_pos[1]/minimap_scaling+820), 1)
                     pygame.draw.circle(screen, "GREEN", (mini[1][0], mini[1][1]), 1)
                 elif tile == "rock":
-                    pygame.draw.circle(screen, "BlACK", (mini[1][0], mini[1][1]), 1)
+                    pygame.draw.circle(screen, "WHITE", (mini[1][0], mini[1][1]), 1)
                 elif tile == "gold":
                     pygame.draw.circle(screen, "YELLOW", (mini[1][0], mini[1][1]), 1)
+                elif tile == "berrybush":
+                    pygame.draw.circle(screen, "PINK", (mini[1][0], mini[1][1]), 1)
+        for player in player_list:
+            for building in player.building_list:
+                iso_pos = self.grid_to_iso_poly(building.pos[0], building.pos[1])
+                iso_pos = [((x) / minimap_scaling + self.width - 420 / 2,
+                         (y) / minimap_scaling + self.height - 200) for x, y in iso_pos]
+                pygame.draw.circle(screen, building.owner.color, (iso_pos[1][0], iso_pos[1][1]), 2)
+                # print(building.owner.color, iso_pos) Debug purpose
+            for unit in player.unit_list:
+                unit_pos = self.grid_to_iso_poly(unit.pos[0], unit.pos[1])
+                unit_pos = [((x) / minimap_scaling + self.width - 420 / 2,
+                            (y) / minimap_scaling + self.height - 200) for x, y in unit_pos]
+                pygame.draw.circle(screen, building.owner.color, (unit_pos[1][0], unit_pos[1][1]), 3)
+
 
     # display resources on map. Most resources have different variations. If resource is selected or has less than max health, we display its health bar
     def display_resources_on_tile(self, resource_tile, screen, camera):
@@ -865,13 +907,14 @@ class Map:
         # For towncenter, we have to display a 2x2 green/Red case, else we only need to highlight a 1x1 case
         if self.temp_tile["name"] == "TownCenter" or self.temp_tile["name"] == "Barracks" or self.temp_tile["name"] == "Market":
             # collision matrix : 0 if collision, else 1, we check the 4 cases of the town center
-            if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or \
-                    self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or \
-                    self.collision_matrix[grid[1] - 1][grid[0]] == 0:
-                self.highlight_tile(grid[0], grid[1] - 1, screen, "RED", camera.scroll, multiple_tiles_tiles_flag=True)
-            else:
-                self.highlight_tile(grid[0], grid[1] - 1, screen, "GREEN", camera.scroll,
-                                    multiple_tiles_tiles_flag=True)
+            if 0 <= grid[0] < self.grid_length_x - 1 and 0 < grid[0] < self.grid_length_y:
+                if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or \
+                        self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or \
+                        self.collision_matrix[grid[1] - 1][grid[0]] == 0:
+                    self.highlight_tile(grid[0], grid[1] - 1, screen, "RED", camera.scroll, multiple_tiles_tiles_flag=True)
+                else:
+                    self.highlight_tile(grid[0], grid[1] - 1, screen, "GREEN", camera.scroll,
+                                        multiple_tiles_tiles_flag=True)
 
         # for normal buildings (1x1)
         else:

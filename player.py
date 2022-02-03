@@ -24,11 +24,18 @@ class Player:
 
         self.building_list = []
 
+        #towncenter
         # formated as (x,y)
         self.towncenter_pos = None
-
         self.towncenter = None
+        self.side = None
         self.townhall_placed = False
+
+        # for defense
+        self.has_tower = False
+        self.has_second_tower = False
+        self.tower_pos = None
+        self.second_tower_pos = None
 
         #tech
         # if tech_food is unlocked, all farms produces 5 food every 10 seconds.
@@ -196,7 +203,7 @@ class Player:
 playerOne = Player("Lucien", True, [1000, 1000, 1000, 1000], color="BLUE")
 playerOne.age = 1
 
-playerTwo = Player("AI", True, [1000, 1000, 1000, 1000], color="RED")
+playerTwo = Player("AI", True, [5000, 5000, 5000, 5000], color="RED")
 playerTwo.age = 1
 player_list = [playerOne, playerTwo]
 #  INIT FOR RESSOURCES DISPLAY
