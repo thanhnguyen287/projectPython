@@ -1,6 +1,6 @@
 from player import player_list, str_to_entity_class
 from .utils import tile_founding, better_look_around, RESSOURCE_LIST
-from units import Villager, Barracks, Clubman, Market, Wall, Tower, House, Farm
+from units import Villager, Barracks, Clubman, Market, Wall, Tower, House, Farm, Dragon
 from random import randint, random
 from settings import MAP_SIZE_X, MAP_SIZE_Y
 
@@ -175,7 +175,7 @@ class new_AI:
             if p != self.player:
                 for u in p.unit_list:
                     if abs(self.tc_pos[0] - u.pos[0]) <= 1 and abs(self.tc_pos[1] - u.pos[1]) <= 1 \
-                            and not u in self.units_focused:  # in tiles
+                            and not u in self.units_focused and not isinstance(u, Dragon):  # in tiles
 
                         if len(self.army) > 1:
                             for my_u in self.army:
