@@ -1289,4 +1289,4 @@ class Map:
         render_pos = self.grid_to_renderpos(spawn_position[0], spawn_position[1])
         render_pos = render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10, render_pos[1] - 55 + camera.scroll.y
         #self.hud.boom_animation.play(render_pos)
-        self.map[spawn_position[0]][spawn_position[1]] = Dragon(spawn_position, player, self)
+        self.units[spawn_position[0]][spawn_position[1]] = Dragon(spawn_position, player, self)
