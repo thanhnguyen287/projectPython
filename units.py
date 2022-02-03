@@ -8,7 +8,8 @@ import pygame
 from math import ceil
 from random import randint
 from game.utils import tile_founding, GENERAL_UNIT_LIST, GENERAL_BUILDING_LIST, UNIT_TYPES, BUILDING_TYPES
-from game.animation import BuildingDeathAnimation, VillagerAttackAnimation, VillagerMiningAnimation, IdleDragonAnimation
+from game.animation import BuildingDeathAnimation, VillagerAttackAnimation, VillagerMiningAnimation, \
+    IdleDragonAnimation, DeathDragonAnimation
 
 
 class Building:
@@ -939,7 +940,7 @@ class Villager(Unit):
                 # for debug, because the first tile of our path is the pos of unit, not the first tile where we must go
                 if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
-                #print("debug path index, path)", self.path_index, len(self.path))
+                print("debug path index, path)", self.path_index, len(self.path))
                 if len(self.path) != 0:
                     new_pos = self.path[self.path_index]
                     #update position in the world
@@ -1165,7 +1166,7 @@ class Dragon(Unit):
     # Training : 50 FOOD, 20s
     description = " Big. Deadly. Breath fire. What else ? "
     construction_tooltip = " Train a Dragon"
-    name = "Dragon"
+    name = "Black Dragon"
     attack_speed = 500
 
     construction_cost = [0, 10, 25, 0]
@@ -1174,7 +1175,7 @@ class Dragon(Unit):
 
     def __init__(self, pos, player_owner_of_unit, map, angle=180):
 
-        self.name = "Dragon"
+        self.name = "Black Dragon"
         # DISPLAY
         # DATA
         self.max_health = 1000
@@ -1215,6 +1216,10 @@ class Dragon(Unit):
         self.idle_animation_group = pygame.sprite.Group()
         self.idle_animation = IdleDragonAnimation(self, map.hud.dragon_sprites["idle"])
 
+        #death animation
+       # self.death_animation_group = pygame.sprite.Group()
+#        self.death_animation = DeathDragonAnimation(self, map.hud.dragon_sprites["death"])
+
     def go_to_attack(self, pos):
         if self.map.get_empty_adjacent_tiles(pos):
             unit_dest = self.map.get_empty_adjacent_tiles(pos)[0]
@@ -1238,7 +1243,7 @@ class Dragon(Unit):
             self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
 
             if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
-
+                self.map.hud.boom_animation.play(self.map.grid_to_display_pos(self.target.pos))
                 if self.target.current_health >= 0:
                     #if the target is a building, our damage are divided by 2
                     if type(self.target) in BUILDING_TYPES:
@@ -1250,7 +1255,6 @@ class Dragon(Unit):
                     if dmg <= 0: dmg = 1
                     self.target.current_health -= dmg
                     self.attack_cooldown = self.now
-                    self.gathered_ressource_stack += 1
                     self.strike += 1
 
                 # else the unit is dead
@@ -1263,7 +1267,7 @@ class Dragon(Unit):
                     self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
                     self.target = None
                     self.is_attacking = False
-                    self.attack_animation.to_be_played = False
+                    #self.attack_animation.to_be_played = False
                     self.strike = 0
 
             if self.target is not None and type(self.target) == Villager and \
@@ -1286,7 +1290,7 @@ class Dragon(Unit):
                 if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
                 #print("debug path index, path)", self.path_index, len(self.path))
-                if len(self.path) != self.path_index:
+                if len(self.path) > self.path_index:
                     new_pos = self.path[self.path_index]
                     #update position in the world
                     self.change_tile(new_pos)
@@ -1304,3 +1308,22 @@ class Dragon(Unit):
 
         if self.is_attacking:
             self.attack()
+
+    #modified change_tile fonction for dragon because we don't have 8 angles for our sprites but only 4.
+    def change_tile(self, new_tile):
+        # remove the unit from its current position on the map
+        possible_angles_list = (0, 90, 180, 270)
+        if self.pos != new_tile:
+            if self.map.get_angle_between(self.pos, new_tile, self) in possible_angles_list:
+                self.angle = self.map.get_angle_between(self.pos, new_tile, self)
+
+        self.map.units[self.pos[0]][self.pos[1]] = None
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] = ""
+        #remove collision from old position
+        self.map.collision_matrix[self.pos[1]][self.pos[0]] = 1
+        # update the map
+        self.map.units[new_tile[0]][new_tile[1]] = self
+        self.pos = tuple(self.map.map[new_tile[0]][new_tile[1]]["grid"])
+        #update collision for new tile
+        self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] = "unit"

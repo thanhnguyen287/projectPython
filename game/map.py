@@ -39,7 +39,7 @@ class Map:
         # self.fog = False
 
         self.map = self.create_map()
-
+        self.camera = None
         self.place_x = 0
         self.place_y = 0
         # here we place the townhall randomly on the map
@@ -57,9 +57,9 @@ class Map:
             self.place_starting_units(p)
 
         self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
-        #self.map[10][10] = Dragon((10,20), MAIN_PLAYER, self)
+        # self.map[10][10] = Dragon((10,20), MAIN_PLAYER, self)
         # to improve animations, not working for now
-        #self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
+        # self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
 
     def create_map(self):
         map = []
@@ -145,7 +145,8 @@ class Map:
                     # we store the future building information inside building_to_create
                     if self.hud.selected_tile["name"] == "Farm" or self.hud.selected_tile["name"] == "House" or \
                             self.hud.selected_tile["name"] == "TownCenter" or \
-                            self.hud.selected_tile["name"] == "Barracks" or self.hud.selected_tile["name"] == "Tower" or self.hud.selected_tile["name"] == "Wall"or self.hud.selected_tile["name"] == "Market":
+                            self.hud.selected_tile["name"] == "Barracks" or self.hud.selected_tile["name"] == "Tower" or \
+                            self.hud.selected_tile["name"] == "Wall" or self.hud.selected_tile["name"] == "Market":
                         working_villager.go_to_build(grid_pos, self.hud.selected_tile["name"])
                     self.hud.selected_tile = None
 
@@ -154,12 +155,24 @@ class Map:
             grid_pos = self.mouse_to_grid(mouse_pos[0], mouse_pos[1], camera.scroll)
             if 0 < grid_pos[0] < self.grid_length_x - 1 and 0 < grid_pos[1] < self.grid_length_y - 1:
 
-                town_center_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(self.buildings[grid_pos[0]][grid_pos[1] + 1]) == TownCenter) or (self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == TownCenter) or (self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(self.buildings[grid_pos[0] - 1][grid_pos[1]]) == TownCenter)
+                town_center_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(
+                    self.buildings[grid_pos[0]][grid_pos[1] + 1]) == TownCenter) or (
+                                                      self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(
+                                                  self.buildings[grid_pos[0] - 1][
+                                                      grid_pos[1] + 1]) == TownCenter) or (
+                                                      self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(
+                                                  self.buildings[grid_pos[0] - 1][grid_pos[1]]) == TownCenter)
 
-                barrack_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(self.buildings[grid_pos[0]][grid_pos[1] + 1]) == Barracks) or (self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == Barracks) or (self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(self.buildings[grid_pos[0] - 1][grid_pos[1]]) == Barracks)
+                barrack_check_condition = (self.buildings[grid_pos[0]][grid_pos[1] + 1] and type(
+                    self.buildings[grid_pos[0]][grid_pos[1] + 1]) == Barracks) or (
+                                                  self.buildings[grid_pos[0] - 1][grid_pos[1] + 1] and type(
+                                              self.buildings[grid_pos[0] - 1][grid_pos[1] + 1]) == Barracks) or (
+                                                  self.buildings[grid_pos[0] - 1][grid_pos[1]] and type(
+                                              self.buildings[grid_pos[0] - 1][grid_pos[1]]) == Barracks)
 
-                #if we left clicked on nothing
-                if mouse_action[0] and not self.is_there_collision(grid_pos) and not self.hud.bottom_hud_rect.collidepoint(
+                # if we left clicked on nothing
+                if mouse_action[0] and not self.is_there_collision(
+                        grid_pos) and not self.hud.bottom_hud_rect.collidepoint(
                     mouse_pos) and not town_center_check_condition and not barrack_check_condition:
                     self.examined_tile = None
                     self.hud.examined_tile = None
@@ -200,16 +213,17 @@ class Map:
                     pass
 
     def draw(self, screen, camera):
+        self.camera = camera
         # displaying grass tiles
         screen.blit(self.grass_tiles, (camera.scroll.x, camera.scroll.y))
         for player in player_list:
-            #building death display, not working for now
+            # building death display, not working for now
             for building in player.building_list:
                 if type(building) == House and building.death_animation.to_be_played:
                     building.death_animation_group.draw(screen)
                     building.death_animation.update()
 
-            #attack villager animation display
+            # attack villager animation display
             for unit in player.unit_list:
                 if type(unit) == Villager and unit.attack_animation.to_be_played:
                     unit.attack_animation_group.draw(screen)
@@ -218,7 +232,7 @@ class Map:
                     unit.mining_animation_group.draw(screen)
                     unit.mining_animation.update()
 
-            #boom animation
+            # boom animation
             if self.hud.boom_animation.to_be_played:
                 self.hud.boom_animation_group.draw(screen)
                 self.hud.boom_animation.update()
@@ -651,12 +665,16 @@ class Map:
         elif type(entity) == Barracks:
 
             self.hud.death_animations["Barracks"]["animation"].play(death_pos, color=entity.owner.color,
-                                                                       age=entity.owner.age)
+                                                                    age=entity.owner.age)
 
         elif type(entity) == Villager:
             entity.owner.current_population -= 1
             self.hud.death_animations["Villager"]["animation"].play(death_pos, color=entity.owner.color,
                                                                     angle=entity.angle)
+        elif type(entity) == Dragon:
+            entity.owner.current_population -= 1
+
+
     # remove resources from tile to get an empty tile
     def clear_tile(self, grid_x, grid_y):
         self.map[grid_x][grid_y]["tile"] = ""
@@ -727,18 +745,17 @@ class Map:
         minimap_scaling = 16
         ### Draw the camera on the map
         ### 420 and 200 is the size of minimap panel
-        self.cam_width = self.width/minimap_scaling
-        self.cam_height = self.height/minimap_scaling
+        self.cam_width = self.width / minimap_scaling
+        self.cam_height = self.height / minimap_scaling
 
         # iso_pos_cam = self.grid_to_iso_poly(camera.scroll.x , camera.scroll.y)
-        iso_pos_cam = [(-camera.scroll.x / minimap_scaling + self.width  - 420 ,
-                         -camera.scroll.y/ minimap_scaling + self.height - 200)]
+        iso_pos_cam = [(-camera.scroll.x / minimap_scaling + self.width - 420,
+                        -camera.scroll.y / minimap_scaling + self.height - 200)]
         for xh in iso_pos_cam:
             print(xh)
             print("**********")
-        rect_cam = pygame.Rect((iso_pos_cam[0][0],iso_pos_cam[0][1]), (self.cam_width, self.cam_height))
-        pygame.draw.rect(screen, "WHITE", rect_cam, 2 )
-
+        rect_cam = pygame.Rect((iso_pos_cam[0][0], iso_pos_cam[0][1]), (self.cam_width, self.cam_height))
+        pygame.draw.rect(screen, "WHITE", rect_cam, 2)
 
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
@@ -767,15 +784,14 @@ class Map:
             for building in player.building_list:
                 iso_pos = self.grid_to_iso_poly(building.pos[0], building.pos[1])
                 iso_pos = [((x) / minimap_scaling + self.width - 420 / 2,
-                         (y) / minimap_scaling + self.height - 200) for x, y in iso_pos]
+                            (y) / minimap_scaling + self.height - 200) for x, y in iso_pos]
                 pygame.draw.circle(screen, building.owner.color, (iso_pos[1][0], iso_pos[1][1]), 2)
                 # print(building.owner.color, iso_pos) Debug purpose
             for unit in player.unit_list:
                 unit_pos = self.grid_to_iso_poly(unit.pos[0], unit.pos[1])
                 unit_pos = [((x) / minimap_scaling + self.width - 420 / 2,
-                            (y) / minimap_scaling + self.height - 200) for x, y in unit_pos]
+                             (y) / minimap_scaling + self.height - 200) for x, y in unit_pos]
                 pygame.draw.circle(screen, building.owner.color, (unit_pos[1][0], unit_pos[1][1]), 3)
-
 
     # display resources on map. Most resources have different variations. If resource is selected or has less than max health, we display its health bar
     def display_resources_on_tile(self, resource_tile, screen, camera):
@@ -785,13 +801,13 @@ class Map:
         # if the tile isnt empty and inst destroyed, we display it. All resources have slightly different models to add variety
         if tile_type != "" and tile_type != "building" and tile_type != "unit":
             variation = self.map[resource_tile["grid"][0]][resource_tile["grid"][1]]["variation"]
-            #offset is only used for trees
+            # offset is only used for trees
             offset = self.hud.resources_sprites_offsets[variation]
             if tile_type != "tree":
-                offset = (0,0)
+                offset = (0, 0)
             screen.blit(self.hud.resources_sprites[tile_type][variation], (
-                            render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + offset[0],
-                            render_pos[1] - (self.tiles[tile_type].get_height() - TILE_SIZE) + camera.scroll.y + offset[1])
+                render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + offset[0],
+                render_pos[1] - (self.tiles[tile_type].get_height() - TILE_SIZE) + camera.scroll.y + offset[1])
                         )
 
             # here we display the health bar of the ressources
@@ -845,7 +861,8 @@ class Map:
                 ...
                 self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
 
-            if unit.searching_for_path and not (type(unit) == Villager and unit.is_moving_to_gather and not unit.is_moving_to_build):
+            if unit.searching_for_path and not (
+                    type(unit) == Villager and unit.is_moving_to_gather and not unit.is_moving_to_build):
                 screen.blit(scale_image(move_icon, w=40), (
                     render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
                     render_pos[1] - (
@@ -893,7 +910,8 @@ class Map:
                 offset = (20, -25)
                 screen.blit(self.hud.destination_flags_sprites[unit.owner.color][0], (
                     unit.dest["render_pos"][0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + offset[0],
-                    unit.dest["render_pos"][1] - (self.hud.destination_flags_sprites[unit.owner.color][0].get_height() - TILE_SIZE) + camera.scroll.y + offset[1])
+                    unit.dest["render_pos"][1] - (self.hud.destination_flags_sprites[unit.owner.color][
+                                                      0].get_height() - TILE_SIZE) + camera.scroll.y + offset[1])
                             )
 
     # temp tile is a dictionary containing name + image + render pos + iso_poly + collision
@@ -905,13 +923,15 @@ class Map:
 
         # if we cannot place our building on the tile because there's already smth, we display the tile in red, else, in green
         # For towncenter, we have to display a 2x2 green/Red case, else we only need to highlight a 1x1 case
-        if self.temp_tile["name"] == "TownCenter" or self.temp_tile["name"] == "Barracks" or self.temp_tile["name"] == "Market":
+        if self.temp_tile["name"] == "TownCenter" or self.temp_tile["name"] == "Barracks" or self.temp_tile[
+            "name"] == "Market":
             # collision matrix : 0 if collision, else 1, we check the 4 cases of the town center
             if 0 <= grid[0] < self.grid_length_x - 1 and 0 < grid[0] < self.grid_length_y:
                 if self.temp_tile["collision"] or self.collision_matrix[grid[1]][grid[0] + 1] == 0 or \
                         self.collision_matrix[grid[1] - 1][grid[0] + 1] == 0 or \
                         self.collision_matrix[grid[1] - 1][grid[0]] == 0:
-                    self.highlight_tile(grid[0], grid[1] - 1, screen, "RED", camera.scroll, multiple_tiles_tiles_flag=True)
+                    self.highlight_tile(grid[0], grid[1] - 1, screen, "RED", camera.scroll,
+                                        multiple_tiles_tiles_flag=True)
                 else:
                     self.highlight_tile(grid[0], grid[1] - 1, screen, "GREEN", camera.scroll,
                                         multiple_tiles_tiles_flag=True)
@@ -941,9 +961,10 @@ class Map:
                             building.owner.age - 1]
                 # farm has the same model the 4 ages, hence we directly have the image and not a list of 4 images, 1 for every age
                 else:
-                    sprite_to_display = self.hud.first_age_building_sprites[building.__class__.__name__][building.owner.color]
+                    sprite_to_display = self.hud.first_age_building_sprites[building.__class__.__name__][
+                        building.owner.color]
 
-                #change the offset to optimise the pos display for every entity
+                # change the offset to optimise the pos display for every entity
                 if isinstance(building, TownCenter):
                     offset = (10, 13)
                 elif isinstance(building, Barracks):
@@ -953,22 +974,22 @@ class Map:
                 elif isinstance(building, Market):
                     offset = (20, 20)
 
-
-                #general display
+                # general display
                 screen.blit(sprite_to_display, (
                     render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
                     render_pos[1] - (sprite_to_display.get_height() - TILE_SIZE) + scroll.y + offset[1])
                             )
 
-            #building construction progress
+            # building construction progress
             else:
-                #need to add a little offset for 2x2 constructoin buildings to display it at the right place
-                offset = (0,30)
+                # need to add a little offset for 2x2 constructoin buildings to display it at the right place
+                offset = (0, 30)
                 if building.construction_progress == 0:
                     if type(building) == TownCenter or type(building) == Barracks or type(building) == Market:
                         screen.blit(building_construction_1_2x2, (
                             render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
-                            render_pos[1] - (building_construction_1_2x2.get_height() - TILE_SIZE) + scroll.y + offset[1])
+                            render_pos[1] - (building_construction_1_2x2.get_height() - TILE_SIZE) + scroll.y + offset[
+                                1])
                                     )
                     else:
                         screen.blit(building_construction_1, (
@@ -980,7 +1001,8 @@ class Map:
                     if type(building) == TownCenter or type(building) == Barracks or type(building) == Market:
                         screen.blit(building_construction_2_2x2, (
                             render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
-                            render_pos[1] - (building_construction_2_2x2.get_height() - TILE_SIZE) + scroll.y + offset[1])
+                            render_pos[1] - (building_construction_2_2x2.get_height() - TILE_SIZE) + scroll.y + offset[
+                                1])
                                     )
                     else:
                         screen.blit(building_construction_2, (
@@ -991,7 +1013,8 @@ class Map:
                     if type(building) == TownCenter or type(building) == Barracks or type(building) == Market:
                         screen.blit(building_construction_3_2x2, (
                             render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
-                            render_pos[1] - (building_construction_3_2x2.get_height() - TILE_SIZE) + scroll.y + offset[1])
+                            render_pos[1] - (building_construction_3_2x2.get_height() - TILE_SIZE) + scroll.y + offset[
+                                1])
                                     )
                     else:
                         screen.blit(building_construction_3, (
@@ -1002,7 +1025,8 @@ class Map:
                     if type(building) == TownCenter or type(building) == Barracks or type(building) == Market:
                         screen.blit(building_construction_4_2x2, (
                             render_pos[0] + building.map.grass_tiles.get_width() / 2 + scroll.x + offset[0],
-                            render_pos[1] - (building_construction_4_2x2.get_height() - TILE_SIZE) + scroll.y + offset[1])
+                            render_pos[1] - (building_construction_4_2x2.get_height() - TILE_SIZE) + scroll.y + offset[
+                                1])
                                     )
                     else:
                         screen.blit(building_construction_4, (
@@ -1022,7 +1046,7 @@ class Map:
                 elif building["name"] == "Market":
                     offset = (20, 20)
 
-            #if not building["has_construction_started"]:
+                # if not building["has_construction_started"]:
                 if building["name"] != "Farm":
                     sprite_to_display = self.hud.first_age_building_sprites[building["name"]][color][the_player.age - 1]
                 else:
@@ -1072,17 +1096,18 @@ class Map:
 
         elif unit.is_gathering:
             tile_type = self.map[unit.targeted_ressource[0]][unit.targeted_ressource[1]]["tile"]
-            #mining
+            # mining
             # mining villager
             if tile_type == "gold" or tile_type == "rock":
                 animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
                 animation_pos = (
                     animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
                     animation_pos[1] - (
-                            self.hud.mining_sprites_villager["RED"]["0"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+                            self.hud.mining_sprites_villager["RED"]["0"][
+                                0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
                 unit.mining_animation.play(animation_pos)
 
-            #cutting wood or berrybush
+            # cutting wood or berrybush
             elif tile_type == "tree" or tile_type == "berrybush":
                 animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
                 animation_pos = (
@@ -1091,7 +1116,7 @@ class Map:
                             self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
                 unit.attack_animation.play(animation_pos)
 
-        #normal villager
+        # normal villager
         else:
             # fixed sprite
             # + 20 because of sprite offset
@@ -1130,7 +1155,7 @@ class Map:
                         self.hud.clubman_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
             unit.attack_animation.play(animation_pos)
 
-        #normal clubman
+        # normal clubman
         else:
             # fixed sprite
             # + 20 because of sprite offset
@@ -1139,7 +1164,6 @@ class Map:
                 render_pos[1] - (self.hud.clubman_sprites[unit.owner.color][
                                      unit.sprite_index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
                         )
-
 
     def display_dragon(self, unit, screen, camera, render_pos):
         """
@@ -1154,19 +1178,20 @@ class Map:
         elif unit.angle == 270:
             unit.sprite_index = 4
 
-       # if unit.is_attacking:
-          #  animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
-          #  animation_pos = (
-            #    animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
-            #    animation_pos[1] - (
-            #            self.hud.clubman_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
-         #   unit.attack_animation.play(animation_pos)
+        # if unit.is_attacking:
+        #  animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
+        #  animation_pos = (
+        #    animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,
+        #    animation_pos[1] - (
+        #            self.hud.clubman_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+        #   unit.attack_animation.play(animation_pos)
 
-        #normal idle animation dragon
+        # normal idle animation dragon
 
         animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
-        animation_pos = (animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x - 60,animation_pos[1] - (
-            self.hud.dragon_sprites["idle"]["0"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
+        animation_pos = (
+            animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x - 60, animation_pos[1] - (
+                    self.hud.dragon_sprites["idle"]["0"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
         unit.idle_animation.play(animation_pos)
 
     # returns the angle between the origin tile and the destination tile. Angle goes from 0 to 360, 0 top, 90 right, etc...
@@ -1229,7 +1254,7 @@ class Map:
                     anchor_dic[reader.line_num] = (int(row[0]), int(row[1]))
         return anchor_dic
 
-    #check nearby tiles of checked_tile to determine if we clicked on the ground or on a 2x2 building
+    # check nearby tiles of checked_tile to determine if we clicked on the ground or on a 2x2 building
     def check_selection_2x2_buildings(self, checked_tile: (int, int)):
         if checked_tile[1] + 1 < self.grid_length_y:
             building = self.buildings[checked_tile[0]][checked_tile[1] + 1]
@@ -1248,9 +1273,9 @@ class Map:
 
         elif self.buildings[checked_tile[0] - 1][checked_tile[1] + 1] and (type(
                 self.buildings[checked_tile[0] - 1][checked_tile[1] + 1]) == TownCenter
-                                                                   or type(
+                                                                           or type(
                     self.buildings[checked_tile[0] - 1][checked_tile[1] + 1]) == Barracks) or type(
-                    self.buildings[checked_tile[0] - 1][checked_tile[1] + 1]) == Market:
+            self.buildings[checked_tile[0] - 1][checked_tile[1] + 1]) == Market:
             self.examined_tile = (checked_tile[0] - 1, checked_tile[1] + 1)
 
             # if the owner is the MAIN_PLAYER (us)
@@ -1265,9 +1290,9 @@ class Map:
 
         elif self.buildings[checked_tile[0] - 1][checked_tile[1]] and (type(
                 self.buildings[checked_tile[0] - 1][checked_tile[1]]) == TownCenter
-                                                               or type(
+                                                                       or type(
                     self.buildings[checked_tile[0] - 1][checked_tile[1]]) == Barracks) or type(
-                    self.buildings[checked_tile[0] - 1][checked_tile[1]]) == Market:
+            self.buildings[checked_tile[0] - 1][checked_tile[1]]) == Market:
             self.examined_tile = (checked_tile[0] - 1, checked_tile[1])
 
             # if the owner is the MAIN_PLAYER (us)
@@ -1280,13 +1305,25 @@ class Map:
                 elif type(self.hud.examined_tile) == Market:
                     self.hud.bottom_left_menu = self.hud.market_panel
 
-    #specify for which player you want the dragon to spawn
+    # specify for which player you want the dragon to spawn
     def spawn_dragon(self, player, camera):
         spawn_position = (player.towncenter_pos[0], player.towncenter_pos[1] + 1)
-        if self.map[spawn_position[0]][spawn_position[1]]["tile"] == "unit" or self.map[spawn_position[0]][spawn_position[1]]["tile"] == "building":
+        if self.map[spawn_position[0]][spawn_position[1]]["tile"] == "unit" or \
+                self.map[spawn_position[0]][spawn_position[1]]["tile"] == "building":
             self.remove_entity(self.units[spawn_position[0]][spawn_position[1]], camera.scroll)
         self.clear_tile(spawn_position[0], spawn_position[1])
-        render_pos = self.grid_to_renderpos(spawn_position[0], spawn_position[1])
-        render_pos = render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10, render_pos[1] - 55 + camera.scroll.y
-        #self.hud.boom_animation.play(render_pos)
+        # render_pos = self.grid_to_renderpos(spawn_position[0], spawn_position[1])
+        # render_pos = render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10, render_pos[
+        #    1] - 55 + camera.scroll.y
+        # self.hud.boom_animation.play(render_pos)
+        #dis_pos = self.grid_to_display_pos(spawn_position[0], spawn_position[1])
         self.units[spawn_position[0]][spawn_position[1]] = Dragon(spawn_position, player, self)
+
+    # use this function to get the (x,y) tuple you need when you when to blit something and you only have its grid position
+    # offset is to slightly change the display position, need to find the good offset yourself tho
+    def grid_to_display_pos(self, grid_pos: (int, int), offset=(0, 0)):
+        render_pos = self.grid_to_renderpos(grid_pos[0], grid_pos[1])
+        display_pos = render_pos[0] + self.grass_tiles.get_width() / 2 + self.camera.scroll.x + 10 + offset[
+            1], render_pos[1] - 55 + self.camera.scroll.y + offset[1]
+
+        return display_pos

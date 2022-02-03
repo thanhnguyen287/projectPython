@@ -196,7 +196,8 @@ class Game:
                         # There is a bug with collecting ressources on the side of the map !!!
 
                         if self.map.hud.examined_tile is not None and (self.map.hud.examined_tile.name == "Villager" or
-                                                                       self.map.hud.examined_tile.name == "Clubman"):
+                                                                       self.map.hud.examined_tile.name == "Clubman" or
+                                                                       self.map.hud.examined_tile.name == "Black Dragon"):
                             villager_pos = self.map.hud.examined_tile.pos
                             this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
 
@@ -219,6 +220,10 @@ class Game:
                                     this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
                                 elif isinstance(this_villager, Clubman) and self.map.collision_matrix[grid_pos[1]][grid_pos[0]] and \
                                         not this_villager.is_attacking:
+                                    this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
+                                elif isinstance(this_villager, Dragon) and self.map.collision_matrix[grid_pos[1]][
+                                    grid_pos[0]] and \
+                                     not this_villager.is_attacking:
                                     this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
 
                                 # we check if the tile we right click on is a ressource and if its on an adjacent tile of

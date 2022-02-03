@@ -1264,10 +1264,10 @@ class Hud:
     def load_dragon_sprites(self):
         dragon_sprites_dic = {"idle": {}, "death": []}
         # loop for the 8 angles. folder * 45 because angles are 0, 45, 90, 135, etc... up to 315 for max.
-        for folder in range(0, 3):
+        for folder in range(0, 4):
             dragon_sprites_dic["idle"][str(int(folder * 90))] = load_images_better("resources/assets/Models/Units/Dragon/idle/" + str(int(folder * 90)))
         dragon_sprites_dic["death"] = load_images_better("resources/assets/Models/Units/Dragon/death")
-
+        print(dragon_sprites_dic)
         return dragon_sprites_dic
 
     # work in progress, not finished

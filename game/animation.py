@@ -8,7 +8,7 @@ pygame.init()
 pygame.mixer.init()
 
 
-#for unit
+# for unit
 class Animation(pygame.sprite.Sprite):
     # change this to make the animation quicker or slower
 
@@ -51,10 +51,10 @@ class Animation(pygame.sprite.Sprite):
         self.rect.topleft = [pos_x, pos_y]
 
         # old stuff, will maybe be used one day. Kinda a file with offset for every sprite.
-        #self.anchor_list = None
+        # self.anchor_list = None
 
     #######################################################################################################
-    #pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
+    # pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
     # example : play(render_pos_0, render_pos_1, age=3, color="YELLOW", angle = 180)                      #
     #######################################################################################################
     def play(self, pos=(0, 0), anchor_list=None, color="BLUE", angle="0"):
@@ -63,15 +63,15 @@ class Animation(pygame.sprite.Sprite):
         if angle == 360: angle = 0
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos[0], pos[1]]
-        #self.image = self.sprites["BLUE"][0][self.current_sprite]
+        # self.image = self.sprites["BLUE"][0][self.current_sprite]
 
-        #we determine which sprites list to use with angle, color and age arguments
-        #sprites list go from 0 to 3 for ages, not 1 to 4, hence the -1
+        # we determine which sprites list to use with angle, color and age arguments
+        # sprites list go from 0 to 3 for ages, not 1 to 4, hence the -1
         self.selected_sprites_list = self.sprites[self.color][str(angle)]
 
         if anchor_list is not None:
             self.anchor_list = anchor_list
-        self.rect.topleft = [ pos[0], pos[1]]
+        self.rect.topleft = [pos[0], pos[1]]
         self.to_be_played = True
 
     def update(self):
@@ -81,6 +81,7 @@ class Animation(pygame.sprite.Sprite):
             self.to_be_played = False
             self.current_sprite = 0
         self.image = self.selected_sprites_list[int(self.current_sprite)]
+
 
 class BoomAnimation(pygame.sprite.Sprite):
     # change this to make the animation quicker or slower
@@ -105,16 +106,16 @@ class BoomAnimation(pygame.sprite.Sprite):
         self.rect.topleft = [0, 0]
 
         # old stuff, will maybe be used one day. Kinda a file with offset for every sprite.
-        #self.anchor_list = None
+        # self.anchor_list = None
 
     #######################################################################################################
-    #pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
+    # pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
     # example : play(render_pos_0, render_pos_1, age=3, color="YELLOW", angle = 180)                      #
     #######################################################################################################
     def play(self, pos=(0, 0)):
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos[0], pos[1]]
-        self.rect.topleft = [ pos[0], pos[1]]
+        self.rect.topleft = [pos[0], pos[1]]
         self.to_be_played = True
 
     def update(self):
@@ -149,10 +150,10 @@ class BuildingAnimation(pygame.sprite.Sprite):
         self.rect.topleft = [pos_x, pos_y]
 
         # old stuff, will maybe be used one day. Kinda a file with offset for every sprite.
-        #self.anchor_list = None
+        # self.anchor_list = None
 
     #######################################################################################################
-    #pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
+    # pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
     # example : play(render_pos_0, render_pos_1, age=3, color="YELLOW", angle = 180)                      #
     #######################################################################################################
     def play(self, pos=(0, 0), age=1, color="BLUE"):
@@ -160,7 +161,7 @@ class BuildingAnimation(pygame.sprite.Sprite):
         self.color = color
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos[0], pos[1]]
-        #we determine which sprites list to use with color and age arguments
+        # we determine which sprites list to use with color and age arguments
 
         self.selected_sprites_list = self.sprites[self.color][str(self.age)]
         self.to_be_played = True
@@ -174,7 +175,7 @@ class BuildingAnimation(pygame.sprite.Sprite):
         self.image = self.selected_sprites_list[int(self.current_sprite)]
 
 
-#sprites dic containing 4 lists with death animation sprites for every age
+# sprites dic containing 4 lists with death animation sprites for every age
 class BuildingDeathAnimation(pygame.sprite.Sprite):
 
     def __init__(self, unit, images, pos_x=0, pos_y=0, animation_speed=0.15):
@@ -221,7 +222,7 @@ class BuildingDeathAnimation(pygame.sprite.Sprite):
         self.image = self.sprites[int(self.current_sprite)]
 
 
-#sprites dic containing 8 lists with angles of attack animation
+# sprites dic containing 8 lists with angles of attack animation
 class VillagerAttackAnimation(pygame.sprite.Sprite):
 
     def __init__(self, unit, images, pos_x=0, pos_y=0, animation_speed=0.2):
@@ -257,7 +258,7 @@ class VillagerAttackAnimation(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos[0], pos[1]]
         # we determine which sprites list to use with color and age arguments
-        #self.sprites = self.sprites[str(self.angle)]
+        # self.sprites = self.sprites[str(self.angle)]
         self.selected_angle_sprites = self.sprites[str(self.angle)]
         self.to_be_played = True
 
@@ -268,6 +269,7 @@ class VillagerAttackAnimation(pygame.sprite.Sprite):
             self.to_be_played = False
             self.current_sprite = 0
         self.image = self.selected_angle_sprites[int(self.current_sprite)]
+
 
 class VillagerMiningAnimation(pygame.sprite.Sprite):
 
@@ -303,7 +305,7 @@ class VillagerMiningAnimation(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos[0], pos[1]]
         # we determine which sprites list to use with color and age arguments
-        #self.sprites = self.sprites[str(self.angle)]
+        # self.sprites = self.sprites[str(self.angle)]
         self.selected_angle_sprites = self.sprites[str(self.angle)]
         self.to_be_played = True
 
@@ -346,10 +348,12 @@ class IdleDragonAnimation(pygame.sprite.Sprite):
     #######################################################################################################
     def play(self, pos=(0, 0)):
         self.angle = self.unit.angle
+        if self.angle == 360: self.angle = 0
+
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos[0], pos[1]]
         # we determine which sprites list to use with color and age arguments
-        #self.sprites = self.sprites[str(self.angle)]
+        # self.sprites = self.sprites[str(self.angle)]
         self.selected_angle_sprites = self.sprites[str(self.angle)]
         self.to_be_played = True
 
@@ -361,6 +365,53 @@ class IdleDragonAnimation(pygame.sprite.Sprite):
             self.current_sprite = 0
         self.image = self.selected_angle_sprites[int(self.current_sprite)]
 
+
+# sprites dic containing 8 lists with angles of attack animation
+class DeathDragonAnimation(pygame.sprite.Sprite):
+
+    def __init__(self, unit, images, pos_x=0, pos_y=0, animation_speed=0.2):
+        super().__init__()
+
+        self.unit = unit
+        self.angle = 270
+        self.sprites = images
+        self.selected_angle_sprites = []
+        # age will be updated when we call the death method display to match the unit's owner age.
+
+        self.index = 0
+        self.current_frame = 0
+        self.current_sprite = 0
+        self.animation_speed = animation_speed
+
+        self.to_be_played = False
+        # image is the image we blit, we change it quickly to create the animation
+        self.image = self.sprites[self.angle][self.current_sprite]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos_x, pos_y]
+
+        self.unit.death_animation_group.add(self)
+
+    #######################################################################################################
+    # pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
+    # example : play(render_pos_0, render_pos_1, age=3, color="YELLOW", angle = 180)                      #
+    #######################################################################################################
+    def play(self, pos=(0, 0)):
+        self.angle = self.unit.angle
+        if self.angle == 360: self.angle = 0
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos[0], pos[1]]
+        # we determine which sprites list to use with color and age arguments
+        # self.sprites = self.sprites[str(self.angle)]
+        self.selected_angle_sprites = self.sprites[str(self.angle)]
+        self.to_be_played = True
+
+    def update(self):
+        if self.to_be_played:
+            self.current_sprite += self.animation_speed
+        if floor(self.current_sprite) >= len(self.selected_angle_sprites):
+            self.to_be_played = False
+            self.current_sprite = 0
+        self.image = self.selected_angle_sprites[int(self.current_sprite)]
 
 
 def load_images_better(path):
