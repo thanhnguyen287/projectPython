@@ -7,13 +7,11 @@ import pygame
 
 
 
-
 pygame.init()
 
 # create screen
 pygame.display.set_caption('Start Menu')
-# screen = pygame.display.set_mode((1200, 675))
-screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((1200, 675))
 
 # add icon
 pygame.display.set_caption("AOE 2")
@@ -27,8 +25,6 @@ textsurface = font.render("text", False, (0, 0, 0))  # "text", antialias, color
 
 
 background = pygame.image.load(os.path.join(assets_path, 'EV0qwWIXQAA8qpN.jpg'))
-width, height = screen.get_size()
-background = pygame.transform.scale(background, (width, height))
 pygame.display.set_caption('AOE 2: Homemade Edition')
 
 mixer.music.load(os.path.join(assets_path,'Age of Empires II- Definitive Edition - Main Menu Soundtrack (audio-extractor.net).wav'))
@@ -48,7 +44,6 @@ clicked = False
 counter = 0
 
 screen.blit(background, (0, 0))
-
 
 
 class Button():

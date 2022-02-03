@@ -40,35 +40,30 @@ class Camera:
         if self.scroll.x + self.width < self.limit[0]:
             if mouse_pos[0] > self.width * 0.97:
                 self.dx = -self.speed
-                self.scroll.x += self.dx
             elif mouse_pos[0] < self.width * 0.03:
                 self.dx = self.speed
-                self.scroll.x += self.dx
-            # else:
-            #     self.dx = 0
+            else:
+                self.dx = 0
         else:
             if mouse_pos[0] > self.width * 0.97:
                 self.dx = -self.speed
-                self.scroll.x += self.dx
-            # else:
-            #     self.dx = 0
+            else:
+                self.dx = 0
 
         #moving in y axis
         if self.scroll.y + self.height < self.limit[1]:
             if mouse_pos[1] > self.height * 0.97:
                 self.dy = -self.speed
-                self.scroll.y += self.dy
             elif mouse_pos[1] < self.height * 0.03:
                 self.dy = self.speed
-                self.scroll.y += self.dy
-            # else:
-            #     self.dy = 0
+            else:
+                self.dy = 0
         else:
             if mouse_pos[1] > self.height * 0.97:
                 self.dy = -self.speed
-                self.scroll.y += self.dy
-            # else:
-            #     self.dy = 0
+            else:
+                self.dy = 0
         # update scroll
 
-
+        self.scroll.x += self.dx
+        self.scroll.y += self.dy
