@@ -13,7 +13,7 @@ class new_AI:
         self.tc_pos = self.player.towncenter_pos
 
         #we chose a behaviour between all the behaviours we defined
-        self.behaviour_possible = ["aggressive"]
+        self.behaviour_possible = ["neutral", "defensive", "aggressive", "pacifist"]
         r = randint(0, len(self.behaviour_possible)-1)
         self.behaviour = self.behaviour_possible[r]
 
@@ -97,7 +97,7 @@ class new_AI:
         if self.player.second_tower is not None and self.player.second_tower not in self.player.building_list:
             self.player.second_tower = None
 
-        print(self.barracks, self.second_barracks)
+        #print(self.barracks, self.second_barracks)
 
         if self.player.towncenter is not None:
 
@@ -128,9 +128,8 @@ class new_AI:
             self.defense_routine()
 
         # the poke
-        if self.army:
-            pass
-            #self.poking_routine()
+        if self.army and self.behaviour == "aggressive":
+            self.poking_routine()
 
         # if we dont need ressources, we are not training units, we have free pop space and we have at least as many
         # buildings as units, then we can train a new unit
@@ -337,7 +336,7 @@ class new_AI:
                             self.barracks = b
                         if isinstance(b, Market):
                             self.market = b
-                        if isinstance(b, Tower) and self.player.second_tower is None:
+                        if isinstance(b, Tower) and self.player.second_tower is None and self.behaviour == "defensive":
                             self.player.second_tower = b
                         elif isinstance(b, Tower) and self.player.tower is None:
                             self.player.tower = b
