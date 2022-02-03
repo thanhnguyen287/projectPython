@@ -41,7 +41,7 @@ class Game:
 
         # IA
         self.AI_1 = new_AI(playerTwo, self.map)
-        self.AI_2 = new_AI(playerOne, self.map)
+        #self.AI_2 = new_AI(playerOne, self.map)
         #self.AI_1 = AI(playerTwo, self.map.map)
         #self.AI_2 = AI(playerOne, self.map.map)
 
@@ -70,7 +70,7 @@ class Game:
             self.update()
             self.draw()
             self.AI_1.run()
-            self.AI_2.run()
+            #self.AI_2.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -101,6 +101,10 @@ class Game:
                             MAIN_PLAYER.update_resource("GOLD", 10000)
                             MAIN_PLAYER.update_resource("STONE", 10000)
                             self.chat_text = "CHEAT CODE ACTIVATED : PICSOU"
+                        elif self.chat_text == "BIGDADDY":
+                            self.map.spawn_dragon(MAIN_PLAYER, self.camera)
+                            self.chat_text = "CHEAT CODE ACTIVATED : BIGDADDY"
+
 
                     # we store the letter
                     else:

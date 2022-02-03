@@ -514,6 +514,8 @@ class Wall(Building):
 
         self.construction_cost = [0, 0, 0, 50]
         self.max_health = 100
+        # can be 0,1 or 2. 0 is for \ like wall and used by default, 1 for / wall and 2 for corners
+        self.variation = 0
 
         super().__init__(pos, map, player_owner_of_unit)
         #self.death_animation_group = pygame.sprite.Group()
@@ -540,6 +542,13 @@ class Wall(Building):
                 self.construction_progress = 50
             elif progress_time_pourcent > 25:
                 self.construction_progress = 25
+
+    #variation should be 0,1 or 2.
+    def change_angle(self, variation=None):
+        if variation is None:
+            self.variation = 1 if self.variation == 0 else 0
+        else:
+            self.variation = variation
 
 # ****************************          UNITS         ***************************************
 

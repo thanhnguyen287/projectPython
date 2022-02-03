@@ -82,6 +82,49 @@ class Animation(pygame.sprite.Sprite):
             self.current_sprite = 0
         self.image = self.selected_sprites_list[int(self.current_sprite)]
 
+class BoomAnimation(pygame.sprite.Sprite):
+    # change this to make the animation quicker or slower
+
+    def __init__(self, sprites_list, animation_speed=0.10):
+        super().__init__()
+
+        self.sprites = sprites_list
+        self.current_sprite = 0
+
+        # used to know if we must use the angle stuff (only for units, no need for buildings)
+        self.angle = "0"
+        self.color = "BLUE"
+        self.index = 0
+        self.current_frame = 0
+        self.animation_speed = animation_speed
+
+        self.to_be_played = False
+        self.image = self.sprites[self.current_sprite]
+
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [0, 0]
+
+        # old stuff, will maybe be used one day. Kinda a file with offset for every sprite.
+        #self.anchor_list = None
+
+    #######################################################################################################
+    #pos : render_pos_x, render_pos_y. This is what you call in map or hud or game to display an animation#
+    # example : play(render_pos_0, render_pos_1, age=3, color="YELLOW", angle = 180)                      #
+    #######################################################################################################
+    def play(self, pos=(0, 0)):
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos[0], pos[1]]
+        self.rect.topleft = [ pos[0], pos[1]]
+        self.to_be_played = True
+
+    def update(self):
+        if self.to_be_played:
+            self.current_sprite += self.animation_speed
+        if floor(self.current_sprite) >= len(self.sprites):
+            self.to_be_played = False
+            self.current_sprite = 0
+        self.image = self.sprites[int(self.current_sprite)]
+
 
 class BuildingAnimation(pygame.sprite.Sprite):
     # change this to make the animation quicker or slower
@@ -271,7 +314,6 @@ class VillagerMiningAnimation(pygame.sprite.Sprite):
             self.to_be_played = False
             self.current_sprite = 0
         self.image = self.selected_angle_sprites[int(self.current_sprite)]
-
 
 
 class IdleDragonAnimation(pygame.sprite.Sprite):

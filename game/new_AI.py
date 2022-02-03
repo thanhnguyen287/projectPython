@@ -13,7 +13,7 @@ class new_AI:
         self.tc_pos = self.player.towncenter_pos
 
         #we chose a behaviour between all the behaviours we defined
-        self.behaviour_possible = ["defensive"]
+        self.behaviour_possible = ["aggressive"]
         r = randint(0, len(self.behaviour_possible)-1)
         self.behaviour = self.behaviour_possible[r]
 
@@ -30,17 +30,12 @@ class new_AI:
         self.quantity_of_each_ressource = self.base_quantity_of_each_ressource
 
         self.needed_ressource = [0, 0, 0, 0]
-        #for defense
-        self.has_defense = False
-        self.has_second_tower = False
-        self.tower_pos = None
-        self.second_tower_pos = None
 
         #for attack
         self.has_barracks = False
         self.has_second_barracks = False
         self.barracks = None
-        self.second_barracks = False
+        self.second_barracks = None
 
         #for technologies
         self.has_market = False
@@ -96,6 +91,14 @@ class new_AI:
 
 
     def run(self):
+        # to update the tower
+        if self.player.tower is not None and self.player.tower not in self.player.building_list:
+            self.player.tower = None
+        if self.player.second_tower is not None and self.player.second_tower not in self.player.building_list:
+            self.player.second_tower = None
+
+        print(self.barracks, self.second_barracks)
+
         if self.player.towncenter is not None:
 
             #we update the army
@@ -126,7 +129,8 @@ class new_AI:
 
         # the poke
         if self.army:
-            self.poking_routine()
+            pass
+            #self.poking_routine()
 
         # if we dont need ressources, we are not training units, we have free pop space and we have at least as many
         # buildings as units, then we can train a new unit
@@ -173,12 +177,20 @@ class new_AI:
                     if abs(self.tc_pos[0] - u.pos[0]) <= 1 and abs(self.tc_pos[1] - u.pos[1]) <= 1 \
                             and not u in self.units_focused:  # in tiles
 
-                        for my_u in self.player.unit_list:
-                            self.reset_villager(my_u)
+                        if len(self.army) > 1:
+                            for my_u in self.army:
+                                if my_u != self.poking_unit:
+                                    my_u.go_to_attack(u.pos)
+                                    if my_u.target is None and not u in self.units_focused:
+                                        my_u.go_to_attack(u.pos)
+                                        self.units_focused.append(u)
+                        else:
+                            for my_u in self.player.unit_list:
+                                self.reset_villager(my_u)
 
-                            if my_u.target is None and not u in self.units_focused:
-                                my_u.go_to_attack(u.pos)
-                            self.units_focused.append(u)
+                                if my_u.target is None and not u in self.units_focused:
+                                    my_u.go_to_attack(u.pos)
+                                    self.units_focused.append(u)
 
                     if u in self.units_focused:
                         for my_u in self.player.unit_list:
@@ -195,7 +207,6 @@ class new_AI:
             for u in self.army:
                 pass
 
-    # TODO
 
     # ==================================================================================================================
     # -------------------------------------------------SUB ROUTINES-----------------------------------------------------
@@ -249,7 +260,7 @@ class new_AI:
                         self.in_building_tiles.append(pos)
 
             #TECHNOLOGY NOT IMPLEMENTED YET
-            #elif not self.has_market and self.has_defense and \
+            #elif not self.has_market and self.player.tower is not None and \
                     #(self.behaviour == "neutral" or self.behaviour == "pacifist"):
                 #while not self.has_market and not self.ressource_to_gather:
                     #tiles_to_build = tile_founding(10, 3, self.range+1, self.map.map, self.player, "", self.map)
@@ -267,15 +278,16 @@ class new_AI:
 
 
             #else we try to build a barracks if we dont have one and we have 5 villagers
-            elif self.count_villagers() >= 5 and not self.has_barracks and self.has_defense and \
-            self.behaviour != "pacifist":
+            elif self.count_villagers() >= 5 and not self.has_barracks and \
+                    (self.player.tower is not None or self.behaviour == "aggressive") and self.behaviour != "pacifist":
                 while not self.has_barracks and not self.ressource_to_gather:
                     tiles_to_build = tile_founding(10, 3, self.range+1, self.map.map, self.player, "", self.map)
                     if tiles_to_build:
                         r = randint(0, len(tiles_to_build) - 1)
                         pos = tiles_to_build[r]
                         if self.check_matrix_and_in_building_tiles(pos) and pos not in self.in_building_tiles and \
-                                self.let_a_path(pos) and self.let_a_path((pos[0], pos[1]+1)):
+                                self.let_a_path(pos) and self.let_a_path((pos[0], pos[1]+1)) and \
+                                self.check_constructor_pos(pos):
                             self.building_queue.append(("Barracks", pos))
                             self.in_building_tiles.append(pos)
                             self.in_building_tiles.append((pos[0], pos[1] - 1))
@@ -284,7 +296,7 @@ class new_AI:
                             self.has_barracks = True
 
             # else we try to build a defense if we dont have one
-            elif not self.has_defense and self.behaviour != "pacifist" and self.behaviour != "aggressive":
+            elif self.player.tower is None and self.behaviour != "pacifist" and self.behaviour != "aggressive":
                 self.build_defense()
 
 
@@ -298,6 +310,13 @@ class new_AI:
                         self.building_queue.append(("Farm", pos))
                         self.in_building_tiles.append(pos)
                         self.nb_ferme += 1
+
+        if self.behaviour == "aggressive" and self.has_barracks and not self.has_second_barracks and \
+                self.barracks is not None:
+            self.has_barracks = False
+            self.has_second_barracks = True
+            self.second_barracks = self.barracks
+            self.barracks = None
 
         # to make the villager able to build other buildings after he buildt a building, we release him
         if u.building_to_create is not None:
@@ -313,11 +332,15 @@ class new_AI:
                             str_to_entity_class(u.building_to_create["name"]).construction_cost[i]
                         u.building_to_create = None
                         u.is_building = False
-                        print(u, "freed")
+                        #print(u, "freed")
                         if isinstance(b, Barracks):
                             self.barracks = b
                         if isinstance(b, Market):
                             self.market = b
+                        if isinstance(b, Tower) and self.player.second_tower is None:
+                            self.player.second_tower = b
+                        elif isinstance(b, Tower) and self.player.tower is None:
+                            self.player.tower = b
 
         self.lock_tiles()
 
@@ -330,17 +353,26 @@ class new_AI:
 
         elif self.check_price(Clubman) and \
                 self.player.current_population+len(self.training_queue) < self.player.max_population and \
-                self.behaviour != "pacifist" and len(self.army) < 5:
+                self.behaviour != "pacifist" and \
+                (len(self.army) < 5 or (self.behaviour == "aggressive" and len(self.army) < 10)) and self.has_barracks:
             self.barracks.train(Clubman)
             for i in range(4):
                 self.needed_ressource[i] -= Clubman.construction_cost[i]
 
+        if self.behaviour == "aggressive" and self.check_price(Clubman) and \
+                self.player.current_population+len(self.training_queue) < self.player.max_population \
+            and len(self.army) < 10 and self.has_second_barracks:
+            self.second_barracks.train(Clubman)
+            for i in range(4):
+                self.needed_ressource[i] -= Clubman.construction_cost[i]
 
     def poking_routine(self):
         #in case the unit get killed
         if self.poking_unit not in self.player.unit_list:
             self.poking_unit = None
 
+        if self.in_poking_player is not None and self.in_poking_player.tower_pos is None:
+            pass
         if self.in_poking_player is not None and self.in_poking_player.towncenter is None:
             self.in_poking_player = None
             self.poking_unit = None
@@ -350,9 +382,15 @@ class new_AI:
                 for p in player_list:
                     if p != self.player:
                         if not u.is_moving_to_attack and u.target is None and self.poking_unit is None:
-                            u.go_to_attack(p.towncenter.pos)
                             self.poking_unit = u
                             self.in_poking_player = p
+                            if self.in_poking_player.tower is not None:
+                                self.poking_unit.go_to_attack(self.in_poking_player.tower_pos)
+                            elif self.in_poking_player.second_tower is not None:
+                                self.poking_unit.go_to_attack(self.in_poking_player.second_tower_pos)
+                            else:
+                                self.poking_unit.go_to_attack(p.towncenter.pos)
+
 
         else:
             self.poking_unit.attack()
@@ -433,7 +471,7 @@ class new_AI:
         #we find a place to build the tower
         pos = (-1, -1) #we initialize it even if it is always modified
         nb_tiles = 1
-        while not self.has_defense:
+        while self.player.tower_pos is None:
             tiles_to_build = tile_founding(nb_tiles, 3, self.range, self.map.map, self.player, "", self.map)
             if tiles_to_build:
                 r = randint(0, len(tiles_to_build)-1)
@@ -442,29 +480,25 @@ class new_AI:
                     self.building_queue.append(("Tower", pos))
                     self.in_building_tiles.append(pos)
 
-                    self.has_defense = True
-                    self.tower_pos = pos
+                    self.player.tower_pos = pos
 
                 elif self.player.side == "bot" and pos[0] <= self.player.towncenter_pos[0]+1 and pos[1] <= self.player.towncenter_pos[1]:
                     self.building_queue.append(("Tower", pos))
                     self.in_building_tiles.append(pos)
 
-                    self.has_defense = True
-                    self.tower_pos = pos
+                    self.player.tower_pos = pos
 
                 elif self.player.side == "left" and pos[0] >= self.player.towncenter_pos[0] and pos[1] <= self.player.towncenter_pos[1]:
                     self.building_queue.append(("Tower", pos))
                     self.in_building_tiles.append(pos)
 
-                    self.has_defense = True
-                    self.tower_pos = pos
+                    self.player.tower_pos = pos
 
                 elif self.player.side == "right" and pos[0] <= self.player.towncenter_pos[0]+1 and pos[1] >= self.player.towncenter_pos[1]:
                     self.building_queue.append(("Tower", pos))
                     self.in_building_tiles.append(pos)
 
-                    self.has_defense = True
-                    self.tower_pos = pos
+                    self.player.tower_pos = pos
             nb_tiles += 1
 
 
@@ -478,11 +512,11 @@ class new_AI:
                 self.building_queue.append(("Wall", pos))
                 self.in_building_tiles.append(pos)
 
-        if self.behaviour == "defensive" and not self.has_second_tower:
-            self.has_defense = False
-            self.has_second_tower = True
-            self.second_tower_pos = self.tower_pos
-            self.tower_pos = None
+        if self.behaviour == "defensive" and self.player.second_tower is None:
+            self.player.second_tower = self.player.tower
+            self.player.tower = None
+            self.player.second_tower_pos = self.player.tower_pos
+            self.player.tower_pos = None
 
 
     def let_a_path(self, pos):
@@ -504,7 +538,7 @@ class new_AI:
         can_build = True
         for i in range(4):
             if self.player.resources[i] < entity_class.construction_cost[i] and \
-                    self.player.resources[i] < self.ressource_to_gather[i]:
+                    self.player.resources[i] < self.needed_ressource[i]:
                 if RESSOURCE_LIST[i] not in self.ressource_to_gather:
                     self.ressource_to_gather.append(RESSOURCE_LIST[i])
                 can_build = False
@@ -519,6 +553,13 @@ class new_AI:
         if self.map.collision_matrix[pos[1] - 1][pos[0]] and self.map.collision_matrix[pos[1]][
             pos[0] + 1] and self.map.collision_matrix[pos[1] - 1][pos[0] + 1] and pos not in self.in_building_tiles and \
                 pos1 not in self.in_building_tiles and pos2 not in self.in_building_tiles and pos3 not in self.in_building_tiles:
+            return True
+        else:
+            return False
+
+    def check_constructor_pos(self, pos):
+        villager_pos = (pos[0] - 1, pos[1] - 1)
+        if self.map.collision_matrix[villager_pos[1]][villager_pos[0]] and villager_pos not in self.in_building_tiles:
             return True
         else:
             return False

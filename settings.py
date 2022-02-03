@@ -109,5 +109,7 @@ building_construction_2_2x2 = pygame.image.load("resources/assets/Models/Buildin
 building_construction_3_2x2 = pygame.image.load("resources/assets/Models/Buildings/b_all_construction_2x2_x2_3.png")
 building_construction_4_2x2 = pygame.image.load("resources/assets/Models/Buildings/b_all_construction_2x2_x2_4.png")
 
+#random icons
+turn_icon = pygame.image.load("resources/assets/icons/pivote.png")
 
 standard_cursor = pygame.image.load("resources/assets/standard_cursor.png")

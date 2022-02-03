@@ -7,7 +7,7 @@ from units import Villager, TownCenter, House, Farm, Building, Barracks, Clubman
 # from buildings import TownCenter, House, Farm, Building
 from .ActionMenu import *
 from tech import Age_II, Age_III, Age_IV, horseshoe_tech, arrow_tech, iron_sword_tech, steel_sword_tech, mithril_sword_tech, iron_armor_tech, steel_armor_tech, mithril_armor_tech, improved_masonry_tech, reinforced_masonry_tech, imbued_masonry_tech, food_production_tech
-from .animation import load_images_better, Animation, BuildingAnimation
+from .animation import load_images_better, Animation, BuildingAnimation, BoomAnimation
 
 
 class Hud:
@@ -52,6 +52,7 @@ class Hud:
         self.villager_panel = self.create_villager_action_panel()
         self.barracks_panel = self.create_action_menu_barracks()
         self.market_panel = self.create_market_action_panel()
+        self.wall_panel = self.create_wall_action_panel()
 
         self.selected_tile = None
         self.examined_tile = None
@@ -83,6 +84,11 @@ class Hud:
         self.mining_sprites_villager = self.load_mining_sprites_villager()
         self.tech_tree_images = self.load_tech_tree()
 
+        #boom animation
+        self.boom_animation_group = pygame.sprite.Group()
+        self.boom_sprites = load_images_better("resources/assets/Boom")
+        self.boom_animation = BoomAnimation(self.boom_sprites)
+        self.boom_animation_group.add(self.boom_animation)
         #dragon
         self.dragon_sprites = self.load_dragon_sprites()
 
@@ -182,6 +188,24 @@ class Hud:
                 render_pos[0] += image.get_width() + 5
         return tiles
 
+    def create_wall_action_panel(self):
+        render_pos = [25, self.height - action_menu.get_height() + 40]
+        object_width = 50
+
+        tiles = []
+
+        tiles.append(
+            {
+                "name": "Pivote",
+                "icon": turn_icon,
+                "image": turn_icon,
+                "rect": turn_icon.get_rect(topleft=render_pos),
+                "affordable": True
+            }
+        )
+
+        return tiles
+
     def create_villager_action_panel(self):
 
         render_pos = [0 + 25, self.height * 0.8 + 10]
@@ -225,7 +249,7 @@ class Hud:
         # building action_menu
         if self.bottom_left_menu is not None:
             for button in self.bottom_left_menu:
-                if button["name"] != "STOP":
+                if button["name"] != "STOP" and button["name"] != "Pivote":
                     if the_player.can_afford(button["name"]):
                         button["affordable"] = True
                     else:
@@ -407,15 +431,15 @@ class Hud:
                     for tile in self.bottom_left_menu:
                         icon = tile["icon"].copy()
                         # if player cant affort to build/train entity, we make the icon transparent
-                        if tile["name"] != "STOP" and not the_player.can_afford(tile["name"]):
+                        if tile["name"] != "STOP" and tile["name"] != "Pivote" and not the_player.can_afford(tile["name"]):
                             icon.set_alpha(100)
                         screen.blit(icon, tile["rect"].topleft)
-                        if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP":
+                        if tile["rect"].collidepoint(mouse_pos) and tile["name"] != "STOP" and tile["name"] != "Pivote":
                             self.display_construction_tooltip(screen, tile["name"])
                         #if tile["rect"].collidepoint(mouse_pos) and (
                          #       tile["name"] == "STOP" and tile["name"] != "Advance to Feudal Age" and tile[
                         #    "name"] != "Advance to Castle Age" and tile["name"] != "Advance to Imperial Age" and tile["name"] != "Research Iron Swords" and tile["name"] != "Research Iron Arrows" and tile["name"] != "Research Iron Horseshoes" and tile["name"] != "Research Super Cows"):
-                        elif tile["rect"].collidepoint(mouse_pos) and tile["name"] == "STOP":
+                        elif tile["rect"].collidepoint(mouse_pos) and (tile["name"] == "STOP"):
                             self.display_construction_tooltip(screen, tile)
         if self.tech_tree_display_flag:
             self.display_tech_tree(screen)
