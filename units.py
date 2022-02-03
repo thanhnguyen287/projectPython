@@ -404,7 +404,7 @@ class Barracks(Building):
     def update(self):
         self.now = pygame.time.get_ticks()
         if not self.is_being_built:
-            if self.now - self.resource_manager_cooldown > 10000:
+            if self.now - self.resource_manager_cooldown > Clubman.construction_time * 1000:
                 self.resource_manager_cooldown = self.now
                 if self.is_working:
                 # if a clubman is being created since 10 secs :
