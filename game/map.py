@@ -8,7 +8,7 @@ import pygame.mouse
 from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
-from player import playerOne, playerTwo, player_list, MAIN_PLAYER
+from player import playerOne, playerTwo, playerThree, player_list, MAIN_PLAYER
 from units import Villager, Unit, Farm, TownCenter, House, Building, Barracks, Clubman, Dragon, Tower, Wall, Market
 
 
@@ -519,6 +519,9 @@ class Map:
                 elif the_player == playerOne:
                     place_x = 1
                     place_y = 0
+                elif the_player == playerThree:
+                    place_x = 0
+                    place_y = 1
 
             # top_left
             if (place_x, place_y) == (0, 0):

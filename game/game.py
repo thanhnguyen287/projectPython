@@ -3,7 +3,7 @@ from .map import *
 from .utils import draw_text, find_owner
 from .hud import Hud
 from .animation import *
-from .AI import AI
+#from .AI import AI
 from.new_AI import new_AI
 from time import sleep
 
@@ -42,8 +42,7 @@ class Game:
         # IA
         self.AI_1 = new_AI(playerTwo, self.map)
         #self.AI_2 = new_AI(playerOne, self.map)
-        #self.AI_1 = AI(playerTwo, self.map.map)
-        #self.AI_2 = AI(playerOne, self.map.map)
+        self.AI_3 = new_AI(playerThree, self.map)
 
         #defeated player
         self.defeated_player = None
@@ -71,6 +70,7 @@ class Game:
             self.draw()
             self.AI_1.run()
             #self.AI_2.run()
+            self.AI_3.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
