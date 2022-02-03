@@ -733,9 +733,11 @@ class Map:
         # iso_pos_cam = self.grid_to_iso_poly(camera.scroll.x , camera.scroll.y)
         iso_pos_cam = [(-camera.scroll.x / minimap_scaling + self.width  - 420 ,
                          -camera.scroll.y/ minimap_scaling + self.height - 200)]
-        for xh in iso_pos_cam:
-            print(xh)
-            print("**********")
+        #For debugging purpose
+
+        # for xh in iso_pos_cam:
+        #     print(xh)
+        #     print("**********")
         rect_cam = pygame.Rect((iso_pos_cam[0][0],iso_pos_cam[0][1]), (self.cam_width, self.cam_height))
         pygame.draw.rect(screen, "WHITE", rect_cam, 2 )
 
