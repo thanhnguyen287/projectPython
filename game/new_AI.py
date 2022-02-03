@@ -13,7 +13,7 @@ class new_AI:
         self.tc_pos = self.player.towncenter_pos
 
         #we chose a behaviour between all the behaviours we defined
-        self.behaviour_possible = ["agressive"]
+        self.behaviour_possible = ["aggressive"]
         r = randint(0, len(self.behaviour_possible)-1)
         self.behaviour = self.behaviour_possible[r]
 
