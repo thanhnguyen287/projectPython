@@ -95,6 +95,10 @@ class Game:
                             MAIN_PLAYER.update_resource("GOLD", 10000)
                             MAIN_PLAYER.update_resource("STONE", 10000)
                             self.chat_text = "CHEAT CODE ACTIVATED : PICSOU"
+                        elif self.chat_text == "BIGDADDY":
+                            self.map.spawn_dragon(MAIN_PLAYER, self.camera)
+                            self.chat_text = "CHEAT CODE ACTIVATED : BIGDADDY"
+
 
                     # we store the letter
                     else:

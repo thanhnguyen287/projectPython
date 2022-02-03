@@ -52,8 +52,8 @@ class Map:
         for p in player_list:
             self.place_starting_units(p)
 
-        self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
-        #self.map[10][10] = Dragon((10,10), MAIN_PLAYER, self)
+        # to improve animations, not working for now
+        #self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
 
     def create_map(self):
         map = []
@@ -106,6 +106,8 @@ class Map:
                     self.hud.bottom_left_menu = self.hud.barracks_panel
                 elif self.hud.examined_tile.name == "Market":
                     self.hud.bottom_left_menu = self.hud.market_panel
+                elif self.hud.examined_tile.name == "Wall":
+                    self.hud.bottom_left_menu = self.hud.wall_panel
 
                 else:
                     self.hud.bottom_left_menu = None
@@ -173,6 +175,8 @@ class Map:
                                 self.hud.bottom_left_menu = self.hud.barracks_panel
                             elif type(self.hud.examined_tile) == Market:
                                 self.hud.bottom_left_menu = self.hud.market_panel
+                            elif type(self.hud.examined_tile) == Wall:
+                                self.hud.bottom_left_menu = self.hud.wall_panel
 
                             else:
                                 self.hud.bottom_left_menu = None
@@ -208,8 +212,12 @@ class Map:
                     unit.mining_animation_group.draw(screen)
                     unit.mining_animation.update()
 
-        for player in player_list:
+            #boom animation
+            if self.hud.boom_animation.to_be_played:
+                self.hud.boom_animation_group.draw(screen)
+                self.hud.boom_animation.update()
 
+        for player in player_list:
             # building display. If building selected, we highlight the tile. If building not full health, we display its health bar
             for building in player.building_list:
                 if building.current_health <= 0:
@@ -569,6 +577,7 @@ class Map:
 
             # for starting villagers
             the_player.pay_entity_cost_bis(Villager)
+            print(the_player.towncenter_pos)
 
     def remove_entity(self, entity, scroll):
         self.entities.remove(entity)
@@ -1113,7 +1122,7 @@ class Map:
         #normal idle animation dragon
 
         animation_pos = (self.grid_to_renderpos(unit.pos[0], unit.pos[1]))
-        animation_pos = (animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 25,animation_pos[1] - (
+        animation_pos = (animation_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x - 60,animation_pos[1] - (
             self.hud.dragon_sprites["idle"]["0"][0].get_height() - TILE_SIZE) + camera.scroll.y - 25)
         unit.idle_animation.play(animation_pos)
 
@@ -1227,3 +1236,14 @@ class Map:
                     self.hud.bottom_left_menu = self.hud.barracks_panel
                 elif type(self.hud.examined_tile) == Market:
                     self.hud.bottom_left_menu = self.hud.market_panel
+
+    #specify for which player you want the dragon to spawn
+    def spawn_dragon(self, player, camera):
+        spawn_position = (player.towncenter_pos[0], player.towncenter_pos[1] + 1)
+        if self.map[spawn_position[0]][spawn_position[1]]["tile"] == "unit" or self.map[spawn_position[0]][spawn_position[1]]["tile"] == "building":
+            self.remove_entity(self.units[spawn_position[0]][spawn_position[1]], camera.scroll)
+        self.clear_tile(spawn_position[0], spawn_position[1])
+        render_pos = self.grid_to_renderpos(spawn_position[0], spawn_position[1])
+        render_pos = render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10, render_pos[1] - 55 + camera.scroll.y
+        #self.hud.boom_animation.play(render_pos)
+        self.map[spawn_position[0]][spawn_position[1]] = Dragon(spawn_position, player, self)
