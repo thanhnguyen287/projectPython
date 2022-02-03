@@ -31,8 +31,8 @@ class Player:
         self.townhall_placed = False
 
         # for defense
-        self.has_tower = False
-        self.has_second_tower = False
+        self.tower = None
+        self.second_tower = None
         self.tower_pos = None
         self.second_tower_pos = None
 
