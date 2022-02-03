@@ -1238,47 +1238,49 @@ class Dragon(Unit):
                         break
 
     def attack(self):
-        if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
+        if self.target is not None:
+            if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
+                possible_angles_list = (0, 90, 180, 270)
+                if self.map.get_angle_between(self.pos, self.target.pos, self) in possible_angles_list:
+                    self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
 
-            self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
+                if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
+                    self.map.hud.boom_animation.play(self.map.grid_to_display_pos(self.target.pos))
+                    if self.target.current_health >= 0:
+                        #if the target is a building, our damage are divided by 2
+                        if type(self.target) in BUILDING_TYPES:
+                            dmg = int((self.attack_dmg/2) - self.target.armor)
+                        #else its normal damage
+                        else:
+                            dmg = int(self.attack_dmg - self.target.armor)
+                        #if the damage is 0 or less, it is still 1
+                        if dmg <= 0: dmg = 1
+                        self.target.current_health -= dmg
+                        self.attack_cooldown = self.now
+                        self.strike += 1
 
-            if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
-                self.map.hud.boom_animation.play(self.map.grid_to_display_pos(self.target.pos))
-                if self.target.current_health >= 0:
-                    #if the target is a building, our damage are divided by 2
-                    if type(self.target) in BUILDING_TYPES:
-                        dmg = int((self.attack_dmg/2) - self.target.armor)
-                    #else its normal damage
+                    # else the unit is dead
                     else:
-                        dmg = int(self.attack_dmg - self.target.armor)
-                    #if the damage is 0 or less, it is still 1
-                    if dmg <= 0: dmg = 1
-                    self.target.current_health -= dmg
-                    self.attack_cooldown = self.now
-                    self.strike += 1
+                        tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
+                        tile["tile"] = ""
+                        if type(self.target) == TownCenter:
+                            self.target.owner.towncenter = None
+                        tile["collision"] = False
+                        self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
+                        self.target = None
+                        self.is_attacking = False
+                        #self.attack_animation.to_be_played = False
+                        self.strike = 0
 
-                # else the unit is dead
-                else:
-                    tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
-                    tile["tile"] = ""
-                    if type(self.target) == TownCenter:
-                        self.target.owner.towncenter = None
-                    tile["collision"] = False
-                    self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
-                    self.target = None
-                    self.is_attacking = False
-                    #self.attack_animation.to_be_played = False
-                    self.strike = 0
-
-            if self.target is not None and type(self.target) == Villager and \
-                    not self.target.is_attacking and self.strike > 1:
-                self.target.target = self
-                self.target.is_attacking = True
-                self.target.attack()
-        else:
-            ind = GENERAL_UNIT_LIST.index(self.target)
-            pos = GENERAL_UNIT_LIST[ind].pos
-            self.go_to_attack(pos)
+                if self.target is not None and type(self.target) == Villager and \
+                        not self.target.is_attacking and self.strike > 1:
+                    self.target.target = self
+                    self.target.is_attacking = True
+                    self.target.attack()
+            else:
+                ind = GENERAL_UNIT_LIST.index(self.target)
+                pos = GENERAL_UNIT_LIST[ind].pos
+                self.go_to_attack(pos)
 
     def update(self):
         self.now = pygame.time.get_ticks()
