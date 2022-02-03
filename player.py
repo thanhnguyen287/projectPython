@@ -24,10 +24,17 @@ class Player:
 
         self.building_list = []
 
+        #towncenter
         self.towncenter_pos = None
         self.towncenter = None
         self.side = None
         self.townhall_placed = False
+
+        # for defense
+        self.has_tower = False
+        self.has_second_tower = False
+        self.tower_pos = None
+        self.second_tower_pos = None
 
         #tech
         # if tech_food is unlocked, all farms produces 5 food every 10 seconds.

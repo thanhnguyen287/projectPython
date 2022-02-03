@@ -57,7 +57,7 @@ class Map:
             self.place_starting_units(p)
 
         self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
-        #self.map[10][10] = Dragon((10,10), MAIN_PLAYER, self)
+        #self.map[10][10] = Dragon((10,20), MAIN_PLAYER, self)
 
     def create_map(self):
         map = []
