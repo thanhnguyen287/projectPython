@@ -762,7 +762,7 @@ class Villager(Unit):
 
             if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
 
-                if self.target.current_health >= 0:
+                if self.target.current_health > 0:
                     #if the target is a building, our damage are divided by 2
                     if type(self.target) in BUILDING_TYPES:
                         dmg = int((self.attack_dmg/2) - self.target.armor)
