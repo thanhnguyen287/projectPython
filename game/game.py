@@ -44,9 +44,14 @@ class Game:
             # we chose a behaviour between all the behaviours we defined
             self.behaviour_possible = ["neutral", "defensive", "aggressive", "pacifist"]
 
-            self.AI_1 = new_AI(playerTwo, self.map, self.behaviour_possible[0])
-            self.AI_2 = new_AI(playerOne, self.map, self.behaviour_possible[2])
-            self.AI_3 = new_AI(playerThree, self.map, self.behaviour_possible[3])
+            if TEST_MODE or MAIN_PLAYER != playerOne:
+                self.AI_1 = new_AI(playerOne, self.map, self.behaviour_possible[2])
+
+            if TEST_MODE or MAIN_PLAYER != playerTwo:
+                self.AI_2 = new_AI(playerTwo, self.map, self.behaviour_possible[0])
+
+            if TEST_MODE or MAIN_PLAYER != playerThree:
+                self.AI_3 = new_AI(playerThree, self.map, self.behaviour_possible[3])
 
         #defeated player
         self.defeated_player = None
@@ -73,9 +78,14 @@ class Game:
             self.update()
             self.draw()
             if IA_MODE:
-                self.AI_1.run()
-                self.AI_2.run()
-                self.AI_3.run()
+                if TEST_MODE or MAIN_PLAYER != playerOne:
+                    self.AI_1.run()
+
+                if TEST_MODE or MAIN_PLAYER != playerTwo:
+                    self.AI_2.run()
+
+                if TEST_MODE or MAIN_PLAYER != playerThree:
+                    self.AI_3.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]

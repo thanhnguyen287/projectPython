@@ -512,7 +512,7 @@ class Map:
             place_y = random.randint(0, 1)
 
             # TO TEST, should be disabled if we play a real game
-            if TEST_MODE:
+            if TEST_MODE or 1:
                 if the_player == playerTwo:
                     place_x = 0
                     place_y = 0
