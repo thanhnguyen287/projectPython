@@ -7,8 +7,9 @@ from tech import Age_II, Age_III, Age_IV, iron_sword_tech, food_production_tech,
 import pygame
 from math import ceil
 from random import randint
-from game.utils import tile_founding, GENERAL_UNIT_LIST, GENERAL_BUILDING_LIST, UNIT_TYPES, BUILDING_TYPES
-from game.animation import BuildingDeathAnimation, VillagerAttackAnimation, VillagerMiningAnimation, IdleDragonAnimation
+from game.utils import tile_founding, GENERAL_UNIT_LIST, GENERAL_BUILDING_LIST, UNIT_TYPES, BUILDING_TYPES, SPEED_OF_GAME
+from game.animation import BuildingDeathAnimation, VillagerAttackAnimation, VillagerMiningAnimation, \
+    IdleDragonAnimation, DeathDragonAnimation
 
 
 class Building:
@@ -55,7 +56,7 @@ class Farm(Building):
     description = " Provides 50 food every 5 seconds."
     construction_tooltip = " Build a Farm"
     construction_cost = [100, 0, 0, 0]
-    construction_time = 4
+    construction_time = 4/SPEED_OF_GAME
     armor = 0
     armor_age_bonus = 0
 
@@ -103,7 +104,7 @@ class TownCenter(Building):
     description = " Used to create villagers."
     construction_tooltip = " Build a Town Center"
     construction_cost = [1000, 0, 0, 100]
-    construction_time = 8
+    construction_time = 8/SPEED_OF_GAME
     armor = 2
     armor_age_bonus = 1
 
@@ -140,7 +141,7 @@ class TownCenter(Building):
     def update(self):
         self.now = pygame.time.get_ticks()
         # add a button to stop the current action if the town center is working
-        if self.now - self.resource_manager_cooldown > 5000  and not self.is_being_built:
+        if self.now - self.resource_manager_cooldown > Villager.construction_time*1000  and not self.is_being_built:
             self.resource_manager_cooldown = self.now
             if self.is_working:
             # if a villager is being created since 5 secs :
@@ -222,8 +223,7 @@ class House(Building):
     description = " Each House increases the maximum population by 5."
     construction_tooltip = " Build a House"
     construction_cost = [300, 0, 0, 50]
-    construction_time = 4
-    armor = -2
+    construction_time = 4/SPEED_OF_GAME
     armor_age_bonus = 2
 
     def __init__(self, pos, map, player_owner_of_unit):
@@ -367,7 +367,7 @@ class Barracks(Building):
     description = " Used to train military units."
     construction_tooltip = " Build a Barrack"
     construction_cost = [500, 0, 0, 200]
-    construction_time = 12
+    construction_time = 12/SPEED_OF_GAME
     armor = 2
     armor_age_bonus = 1
 
@@ -403,7 +403,7 @@ class Barracks(Building):
     def update(self):
         self.now = pygame.time.get_ticks()
         if not self.is_being_built:
-            if self.now - self.resource_manager_cooldown > 10000:
+            if self.now - self.resource_manager_cooldown > Clubman.construction_time * 1000:
                 self.resource_manager_cooldown = self.now
                 if self.is_working:
                 # if a clubman is being created since 10 secs :
@@ -465,7 +465,7 @@ class Tower(Building):
     description = " Basic stone tower. Automatically attacks enemy units and buildings within range."
     construction_tooltip = " Build a Tower"
     construction_cost = [100, 0, 0, 75]
-    construction_time = 4
+    construction_time = 4/SPEED_OF_GAME
     armor = -2
     armor_age_bonus = 2
 
@@ -505,7 +505,7 @@ class Wall(Building):
     description = " Stone wall that is cheap and easy to build. Slows down your enemies and warns you of their approach."
     construction_tooltip = " Build a Wall"
     construction_cost = [0, 0, 0, 50]
-    construction_time = 4
+    construction_time = 4/SPEED_OF_GAME
     armor = -2
     armor_age_bonus = 2
 
@@ -648,7 +648,7 @@ class Villager(Unit):
     attack_speed = 500
 
     construction_cost = [0, 10, 25, 0]
-    construction_time = 5
+    construction_time = 5/SPEED_OF_GAME
     population_produced = 1
 
     def __init__(self, pos, player_owner_of_unit, map, angle=225):
@@ -755,52 +755,53 @@ class Villager(Unit):
                         break
 
     def attack(self):
-        if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
+        if self.target is not None:
+            if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
 
-            self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
+                self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
 
-            if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
+                if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
 
-                if self.target.current_health >= 0:
-                    #if the target is a building, our damage are divided by 2
-                    if type(self.target) in BUILDING_TYPES:
-                        dmg = int((self.attack_dmg/2) - self.target.armor)
-                    #else its normal damage
+                    if self.target.current_health > 0:
+                        #if the target is a building, our damage are divided by 2
+                        if type(self.target) in BUILDING_TYPES:
+                            dmg = int((self.attack_dmg/2) - self.target.armor)
+                        #else its normal damage
+                        else:
+                            dmg = int(self.attack_dmg - self.target.armor)
+                        #if the damage is 0 or less, it is still 1
+                        if dmg <= 0: dmg = 1
+                        self.target.current_health -= dmg
+                        self.attack_cooldown = self.now
+                        self.strike += 1
+
+                    # else the unit is dead
                     else:
-                        dmg = int(self.attack_dmg - self.target.armor)
-                    #if the damage is 0 or less, it is still 1
-                    if dmg <= 0: dmg = 1
-                    self.target.current_health -= dmg
-                    self.attack_cooldown = self.now
-                    self.strike += 1
+                        tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
+                        tile["tile"] = ""
+                        if type(self.target) == TownCenter:
+                            self.target.owner.towncenter = None
+                        tile["collision"] = False
+                        self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
+                        self.target = None
+                        self.is_attacking = False
+                        self.attack_animation.to_be_played = False
+                        self.strike = 0
 
-                # else the unit is dead
-                else:
-                    tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
-                    tile["tile"] = ""
-                    if type(self.target) == TownCenter:
-                        self.target.owner.towncenter = None
-                    tile["collision"] = False
-                    self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
-                    self.target = None
-                    self.is_attacking = False
-                    self.attack_animation.to_be_played = False
-                    self.strike = 0
-
-            if self.target is not None and type(self.target) == Villager and \
-                    not self.target.is_attacking and self.strike > 1:
-                self.target.target = self
-                self.target.is_attacking = True
-                self.target.attack()
-        else:
-            if self.target in GENERAL_UNIT_LIST:
-                ind = GENERAL_UNIT_LIST.index(self.target)
-                pos = GENERAL_UNIT_LIST[ind].pos
-                self.go_to_attack(pos)
-            elif self.target in GENERAL_BUILDING_LIST:
-                ind = GENERAL_BUILDING_LIST.index(self.target)
-                pos = GENERAL_BUILDING_LIST[ind].pos
-                self.go_to_attack(pos)
+                if self.target is not None and type(self.target) == Villager and \
+                        not self.target.is_attacking and self.strike > 1:
+                    self.target.target = self
+                    self.target.is_attacking = True
+                    self.target.attack()
+            else:
+                if self.target in GENERAL_UNIT_LIST:
+                    ind = GENERAL_UNIT_LIST.index(self.target)
+                    pos = GENERAL_UNIT_LIST[ind].pos
+                    self.go_to_attack(pos)
+                elif self.target in GENERAL_BUILDING_LIST:
+                    ind = GENERAL_BUILDING_LIST.index(self.target)
+                    pos = GENERAL_BUILDING_LIST[ind].pos
+                    self.go_to_attack(pos)
 
     def go_to_build(self, pos, name):
         if self.map.get_empty_adjacent_tiles(pos):
@@ -1021,7 +1022,7 @@ class Clubman(Unit):
     attack_speed = 500
 
     construction_cost = [0, 100, 50, 0]
-    construction_time = 26
+    construction_time = 26/SPEED_OF_GAME
     population_produced = 1
 
     def __init__(self, pos, player_owner_of_unit, map, angle=225):
@@ -1082,52 +1083,53 @@ class Clubman(Unit):
                         break
 
     def attack(self):
-        if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
+        if self.target is not None:
+            if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
 
-            self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
+                self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
 
-            if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
+                if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
 
-                if self.target.current_health >= 0:
-                    #if the target is a building, our damage are divided by 2
-                    if type(self.target) in BUILDING_TYPES:
-                        dmg = int((self.attack_dmg/2) - self.target.armor)
-                    #else its normal damage
+                    if self.target.current_health >= 0:
+                        #if the target is a building, our damage are divided by 2
+                        if type(self.target) in BUILDING_TYPES:
+                            dmg = int((self.attack_dmg/2) - self.target.armor)
+                        #else its normal damage
+                        else:
+                            dmg = int(self.attack_dmg - self.target.armor)
+                        #if the damage is 0 or less, it is still 1
+                        if dmg <= 0: dmg = 1
+                        self.target.current_health -= dmg
+                        self.attack_cooldown = self.now
+                        self.strike += 1
+
+                    # else the unit is dead
                     else:
-                        dmg = int(self.attack_dmg - self.target.armor)
-                    #if the damage is 0 or less, it is still 1
-                    if dmg <= 0: dmg = 1
-                    self.target.current_health -= dmg
-                    self.attack_cooldown = self.now
-                    self.strike += 1
+                        tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
+                        tile["tile"] = ""
+                        if type(self.target) == TownCenter:
+                            self.target.owner.towncenter = None
+                        tile["collision"] = False
+                        self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
+                        self.target = None
+                        self.is_attacking = False
+                        self.attack_animation.to_be_played = False
+                        self.strike = 0
 
-                # else the unit is dead
-                else:
-                    tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
-                    tile["tile"] = ""
-                    if type(self.target) == TownCenter:
-                        self.target.owner.towncenter = None
-                    tile["collision"] = False
-                    self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
-                    self.target = None
-                    self.is_attacking = False
-                    self.attack_animation.to_be_played = False
-                    self.strike = 0
-
-            if self.target is not None and type(self.target) == Villager and \
-                    not self.target.is_attacking and self.strike > 1:
-                self.target.target = self
-                self.target.is_attacking = True
-                self.target.attack()
-        else:
-            if self.target in GENERAL_UNIT_LIST:
-                ind = GENERAL_UNIT_LIST.index(self.target)
-                pos = GENERAL_UNIT_LIST[ind].pos
-                self.go_to_attack(pos)
-            elif self.target in GENERAL_BUILDING_LIST:
-                ind = GENERAL_BUILDING_LIST.index(self.target)
-                pos = GENERAL_BUILDING_LIST[ind].pos
-                self.go_to_attack(pos)
+                if self.target is not None and type(self.target) == Villager and \
+                        not self.target.is_attacking and self.strike > 1:
+                    self.target.target = self
+                    self.target.is_attacking = True
+                    self.target.attack()
+            else:
+                if self.target in GENERAL_UNIT_LIST:
+                    ind = GENERAL_UNIT_LIST.index(self.target)
+                    pos = GENERAL_UNIT_LIST[ind].pos
+                    self.go_to_attack(pos)
+                elif self.target in GENERAL_BUILDING_LIST:
+                    ind = GENERAL_BUILDING_LIST.index(self.target)
+                    pos = GENERAL_BUILDING_LIST[ind].pos
+                    self.go_to_attack(pos)
 
     def update(self):
         self.now = pygame.time.get_ticks()
@@ -1165,7 +1167,7 @@ class Dragon(Unit):
     # Training : 50 FOOD, 20s
     description = " Big. Deadly. Breath fire. What else ? "
     construction_tooltip = " Train a Dragon"
-    name = "Dragon"
+    name = "Black Dragon"
     attack_speed = 500
 
     construction_cost = [0, 10, 25, 0]
@@ -1174,7 +1176,7 @@ class Dragon(Unit):
 
     def __init__(self, pos, player_owner_of_unit, map, angle=180):
 
-        self.name = "Dragon"
+        self.name = "Black Dragon"
         # DISPLAY
         # DATA
         self.max_health = 1000
@@ -1215,6 +1217,10 @@ class Dragon(Unit):
         self.idle_animation_group = pygame.sprite.Group()
         self.idle_animation = IdleDragonAnimation(self, map.hud.dragon_sprites["idle"])
 
+        #death animation
+       # self.death_animation_group = pygame.sprite.Group()
+#        self.death_animation = DeathDragonAnimation(self, map.hud.dragon_sprites["death"])
+
     def go_to_attack(self, pos):
         if self.map.get_empty_adjacent_tiles(pos):
             unit_dest = self.map.get_empty_adjacent_tiles(pos)[0]
@@ -1233,48 +1239,49 @@ class Dragon(Unit):
                         break
 
     def attack(self):
-        if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
+        if self.target is not None:
+            if abs(self.pos[0] - self.target.pos[0]) <= 1 and abs(self.pos[1] - self.target.pos[1]) <= 1:
+                possible_angles_list = (0, 90, 180, 270)
+                if self.map.get_angle_between(self.pos, self.target.pos, self) in possible_angles_list:
+                    self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
 
-            self.angle = self.map.get_angle_between(self.pos, self.target.pos, self)
+                if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
+                    self.map.hud.boom_animation.play(self.map.grid_to_display_pos(self.target.pos))
+                    if self.target.current_health >= 0:
+                        #if the target is a building, our damage are divided by 2
+                        if type(self.target) in BUILDING_TYPES:
+                            dmg = int((self.attack_dmg/2) - self.target.armor)
+                        #else its normal damage
+                        else:
+                            dmg = int(self.attack_dmg - self.target.armor)
+                        #if the damage is 0 or less, it is still 1
+                        if dmg <= 0: dmg = 1
+                        self.target.current_health -= dmg
+                        self.attack_cooldown = self.now
+                        self.strike += 1
 
-            if self.is_attacking and (self.now - self.attack_cooldown > self.attack_speed):
-
-                if self.target.current_health >= 0:
-                    #if the target is a building, our damage are divided by 2
-                    if type(self.target) in BUILDING_TYPES:
-                        dmg = int((self.attack_dmg/2) - self.target.armor)
-                    #else its normal damage
+                    # else the unit is dead
                     else:
-                        dmg = int(self.attack_dmg - self.target.armor)
-                    #if the damage is 0 or less, it is still 1
-                    if dmg <= 0: dmg = 1
-                    self.target.current_health -= dmg
-                    self.attack_cooldown = self.now
-                    self.gathered_ressource_stack += 1
-                    self.strike += 1
+                        tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
+                        tile["tile"] = ""
+                        if type(self.target) == TownCenter:
+                            self.target.owner.towncenter = None
+                        tile["collision"] = False
+                        self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
+                        self.target = None
+                        self.is_attacking = False
+                        #self.attack_animation.to_be_played = False
+                        self.strike = 0
 
-                # else the unit is dead
-                else:
-                    tile = self.map.map[self.target.pos[0]][self.target.pos[1]]
-                    tile["tile"] = ""
-                    if type(self.target) == TownCenter:
-                        self.target.owner.towncenter = None
-                    tile["collision"] = False
-                    self.map.collision_matrix[tile["grid"][1]][tile["grid"][0]] = 1
-                    self.target = None
-                    self.is_attacking = False
-                    self.attack_animation.to_be_played = False
-                    self.strike = 0
-
-            if self.target is not None and type(self.target) == Villager and \
-                    not self.target.is_attacking and self.strike > 1:
-                self.target.target = self
-                self.target.is_attacking = True
-                self.target.attack()
-        else:
-            ind = GENERAL_UNIT_LIST.index(self.target)
-            pos = GENERAL_UNIT_LIST[ind].pos
-            self.go_to_attack(pos)
+                if self.target is not None and type(self.target) == Villager and \
+                        not self.target.is_attacking and self.strike > 1:
+                    self.target.target = self
+                    self.target.is_attacking = True
+                    self.target.attack()
+            else:
+                ind = GENERAL_UNIT_LIST.index(self.target)
+                pos = GENERAL_UNIT_LIST[ind].pos
+                self.go_to_attack(pos)
 
     def update(self):
         self.now = pygame.time.get_ticks()
@@ -1286,7 +1293,7 @@ class Dragon(Unit):
                 if self.path_index < len(self.path) and self.path[self.path_index] == self.pos:
                     self.path_index += 1
                 #print("debug path index, path)", self.path_index, len(self.path))
-                if len(self.path) != self.path_index:
+                if len(self.path) > self.path_index:
                     new_pos = self.path[self.path_index]
                     #update position in the world
                     self.change_tile(new_pos)
@@ -1304,3 +1311,22 @@ class Dragon(Unit):
 
         if self.is_attacking:
             self.attack()
+
+    #modified change_tile fonction for dragon because we don't have 8 angles for our sprites but only 4.
+    def change_tile(self, new_tile):
+        # remove the unit from its current position on the map
+        possible_angles_list = (0, 90, 180, 270)
+        if self.pos != new_tile:
+            if self.map.get_angle_between(self.pos, new_tile, self) in possible_angles_list:
+                self.angle = self.map.get_angle_between(self.pos, new_tile, self)
+
+        self.map.units[self.pos[0]][self.pos[1]] = None
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] = ""
+        #remove collision from old position
+        self.map.collision_matrix[self.pos[1]][self.pos[0]] = 1
+        # update the map
+        self.map.units[new_tile[0]][new_tile[1]] = self
+        self.pos = tuple(self.map.map[new_tile[0]][new_tile[1]]["grid"])
+        #update collision for new tile
+        self.map.collision_matrix[self.pos[1]][self.pos[0]] = 0
+        self.map.map[self.pos[0]][self.pos[1]]["tile"] = "unit"

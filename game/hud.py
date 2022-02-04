@@ -688,6 +688,10 @@ class Hud:
                 img = self.clubman_sprites[self.examined_tile.owner.color][4].copy()
                 img_scaled = scale_image(img, h * 0.40)
                 screen.blit(img_scaled, (action_menu.get_width() + 40, self.height - selection_panel.get_height() + 70))
+            elif isinstance(self.examined_tile, Dragon):
+                img = self.dragon_sprites["idle"]["180"][3].copy()
+                img_scaled = scale_image(img, h * 0.70)
+                screen.blit(img_scaled, (action_menu.get_width() + 20, self.height - selection_panel.get_height() + 50))
 
         if type(self.examined_tile) == Farm:
             img_scaled = scale_image(img, h * 0.60)
@@ -1263,11 +1267,10 @@ class Hud:
 
     def load_dragon_sprites(self):
         dragon_sprites_dic = {"idle": {}, "death": []}
-        # loop for the 8 angles. folder * 45 because angles are 0, 45, 90, 135, etc... up to 315 for max.
-        for folder in range(0, 3):
+        # loop for the 4 angles. folder * 90 because angles are 0, 90, etc... up to 270 for max.
+        for folder in range(0, 4):
             dragon_sprites_dic["idle"][str(int(folder * 90))] = load_images_better("resources/assets/Models/Units/Dragon/idle/" + str(int(folder * 90)))
         dragon_sprites_dic["death"] = load_images_better("resources/assets/Models/Units/Dragon/death")
-
         return dragon_sprites_dic
 
     # work in progress, not finished

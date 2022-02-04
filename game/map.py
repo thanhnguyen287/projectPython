@@ -8,7 +8,7 @@ import pygame.mouse
 from .utils import *
 from settings import *
 # from buildings import Farm, TownCenter, House, Building
-from player import playerOne, playerTwo, player_list, MAIN_PLAYER
+from player import playerOne, playerTwo, playerThree, player_list, MAIN_PLAYER
 from units import Villager, Unit, Farm, TownCenter, House, Building, Barracks, Clubman, Dragon, Tower, Wall, Market
 
 
@@ -39,7 +39,7 @@ class Map:
         # self.fog = False
 
         self.map = self.create_map()
-
+        self.camera = None
         self.place_x = 0
         self.place_y = 0
         # here we place the townhall randomly on the map
@@ -57,9 +57,9 @@ class Map:
             self.place_starting_units(p)
 
         self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
-        #self.map[10][10] = Dragon((10,20), MAIN_PLAYER, self)
+        # self.map[10][10] = Dragon((10,20), MAIN_PLAYER, self)
         # to improve animations, not working for now
-        #self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
+        # self.anchor_points = self.load_anchor_points("Resources/assets/axeman_attack_anchor_90.csv")
 
     def create_map(self):
         map = []
@@ -200,6 +200,7 @@ class Map:
                     pass
 
     def draw(self, screen, camera):
+        self.camera = camera
         # displaying grass tiles
         screen.blit(self.grass_tiles, (camera.scroll.x, camera.scroll.y))
         for player in player_list:
@@ -511,13 +512,16 @@ class Map:
             place_y = random.randint(0, 1)
 
             # TO TEST, should be disabled if we play a real game
-            if TEST_MODE:
+            if TEST_MODE or 1:
                 if the_player == playerTwo:
                     place_x = 0
                     place_y = 0
                 elif the_player == playerOne:
                     place_x = 1
                     place_y = 0
+                elif the_player == playerThree:
+                    place_x = 0
+                    place_y = 1
 
             # top_left
             if (place_x, place_y) == (0, 0):
@@ -657,6 +661,10 @@ class Map:
             entity.owner.current_population -= 1
             self.hud.death_animations["Villager"]["animation"].play(death_pos, color=entity.owner.color,
                                                                     angle=entity.angle)
+        elif type(entity) == Dragon:
+            entity.owner.current_population -= 1
+
+
     # remove resources from tile to get an empty tile
     def clear_tile(self, grid_x, grid_y):
         self.map[grid_x][grid_y]["tile"] = ""
@@ -741,7 +749,6 @@ class Map:
         rect_cam = pygame.Rect((iso_pos_cam[0][0],iso_pos_cam[0][1]), (self.cam_width, self.cam_height))
         pygame.draw.rect(screen, "WHITE", rect_cam, 2 )
 
-
         for x in range(self.grid_length_x):
             for y in range(self.grid_length_y):
                 # Draw polygon
@@ -778,7 +785,6 @@ class Map:
                             (y) / minimap_scaling + self.height - 200) for x, y in unit_pos]
                 pygame.draw.circle(screen, building.owner.color, (unit_pos[1][0], unit_pos[1][1]), 3)
 
-
     # display resources on map. Most resources have different variations. If resource is selected or has less than max health, we display its health bar
     def display_resources_on_tile(self, resource_tile, screen, camera):
         tile_type = resource_tile["tile"]
@@ -812,91 +818,92 @@ class Map:
     def display_unit(self, unit, screen, camera, render_pos):
         # HERE WE DRAW THE UNITS ON THE MAP
         # we extract from the units list the unit we want to display
-        if unit is not None and unit.current_health <= 0:
-            self.remove_entity(unit, camera.scroll)
-        elif unit is not None:
-            # have we selected this unit ? if yes we will highlight its tile
-            if self.examined_tile is not None:
-                if (unit.pos[0] == self.examined_tile[0]) and (unit.pos[1] == self.examined_tile[1]):
-                    self.highlight_tile(self.examined_tile[0], self.examined_tile[1], screen, "WHITE",
-                                        camera.scroll)
-                    self.hud.display_life_bar(screen, unit, self, for_hud=False, camera=camera, for_resource=False)
-
-            # we initialize target to None just in case
-            target = None
-
-            # if we select the unit, she wont attack herself
-            if type(unit.target) in UNIT_TYPES and unit.target.pos == unit.pos:
-                unit.target = None
-
-            # if we select a building or a unit, the unit go attack it
-            if (type(unit.target) in UNIT_TYPES and unit.target.pos != unit.pos) or type(unit.target) in BUILDING_TYPES:
-                target = unit.target
-
-            # if we attack a ressource, we go gather it
-            if type(unit) == Villager and unit.targeted_ressource is not None:
-                target = unit.map.map[unit.targeted_ressource[0]][unit.targeted_ressource[1]]
-
-            # if the unit is attacking, we highlight the tile she is attacking in DARK RED
-            if target is not None and (unit.is_attacking or unit.is_moving_to_attack):
-                # target highlighted in dark red
-                self.highlight_tile(target.pos[0], target.pos[1], screen, "DARK_RED", camera.scroll)
-
-            # if the unit is going to gather we highlight the tile she is going to gather in GREEN
-            elif target is not None and ((type(unit) == Villager and unit.is_gathering) or unit.is_moving_to_gather):
-                ...
-                self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
-
-            if unit.searching_for_path and not (type(unit) == Villager and unit.is_moving_to_gather and not unit.is_moving_to_build):
-                screen.blit(scale_image(move_icon, w=40), (
-                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
-                    render_pos[1] - (
-                            self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 80)
-                            )
-            elif unit.is_attacking or (type(unit) == Villager and (unit.is_gathering or unit.is_moving_to_gather)):
-                screen.blit(scale_image(attack_icon, w=40), (
-                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
-                    render_pos[1] - (
-                            self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 80)
-                            )
-
-            elif type(unit) == Villager and (unit.is_building or unit.is_moving_to_build):
-                screen.blit(scale_image(build_icon, w=40), (
-                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
-                    render_pos[1] - (
-                            self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y + -80)
-                            )
-
-            if type(unit) == Villager:
-                # draw future buildings
-                if unit.building_to_create is not None and not unit.building_to_create["has_construction_started"]:
-                    future_building = unit.building_to_create
-                    future_building_render_pos = self.grid_to_renderpos(future_building["pos"][0],
-                                                                        future_building["pos"][1])
-                    for p in player_list:
-                        self.display_building(screen, future_building, unit.owner.color, camera.scroll,
-                                              future_building_render_pos, p,
-                                              is_hypothetical_building=True, is_build_possibility_display=True)
-            # display unit model
-            if type(unit) == Villager:
-                self.display_villager(unit, screen, camera, render_pos)
-            elif type(unit) == Clubman:
-                self.display_clubman(unit, screen, camera, render_pos)
-            elif type(unit) == Dragon:
-                self.display_dragon(unit, screen, camera, render_pos)
+        if unit is not None:
+            if unit.current_health <= 0:
+                self.remove_entity(unit, camera.scroll)
             else:
-                screen.blit(unit.sprite, (
-                    render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
-                    render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
-                            )
+                # have we selected this unit ? if yes we will highlight its tile
+                if self.examined_tile is not None:
+                    if (unit.pos[0] == self.examined_tile[0]) and (unit.pos[1] == self.examined_tile[1]):
+                        self.highlight_tile(self.examined_tile[0], self.examined_tile[1], screen, "WHITE",
+                                            camera.scroll)
+                        self.hud.display_life_bar(screen, unit, self, for_hud=False, camera=camera, for_resource=False)
 
-            if unit.searching_for_path:
-                # creates a flag to display where the unit is going
-                offset = (20, -25)
-                screen.blit(self.hud.destination_flags_sprites[unit.owner.color][0], (
-                    unit.dest["render_pos"][0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + offset[0],
-                    unit.dest["render_pos"][1] - (self.hud.destination_flags_sprites[unit.owner.color][0].get_height() - TILE_SIZE) + camera.scroll.y + offset[1])
-                            )
+                # we initialize target to None just in case
+                target = None
+
+                # if we select the unit, she wont attack herself
+                if type(unit.target) in UNIT_TYPES and unit.target.pos == unit.pos:
+                    unit.target = None
+
+                # if we select a building or a unit, the unit go attack it
+                if (type(unit.target) in UNIT_TYPES and unit.target.pos != unit.pos) or type(unit.target) in BUILDING_TYPES:
+                    target = unit.target
+
+                # if we attack a ressource, we go gather it
+                if type(unit) == Villager and unit.targeted_ressource is not None:
+                    target = unit.map.map[unit.targeted_ressource[0]][unit.targeted_ressource[1]]
+
+                # if the unit is attacking, we highlight the tile she is attacking in DARK RED
+                if target is not None and (unit.is_attacking or unit.is_moving_to_attack):
+                    # target highlighted in dark red
+                    self.highlight_tile(target.pos[0], target.pos[1], screen, "DARK_RED", camera.scroll)
+
+                # if the unit is going to gather we highlight the tile she is going to gather in GREEN
+                elif target is not None and ((type(unit) == Villager and unit.is_gathering) or unit.is_moving_to_gather):
+                    ...
+                    self.highlight_tile(target["grid"][0], target["grid"][1], screen, "GREEN", camera.scroll)
+
+                if unit.searching_for_path and not (type(unit) == Villager and unit.is_moving_to_gather and not unit.is_moving_to_build):
+                    screen.blit(scale_image(move_icon, w=40), (
+                        render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
+                        render_pos[1] - (
+                                self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 80)
+                                )
+                elif unit.is_attacking or (type(unit) == Villager and (unit.is_gathering or unit.is_moving_to_gather)):
+                    screen.blit(scale_image(attack_icon, w=40), (
+                        render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
+                        render_pos[1] - (
+                                self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y - 80)
+                                )
+
+                elif type(unit) == Villager and (unit.is_building or unit.is_moving_to_build):
+                    screen.blit(scale_image(build_icon, w=40), (
+                        render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 35,
+                        render_pos[1] - (
+                                self.hud.villager_sprites["RED"][0].get_height() - TILE_SIZE) + camera.scroll.y + -80)
+                                )
+
+                if type(unit) == Villager:
+                    # draw future buildings
+                    if unit.building_to_create is not None and not unit.building_to_create["has_construction_started"]:
+                        future_building = unit.building_to_create
+                        future_building_render_pos = self.grid_to_renderpos(future_building["pos"][0],
+                                                                            future_building["pos"][1])
+                        for p in player_list:
+                            self.display_building(screen, future_building, unit.owner.color, camera.scroll,
+                                                  future_building_render_pos, p,
+                                                  is_hypothetical_building=True, is_build_possibility_display=True)
+                # display unit model
+                if type(unit) == Villager:
+                    self.display_villager(unit, screen, camera, render_pos)
+                elif type(unit) == Clubman:
+                    self.display_clubman(unit, screen, camera, render_pos)
+                elif type(unit) == Dragon:
+                    self.display_dragon(unit, screen, camera, render_pos)
+                else:
+                    screen.blit(unit.sprite, (
+                        render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x,
+                        render_pos[1] - (unit.sprite.get_height() - TILE_SIZE) + camera.scroll.y)
+                                )
+
+                if unit.searching_for_path:
+                    # creates a flag to display where the unit is going
+                    offset = (20, -25)
+                    screen.blit(self.hud.destination_flags_sprites[unit.owner.color][0], (
+                        unit.dest["render_pos"][0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + offset[0],
+                        unit.dest["render_pos"][1] - (self.hud.destination_flags_sprites[unit.owner.color][0].get_height() - TILE_SIZE) + camera.scroll.y + offset[1])
+                                )
 
     # temp tile is a dictionary containing name + image + render pos + iso_poly + collision
     # if player is looking for a tile to place a building, we highlight the tested tiles in RED or GREEN if the tile is free or not
@@ -1142,7 +1149,6 @@ class Map:
                                      unit.sprite_index].get_height() - TILE_SIZE) + camera.scroll.y - 25)
                         )
 
-
     def display_dragon(self, unit, screen, camera, render_pos):
         """
         We have to calculate the angle between the villager's target and him
@@ -1285,10 +1291,22 @@ class Map:
     #specify for which player you want the dragon to spawn
     def spawn_dragon(self, player, camera):
         spawn_position = (player.towncenter_pos[0], player.towncenter_pos[1] + 1)
-        if self.map[spawn_position[0]][spawn_position[1]]["tile"] == "unit" or self.map[spawn_position[0]][spawn_position[1]]["tile"] == "building":
+        if self.map[spawn_position[0]][spawn_position[1]]["tile"] == "unit" or \
+                self.map[spawn_position[0]][spawn_position[1]]["tile"] == "building":
             self.remove_entity(self.units[spawn_position[0]][spawn_position[1]], camera.scroll)
         self.clear_tile(spawn_position[0], spawn_position[1])
-        render_pos = self.grid_to_renderpos(spawn_position[0], spawn_position[1])
-        render_pos = render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10, render_pos[1] - 55 + camera.scroll.y
-        #self.hud.boom_animation.play(render_pos)
+        # render_pos = self.grid_to_renderpos(spawn_position[0], spawn_position[1])
+        # render_pos = render_pos[0] + self.grass_tiles.get_width() / 2 + camera.scroll.x + 10, render_pos[
+        #    1] - 55 + camera.scroll.y
+        # self.hud.boom_animation.play(render_pos)
+        #dis_pos = self.grid_to_display_pos(spawn_position[0], spawn_position[1])
         self.units[spawn_position[0]][spawn_position[1]] = Dragon(spawn_position, player, self)
+
+    # use this function to get the (x,y) tuple you need when you when to blit something and you only have its grid position
+    # offset is to slightly change the display position, need to find the good offset yourself tho
+    def grid_to_display_pos(self, grid_pos: (int, int), offset=(0, 0)):
+        render_pos = self.grid_to_renderpos(grid_pos[0], grid_pos[1])
+        display_pos = render_pos[0] + self.grass_tiles.get_width() / 2 + self.camera.scroll.x + 10 + offset[
+            1], render_pos[1] - 55 + self.camera.scroll.y + offset[1]
+
+        return display_pos

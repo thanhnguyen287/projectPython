@@ -200,12 +200,16 @@ class Player:
         screen.blit(tech_tree_icon, (screen.get_size()[0] - tech_tree_icon.get_width() - 5, age_panel.get_height() + 10))
 
 
-playerOne = Player("Lucien", True, [1000, 1000, 1000, 1000], color="BLUE")
+playerOne = Player("Lucien", True, [2000, 1000, 1000, 2000], color="BLUE")
 playerOne.age = 1
 
-playerTwo = Player("AI", True, [5000, 5000, 5000, 5000], color="RED")
+playerTwo = Player("AI", True, [2000, 1000, 1000, 2000], color="RED")
 playerTwo.age = 1
-player_list = [playerOne, playerTwo]
+
+playerThree = Player("AI", True, [2000, 1000, 1000, 2000], color="YELLOW")
+playerThree.age = 1
+
+player_list = [playerOne, playerTwo, playerThree]
 #  INIT FOR RESSOURCES DISPLAY
 
 #define which player is controlled by us

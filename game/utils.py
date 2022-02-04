@@ -9,7 +9,10 @@ GENERAL_BUILDING_LIST = []
 UNIT_TYPES = []
 BUILDING_TYPES = []
 
-TEST_MODE = True
+TEST_MODE = False
+IA_MODE = False
+
+SPEED_OF_GAME = 3
 
 def draw_text(screen, text, size, color, pos):
     # create a Font object from the system fonts

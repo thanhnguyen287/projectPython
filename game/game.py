@@ -1,9 +1,9 @@
 from .camera import Camera
 from .map import *
-from .utils import draw_text, find_owner
+from .utils import draw_text, find_owner, IA_MODE
 from .hud import Hud
 from .animation import *
-from .AI import AI
+#from .AI import AI
 from.new_AI import new_AI
 from time import sleep
 
@@ -40,10 +40,18 @@ class Game:
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
 
         # IA
-        self.AI_1 = new_AI(playerTwo, self.map)
-        #self.AI_2 = new_AI(playerOne, self.map)
-        #self.AI_1 = AI(playerTwo, self.map.map)
-        #self.AI_2 = AI(playerOne, self.map.map)
+        if IA_MODE:
+            # we chose a behaviour between all the behaviours we defined
+            self.behaviour_possible = ["neutral", "defensive", "aggressive", "pacifist"]
+
+            if TEST_MODE or MAIN_PLAYER != playerOne:
+                self.AI_1 = new_AI(playerOne, self.map, self.behaviour_possible[2])
+
+            if TEST_MODE or MAIN_PLAYER != playerTwo:
+                self.AI_2 = new_AI(playerTwo, self.map, self.behaviour_possible[0])
+
+            if TEST_MODE or MAIN_PLAYER != playerThree:
+                self.AI_3 = new_AI(playerThree, self.map, self.behaviour_possible[3])
 
         #defeated player
         self.defeated_player = None
@@ -69,8 +77,15 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            self.AI_1.run()
-            #self.AI_2.run()
+            if IA_MODE:
+                if TEST_MODE or MAIN_PLAYER != playerOne:
+                    self.AI_1.run()
+
+                if TEST_MODE or MAIN_PLAYER != playerTwo:
+                    self.AI_2.run()
+
+                if TEST_MODE or MAIN_PLAYER != playerThree:
+                    self.AI_3.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -104,6 +119,13 @@ class Game:
                         elif self.chat_text == "BIGDADDY":
                             self.map.spawn_dragon(MAIN_PLAYER, self.camera)
                             self.chat_text = "CHEAT CODE ACTIVATED : BIGDADDY"
+                        elif self.chat_text == "DESTROY":
+                            for u in GENERAL_UNIT_LIST:
+                                u.attack_dmg *= 5
+                                u.max_health *= 5
+                                u.current_health *= 5
+                            self.chat_text = "CHEAT CODE ACTIVATED : DESTROY"
+
 
 
                     # we store the letter
@@ -196,7 +218,8 @@ class Game:
                         # There is a bug with collecting ressources on the side of the map !!!
 
                         if self.map.hud.examined_tile is not None and (self.map.hud.examined_tile.name == "Villager" or
-                                                                       self.map.hud.examined_tile.name == "Clubman"):
+                                                                       self.map.hud.examined_tile.name == "Clubman" or
+                                                                       self.map.hud.examined_tile.name == "Black Dragon"):
                             villager_pos = self.map.hud.examined_tile.pos
                             this_villager = self.map.units[villager_pos[0]][villager_pos[1]]
 
@@ -219,6 +242,10 @@ class Game:
                                     this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
                                 elif isinstance(this_villager, Clubman) and self.map.collision_matrix[grid_pos[1]][grid_pos[0]] and \
                                         not this_villager.is_attacking:
+                                    this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
+                                elif isinstance(this_villager, Dragon) and self.map.collision_matrix[grid_pos[1]][
+                                    grid_pos[0]] and \
+                                     not this_villager.is_attacking:
                                     this_villager.move_to(self.map.map[grid_pos[0]][grid_pos[1]])
 
                                 # we check if the tile we right click on is a ressource and if its on an adjacent tile of
