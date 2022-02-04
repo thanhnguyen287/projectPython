@@ -9,9 +9,11 @@ GENERAL_BUILDING_LIST = []
 UNIT_TYPES = []
 BUILDING_TYPES = []
 
-TEST_MODE = False
-IA_MODE = False
 
+#Global parameters of the game
+
+TEST_MODE = True
+IA_MODE = True
 SPEED_OF_GAME = 3
 
 def draw_text(screen, text, size, color, pos):

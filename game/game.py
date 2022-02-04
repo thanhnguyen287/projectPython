@@ -122,8 +122,8 @@ class Game:
                         elif self.chat_text == "DESTROY":
                             for u in GENERAL_UNIT_LIST:
                                 u.attack_dmg *= 5
-                                u.max_health *= 5
-                                u.current_health *= 5
+                                u.max_health *= 10
+                                u.current_health *= 10
                             self.chat_text = "CHEAT CODE ACTIVATED : DESTROY"
 
 
