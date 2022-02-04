@@ -191,7 +191,12 @@ class new_AI:
                     if u in self.units_focused:
                         for my_u in self.player.unit_list:
                             if my_u.target == u:
-                                my_u.attack()
+                                if u.current_health > 0:
+                                    my_u.attack()
+                                else:
+                                    my_u.target = None
+                                    my_u.is_attacking = False
+                                    self.units_focused.remove(u)
 
 
         #creer une routine de repli des villageois près de l'hotel de ville
