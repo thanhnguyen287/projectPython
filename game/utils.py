@@ -10,6 +10,10 @@ UNIT_TYPES = []
 BUILDING_TYPES = []
 
 TEST_MODE = True
+IA_MDOE = True
+
+SPEED_OF_BUILDING = 1
+GLOBAL_DMG_MULT = 1
 
 def draw_text(screen, text, size, color, pos):
     # create a Font object from the system fonts

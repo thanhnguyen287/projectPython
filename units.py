@@ -7,7 +7,7 @@ from tech import Age_II, Age_III, Age_IV, iron_sword_tech, food_production_tech,
 import pygame
 from math import ceil
 from random import randint
-from game.utils import tile_founding, GENERAL_UNIT_LIST, GENERAL_BUILDING_LIST, UNIT_TYPES, BUILDING_TYPES
+from game.utils import tile_founding, GENERAL_UNIT_LIST, GENERAL_BUILDING_LIST, UNIT_TYPES, BUILDING_TYPES, SPEED_OF_BUILDING
 from game.animation import BuildingDeathAnimation, VillagerAttackAnimation, VillagerMiningAnimation, \
     IdleDragonAnimation, DeathDragonAnimation
 
@@ -56,7 +56,7 @@ class Farm(Building):
     description = " Provides 50 food every 5 seconds."
     construction_tooltip = " Build a Farm"
     construction_cost = [100, 0, 0, 0]
-    construction_time = 4
+    construction_time = 4/SPEED_OF_BUILDING
     armor = 0
     armor_age_bonus = 0
 
@@ -104,7 +104,7 @@ class TownCenter(Building):
     description = " Used to create villagers."
     construction_tooltip = " Build a Town Center"
     construction_cost = [1000, 0, 0, 100]
-    construction_time = 8
+    construction_time = 8/SPEED_OF_BUILDING
     armor = 2
     armor_age_bonus = 1
 
@@ -223,7 +223,7 @@ class House(Building):
     description = " Each House increases the maximum population by 5."
     construction_tooltip = " Build a House"
     construction_cost = [300, 0, 0, 50]
-    construction_time = 4
+    construction_time = 4/SPEED_OF_BUILDING
     armor = -2
     armor_age_bonus = 2
 
@@ -368,7 +368,7 @@ class Barracks(Building):
     description = " Used to train military units."
     construction_tooltip = " Build a Barrack"
     construction_cost = [500, 0, 0, 200]
-    construction_time = 12
+    construction_time = 12/SPEED_OF_BUILDING
     armor = 2
     armor_age_bonus = 1
 
@@ -466,7 +466,7 @@ class Tower(Building):
     description = " Basic stone tower. Automatically attacks enemy units and buildings within range."
     construction_tooltip = " Build a Tower"
     construction_cost = [100, 0, 0, 75]
-    construction_time = 4
+    construction_time = 4/SPEED_OF_BUILDING
     armor = -2
     armor_age_bonus = 2
 

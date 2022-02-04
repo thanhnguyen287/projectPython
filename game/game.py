@@ -1,6 +1,6 @@
 from .camera import Camera
 from .map import *
-from .utils import draw_text, find_owner
+from .utils import draw_text, find_owner, IA_MDOE
 from .hud import Hud
 from .animation import *
 #from .AI import AI
@@ -40,9 +40,13 @@ class Game:
         self.camera.scroll = pygame.Vector2(cam_x, cam_y)
 
         # IA
-        self.AI_1 = new_AI(playerTwo, self.map)
-        #self.AI_2 = new_AI(playerOne, self.map)
-        self.AI_3 = new_AI(playerThree, self.map)
+        if IA_MDOE:
+            # we chose a behaviour between all the behaviours we defined
+            self.behaviour_possible = ["neutral", "defensive", "aggressive", "pacifist"]
+
+            self.AI_1 = new_AI(playerTwo, self.map, self.behaviour_possible[1])
+            self.AI_2 = new_AI(playerOne, self.map, self.behaviour_possible[2])
+            #self.AI_3 = new_AI(playerThree, self.map, self.behaviour_possible[2])
 
         #defeated player
         self.defeated_player = None
@@ -68,9 +72,10 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            self.AI_1.run()
-            #self.AI_2.run()
-            self.AI_3.run()
+            if IA_MDOE:
+                self.AI_1.run()
+                self.AI_2.run()
+                #self.AI_3.run()
 
     def events(self):
         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -104,6 +109,10 @@ class Game:
                         elif self.chat_text == "BIGDADDY":
                             self.map.spawn_dragon(MAIN_PLAYER, self.camera)
                             self.chat_text = "CHEAT CODE ACTIVATED : BIGDADDY"
+                        elif self.chat_text == "DESTROY":
+                            for u in GENERAL_UNIT_LIST:
+                                u.attack_dmg *= 5
+                            self.chat_text = "CHEAT CODE ACTIVATED : DESTROY"
 
 
                     # we store the letter

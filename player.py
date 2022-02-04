@@ -209,7 +209,7 @@ playerTwo.age = 1
 playerThree = Player("AI", True, [2000, 1000, 1000, 2000], color="YELLOW")
 playerThree.age = 1
 
-player_list = [playerOne, playerTwo, playerThree]
+player_list = [playerOne, playerTwo]
 #  INIT FOR RESSOURCES DISPLAY
 
 #define which player is controlled by us

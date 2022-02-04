@@ -7,15 +7,12 @@ from settings import MAP_SIZE_X, MAP_SIZE_Y
 
 class new_AI:
 
-    def __init__(self, player, map):
+    def __init__(self, player, map, behaviour):
         self.player = player
         self.map = map
         self.tc_pos = self.player.towncenter_pos
 
-        #we chose a behaviour between all the behaviours we defined
-        self.behaviour_possible = ["neutral", "defensive", "aggressive", "pacifist"]
-        r = randint(0, len(self.behaviour_possible)-1)
-        self.behaviour = self.behaviour_possible[r]
+        self.behaviour = behaviour
 
 
         # the range (in layers) that the AI will go to. It increase when the AI becomes stronger
@@ -280,7 +277,7 @@ class new_AI:
             elif self.count_villagers() >= 5 and not self.has_barracks and \
                     (self.player.tower is not None or self.behaviour == "aggressive") and self.behaviour != "pacifist":
                 while not self.has_barracks and not self.ressource_to_gather:
-                    tiles_to_build = tile_founding(10, 3, self.range+1, self.map.map, self.player, "", self.map)
+                    tiles_to_build = tile_founding(20, 2, self.range+1, self.map.map, self.player, "", self.map)
                     if tiles_to_build:
                         r = randint(0, len(tiles_to_build) - 1)
                         pos = tiles_to_build[r]
@@ -370,10 +367,13 @@ class new_AI:
         if self.poking_unit not in self.player.unit_list:
             self.poking_unit = None
 
-        if self.in_poking_player is not None and self.in_poking_player.tower_pos is None:
-            pass
+        if self.poking_unit is not None and self.in_poking_player is not None and \
+                self.in_poking_player.tower is None and self.poking_unit.target is None:
+            self.poking_unit.go_to_attack(self.in_poking_player.towncenter_pos)
+
         if self.in_poking_player is not None and self.in_poking_player.towncenter is None:
             self.in_poking_player = None
+            self.poking_unit.is_attacking = False
             self.poking_unit = None
 
         if self.poking_unit is None:
@@ -504,12 +504,13 @@ class new_AI:
         #we look for the eight surrounding position if we can build walls
         eight_pos = [(pos[0]+1, pos[1]-1), (pos[0]+1, pos[1]), (pos[0]+1, pos[1]+1), (pos[0], pos[1]+1),
                      (pos[0]-1, pos[1]+1), (pos[0]-1, pos[1]), (pos[0]-1, pos[1]-1), (pos[0], pos[1]-1)]
-
+        """
         for i in range(8):
             pos = eight_pos[i]
             if self.map.collision_matrix[pos[1]][pos[0]]:
                 self.building_queue.append(("Wall", pos))
                 self.in_building_tiles.append(pos)
+        """
 
         if self.behaviour == "defensive" and self.player.second_tower is None:
             self.player.second_tower = self.player.tower
